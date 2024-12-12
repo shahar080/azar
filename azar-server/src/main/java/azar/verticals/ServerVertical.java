@@ -1,5 +1,7 @@
 package azar.verticals;
 
+import azar.properties.AppProperties;
+import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.Router;
@@ -16,31 +18,40 @@ public class ServerVertical extends AbstractVerticle {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final int SERVER_PORT = 8080; // TODO: 12/12/2024 SHAHAR-8
+    private final AppProperties appProperties;
 
+    @Inject
+    public ServerVertical(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
 
     @Override
     public void start(Promise<Void> startPromise) {
-        Router router = Router.router(vertx);
+        try {
+            Router router = Router.router(vertx);
 
-        router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
+            router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
 
 
-        vertx
-                .createHttpServer()
-                .requestHandler(router)
-                .listen(
-                        // Retrieve the port from the configuration,
-                        // default to 8080.
-                        config().getInteger("http.port", SERVER_PORT),
-                        "localhost"
-                ).onSuccess(ignored -> {
-                    logger.info("Server is up and listening on port: " + SERVER_PORT);
-                    startPromise.complete();
-                })
-                .onFailure(err -> {
-                    logger.error("Server failed to start due to", err);
-                    startPromise.fail(err);
-                });
+            int serverPort = appProperties.getIntProperty("server.port", 8080);
+            String serverHost = appProperties.getProperty("server.host");
+
+            vertx
+                    .createHttpServer()
+                    .requestHandler(router)
+                    .listen(
+                            serverPort,
+                            serverHost
+                    ).onSuccess(ignored -> {
+                        logger.info("Server is up and listening on {}", String.format("%s:%s", serverHost, serverPort));
+                        startPromise.complete();
+                    })
+                    .onFailure(err -> {
+                        logger.error("Server failed to start due to", err);
+                        startPromise.fail(err);
+                    });
+        } catch (Exception e) {
+            logger.error("Server failed to start due to", e);
+        }
     }
 }

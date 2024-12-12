@@ -3,6 +3,9 @@ package azar.verticals;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.Router;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Author: Shahar Azar
@@ -10,6 +13,8 @@ import io.vertx.ext.web.Router;
  * Purpose: //TODO add purpose for class ServerVertical
  **/
 public class ServerVertical extends AbstractVerticle {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final int SERVER_PORT = 8080; // TODO: 12/12/2024 SHAHAR-8
 
@@ -30,11 +35,11 @@ public class ServerVertical extends AbstractVerticle {
                         config().getInteger("http.port", SERVER_PORT),
                         "localhost"
                 ).onSuccess(ignored -> {
-                    System.out.println("Server is up and listening on port: " + SERVER_PORT);
+                    logger.info("Server is up and listening on port: " + SERVER_PORT);
                     startPromise.complete();
                 })
                 .onFailure(err -> {
-                    System.out.println("Server failed to start..");
+                    logger.error("Server failed to start due to", err);
                     startPromise.fail(err);
                 });
     }

@@ -1,15 +1,18 @@
 package azar.verticals;
 
 import azar.dal.entities.db.User;
+import azar.dal.entities.db.UserNameAndPassword;
 import azar.dal.service.UserService;
 import azar.properties.AppProperties;
 import azar.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +43,18 @@ public class ServerVertical extends AbstractVerticle {
             Router router = Router.router(vertx);
             router.route().handler(BodyHandler.create());
 
+            // TODO: 13/12/2024 AZAR-1
+            router.route().handler(CorsHandler.create() // Allow all origins; replace "*" with specific domains if needed
+                    .allowedMethod(HttpMethod.GET)            // Allow GET requests
+                    .allowedMethod(HttpMethod.POST)           // Allow POST requests
+                    .allowedHeader("Content-Type")            // Allow Content-Type header
+                    .allowedHeader("Authorization")           // Allow Authorization header, if needed
+                    .allowedHeader("Access-Control-Allow-Origin") // Required for some browsers
+            );
+
             router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
             router.route("/user/add").handler(this::handleAddUser);
+            router.route("/user/login").handler(this::handleUserLogin);
 
 
             int serverPort = appProperties.getIntProperty("server.port", 8080);
@@ -101,6 +114,38 @@ public class ServerVertical extends AbstractVerticle {
                     logger.info("User '{}' has registered successfully.", user.getUserName());
                 })
                 .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while adding user: {}", err.getMessage()));
+    }
+
+    private void handleUserLogin(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+
+        // Parse JSON body to User
+        UserNameAndPassword userNameAndPassword = jsonManager.fromJson(routingContext.body().asString(), UserNameAndPassword.class);
+
+        if (userNameAndPassword == null) {
+            sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
+            return;
+        }
+
+        // Check if username already exists
+        userService.getUserByUserName(userNameAndPassword.getUserName())
+                .onSuccess(user -> {
+                    if (user != null) {
+                        if (user.getPassword().equals(userNameAndPassword.getPassword())) {
+                            routingContext.response()
+                                    .setStatusCode(200)
+                                    .putHeader("Content-Type", "application/json")
+                                    .end(jsonManager.toJson(true, Boolean.class));
+                            logger.info("User '{}' has logged in successfully.", user.getUserName());
+                        } else {
+                            sendErrorResponse(routingContext, 401, "Wrong username or password", "Wrong username or password. Username: {}", userNameAndPassword.getUserName());
+                        }
+                    } else {
+                        // Add user to the system
+                        sendErrorResponse(routingContext, 400, "Username doesn't exists!", "Username '{}' doesn't exists!", userNameAndPassword.getUserName());
+                    }
+                })
+                .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while retrieving user by username: {}", err.getMessage()));
     }
 
     private void sendErrorResponse(RoutingContext routingContext, int statusCode, String message, String logMessage, Object... logParams) {

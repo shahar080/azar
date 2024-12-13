@@ -28,7 +28,7 @@ public class UserService extends GenericService<User> {
      * A wrapper function to add a new user to the db
      *
      * @param newUser - the new user
-     * @return true if succeeded, else, false // TODO: 12/12/2024 SHAHAR-11
+     * @return true if succeeded, else, false // TODO: 12/12/2024 AZAR-11
      */
     @Override
     public Future<User> add(User newUser) {
@@ -40,7 +40,7 @@ public class UserService extends GenericService<User> {
      * A wrapper function to update a user in the db
      *
      * @param updatedUser - the updated user
-     * @return true if succeeded, else, false // TODO: 12/12/2024 SHAHAR-11
+     * @return true if succeeded, else, false // TODO: 12/12/2024 AZAR-11
      */
     @Override
     public Future<User> update(User updatedUser) {

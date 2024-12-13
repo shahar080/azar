@@ -30,7 +30,6 @@ public class UserDao extends GenericDao<User> {
      */
     @Override
     public Future<Set<User>> getAll() {
-        logger.info("Trying to get all users from DB..");
         return super.getAll();
     }
 
@@ -38,11 +37,10 @@ public class UserDao extends GenericDao<User> {
      * A function to add a new user to the DB
      *
      * @param user - the new user
-     * @return - true if added, else, false // TODO: 12/12/2024 SHAHAR-11
+     * @return - true if added, else, false // TODO: 12/12/2024 AZAR-11
      */
     @Override
     public Future<User> add(User user) {
-        logger.info("Starting to add user to the DB. user name: {}", user.getUserName());
         return super.add(createUserWithId(user));
     }
 
@@ -58,7 +56,7 @@ public class UserDao extends GenericDao<User> {
 
     private Integer getAvailableId() {
         try (Session session = openSession()) {
-            String hql = "FROM User U WHERE U.id = (SELECT max(id) from User )"; // TODO: 12/12/2024 SHAHAR-13
+            String hql = "FROM User U WHERE U.id = (SELECT max(id) from User )"; // TODO: 12/12/2024 AZAR-13
             Query<User> query = session.createQuery(hql, User.class);
             List<User> results = query.list();
             if (results.size() == 1) {
@@ -83,7 +81,6 @@ public class UserDao extends GenericDao<User> {
      */
     @Override
     public Future<User> update(User newUser) {
-        logger.info("Trying to update user with id: {}", newUser.getId());
         return super.update(newUser);
     }
 
@@ -95,7 +92,6 @@ public class UserDao extends GenericDao<User> {
      */
     @Override
     public Future<User> getById(Integer id) {
-        logger.info("Returning a user by given id: {}", id);
         return super.getById(id);
     }
 
@@ -106,11 +102,11 @@ public class UserDao extends GenericDao<User> {
      * @return the user if found, else, null
      */
     public Future<User> getUserByUserName(String userName) {
-        logger.info("Returning user by userName: {}", userName);
         return Future.future(promise -> {
             try (Session session = openSession()) {
-                String hql = "FROM User U WHERE U.userName = '" + userName + "'";
+                String hql = "FROM User U WHERE lower(U.userName) = lower(:userName)";
                 Query<User> query = session.createQuery(hql, User.class);
+                query.setParameter("userName", userName);
                 List<User> results = query.list();
                 if (!results.isEmpty()) {
                     promise.complete(results.getFirst());
@@ -133,7 +129,6 @@ public class UserDao extends GenericDao<User> {
      */
     @Override
     public Future<Boolean> remove(User user) {
-        logger.info("Starting to remove user from DB. User id: {}", user.getId());
         return super.remove(user);
     }
 
@@ -145,7 +140,6 @@ public class UserDao extends GenericDao<User> {
      */
     @Override
     public Future<Boolean> removeById(Integer id) {
-        logger.info("Trying to remove user from DB with id: {}", id);
         return super.removeById(id);
     }
 

@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {Box, Button, TextField, Typography} from '@mui/material';
+import {Box, Button, Typography} from '@mui/material';
+import {LoginForm} from "../components/LoginForm.tsx"
 
 const LandingPage: React.FC = () => {
     const [showLoginForm, setShowLoginForm] = useState(false);
@@ -10,6 +11,14 @@ const LandingPage: React.FC = () => {
 
     const handleCancel = () => {
         setShowLoginForm(false);
+    };
+
+    const onLoginSuccess = () => {
+        alert("Success");
+    };
+
+    const onLoginFailure = () => {
+        alert("Failure");
     };
 
     return (
@@ -56,46 +65,9 @@ const LandingPage: React.FC = () => {
             )}
 
             {showLoginForm && (
-                <Box
-                    component="form"
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 2,
-                        width: '300px',
-                    }}
-                >
-                    <TextField
-                        label="Username"
-                        variant="outlined"
-                        fullWidth
-                        required
-                    />
-                    <TextField
-                        label="Password"
-                        variant="outlined"
-                        type="password"
-                        fullWidth
-                        required
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        fullWidth
-                    >
-                        Login
-                    </Button>
-                    <Button
-                        variant="text"
-                        color="secondary"
-                        onClick={handleCancel}
-                        fullWidth
-                    >
-                        Cancel
-                    </Button>
-                </Box>
+                <LoginForm handleCancel={handleCancel}
+                           onLoginSuccess={onLoginSuccess}
+                           onLoginFailure={onLoginFailure}/>
             )}
         </Box>
     );

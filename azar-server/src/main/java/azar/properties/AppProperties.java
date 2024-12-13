@@ -15,7 +15,7 @@ import java.util.Properties;
  **/
 
 public class AppProperties {
-    private final static String PROPERTIES_FILE_NAME = "app.properties"; // TODO: 12/12/2024 SHAHAR-8 get from env, if not exists, use default
+    private final static String PROPERTIES_FILE_NAME = "app.properties"; // TODO: 12/12/2024 AZAR-8 get from env, if not exists, use default
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -49,7 +49,7 @@ public class AppProperties {
                 return defaultValue;
             } else {
                 logger.error("{} not found in properties file", key);
-                throw new RuntimeException(); // TODO: 12/12/2024 SHAHAR-11
+                throw new RuntimeException(); // TODO: 12/12/2024 AZAR-11
             }
         }
         return propertyValue;
@@ -71,7 +71,7 @@ public class AppProperties {
                 return defaultValue;
             } else {
                 logger.error("{} not found in properties file", key);
-                throw new RuntimeException(); // TODO: 12/12/2024 SHAHAR-11
+                throw new RuntimeException(); // TODO: 12/12/2024 AZAR-11
             }
         }
         return Integer.parseInt(propertyValue);
@@ -93,7 +93,7 @@ public class AppProperties {
                 return defaultValue;
             } else {
                 logger.error("{} not found in properties file", key);
-                throw new RuntimeException(); // TODO: 12/12/2024 SHAHAR-11
+                throw new RuntimeException(); // TODO: 12/12/2024 AZAR-11
             }
         }
         return Boolean.parseBoolean(propertyValue);

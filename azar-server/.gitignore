@@ -5,6 +5,7 @@ target/
 logs/
 .idea/
 /src/main/resources/app.properties
+/src/main/resources/hibernate.cfg.xml
 
 
 ### IntelliJ IDEA ###

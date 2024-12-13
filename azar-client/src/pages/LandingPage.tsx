@@ -1,9 +1,14 @@
 import React, {useState} from 'react';
 import {Box, Button, Typography} from '@mui/material';
 import {LoginForm} from "../components/LoginForm.tsx"
+import {useDispatch} from 'react-redux';
+import {useNavigate} from 'react-router-dom';
+import {login} from '../store/authSlice';
 
 const LandingPage: React.FC = () => {
     const [showLoginForm, setShowLoginForm] = useState(false);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleGetStarted = () => {
         setShowLoginForm(true);
@@ -13,8 +18,9 @@ const LandingPage: React.FC = () => {
         setShowLoginForm(false);
     };
 
-    const onLoginSuccess = () => {
-        alert("Success");
+    const onLoginSuccess = (username: string) => {
+        dispatch(login(username));
+        navigate('/');
     };
 
     const onLoginFailure = () => {

@@ -4,7 +4,7 @@ import {login} from '../server/api/userApi';
 
 interface LoginFormProps {
     handleCancel: () => void;
-    onLoginSuccess: () => void;
+    onLoginSuccess: (username: string) => void;
     onLoginFailure: () => void;
 }
 
@@ -19,7 +19,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSucces
             const response = await login(formData);
             console.log('Login successful:', response);
             if (response) {
-                onLoginSuccess();
+                onLoginSuccess(formData.userName);
             } else {
                 onLoginFailure();
             }

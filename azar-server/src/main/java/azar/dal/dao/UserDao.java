@@ -51,6 +51,7 @@ public class UserDao extends GenericDao<User> {
                 .lastName(user.getLastName())
                 .userName(user.getUserName())
                 .password(user.getPassword())
+                .userType(user.getUserType())
                 .build();
     }
 

@@ -4,6 +4,7 @@ import azar.dal.service.UserService;
 import azar.entities.LoginResponse;
 import azar.entities.db.User;
 import azar.entities.db.UserNameAndPassword;
+import azar.entities.requests.AddUserRequest;
 import azar.properties.AppProperties;
 import azar.utils.AuthService;
 import azar.utils.JsonManager;
@@ -13,7 +14,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
-import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -65,7 +65,6 @@ public class ServerVertical extends AbstractVerticle {
 
             router.route().handler(BodyHandler.create());
             router.route("/user/ops/*").handler(JWTAuthHandler.create(jwtAuth));
-
 
 
             router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
@@ -167,32 +166,45 @@ public class ServerVertical extends AbstractVerticle {
         logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
 
         // Parse JSON body to User
-        User user = jsonManager.fromJson(routingContext.body().asString(), User.class);
+        AddUserRequest addUserRequest = jsonManager.fromJson(routingContext.body().asString(), AddUserRequest.class);
 
-        // Validate user data
-        if (userService.isInvalidUser(user)) {
-            sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
-            return;
-        }
-
-        // Check if username already exists
-        userService.getUserByUserName(user.getUserName())
-                .onSuccess(existingUser -> {
-                    if (existingUser != null) {
-                        sendErrorResponse(routingContext, 400, "Username already exists!", "Username '{}' already exists!", user.getUserName());
-                    } else {
-                        // Add user to the system
-                        addUser(routingContext, user);
+        userService.getUserByUserName(addUserRequest.currentUser())
+                .onSuccess(dbUser -> {
+                    if (dbUser == null) {
+                        sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
+                        return;
                     }
+                    if (!dbUser.isAdmin()) {
+                        sendErrorResponse(routingContext, 401, "UNAUTHORIZED", "User %s is not authorized to add users!".formatted(dbUser.getUserName()));
+                        return;
+                    }
+                    User user = addUserRequest.userToAdd();
+                    // Validate user data
+                    if (userService.isInvalidUser(user)) {
+                        sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
+                        return;
+                    }
+
+                    // Check if username already exists
+                    userService.getUserByUserName(user.getUserName())
+                            .onSuccess(existingUser -> {
+                                if (existingUser != null) {
+                                    sendErrorResponse(routingContext, 400, "Username already exists!", "Username '{}' already exists!", user.getUserName());
+                                } else {
+                                    // Add user to the system
+                                    addUser(routingContext, user);
+                                }
+                            })
+                            .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while handling add user: {}", err.getMessage()));
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while retrieving user by username: {}", err.getMessage()));
+                .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while handling add user: {}", err.getMessage()));
     }
 
     private void addUser(RoutingContext routingContext, User user) {
         userService.add(user)
                 .onSuccess(addedUser -> {
                     routingContext.response()
-                            .setStatusCode(200)
+                            .setStatusCode(201)
                             .putHeader("Content-Type", "application/json")
                             .end(jsonManager.toJson(addedUser.getId(), Integer.class));
                     logger.info("User '{}' has registered successfully.", user.getUserName());
@@ -216,7 +228,7 @@ public class ServerVertical extends AbstractVerticle {
                     if (user != null && user.getPassword().equals(userNameAndPassword.getPassword())) {
                         String token = jwtAuth.generateToken(
                                 new JsonObject().put("userName", user.getUserName()),
-                                new JWTOptions().setExpiresInSeconds(1)
+                                new JWTOptions().setExpiresInSeconds(3600)
                         );
 
                         LoginResponse response = new LoginResponse(true, token, "Login successful.");

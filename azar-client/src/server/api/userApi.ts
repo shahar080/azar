@@ -1,5 +1,5 @@
 import apiClient from "./apiClient.ts";
-import {UserNameAndPassword} from "../../models/models.ts"
+import {User, UserNameAndPassword} from "../../models/models.ts"
 
 export async function login(userNameAndPassword: UserNameAndPassword): Promise<boolean> {
     try {
@@ -19,12 +19,17 @@ export async function login(userNameAndPassword: UserNameAndPassword): Promise<b
     }
 }
 
-export async function add() {
-    const user = {
-        "firstName": "test",
-        "lastName": "test",
-        "userName": "test",
-        "password": "test"
+export async function add(userName: string, userToAdd: User): Promise<boolean> {
+    const req = {
+        "currentUser": userName,
+        "userToAdd": userToAdd
     }
-    await apiClient.post('/user/ops/add', user);
+    try {
+        const response = await apiClient.post('/user/ops/add', req);
+        return response.status === 201;
+    } catch (error) {
+        console.error('Create user failed:', error);
+        return false;
+    }
+
 }

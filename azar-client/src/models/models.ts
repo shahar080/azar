@@ -4,6 +4,7 @@ export interface User {
     lastName: string;
     userName: string;
     password: string;
+    userType: string;
 }
 
 export interface UserNameAndPassword {

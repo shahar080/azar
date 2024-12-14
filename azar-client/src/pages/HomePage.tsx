@@ -5,13 +5,18 @@ import DrawerMenu from '../components/DrawerMenu';
 import {useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import {RootState} from '../store/store';
+import RegisterUserModal from "../components/RegisterUserModal.tsx";
+import {User} from "../models/models.ts";
+import {add} from "../server/api/userApi.ts";
 
 const drawerWidth = 240;
 
 const HomePage: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerPinned, setDrawerPinned] = useState(true);
+    const [isRegisterUserModalOpen, setRegisterUserModalOpen] = useState(false);
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+    const userName = useSelector((state: RootState) => state.auth.username);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -35,6 +40,14 @@ const HomePage: React.FC = () => {
         // Add routing logic here
     };
 
+    const handleRegisterUser = () => {
+        setRegisterUserModalOpen(true);
+    };
+
+    const handleUserRegistration = (userToAdd: User) => {
+        add(userName, userToAdd)
+    };
+
     return (
         <Box sx={{display: 'flex'}}>
             <CssBaseline/>
@@ -47,6 +60,7 @@ const HomePage: React.FC = () => {
                 pinned={drawerPinned}
                 onPinToggle={pinDrawer}
                 onNavigate={navigateTo}
+                onRegisterUser={handleRegisterUser}
                 onClose={() => setDrawerOpen(false)}
             />
 
@@ -63,6 +77,9 @@ const HomePage: React.FC = () => {
                 <Toolbar/>
                 <Typography variant="h4">Welcome to the Home Page</Typography>
                 <Typography>This is your home page content.</Typography>
+                <RegisterUserModal open={isRegisterUserModalOpen}
+                                   onClose={() => setRegisterUserModalOpen(false)}
+                                   onSubmit={handleUserRegistration}/>
             </Box>
         </Box>
     );

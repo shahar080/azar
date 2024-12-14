@@ -4,10 +4,10 @@ import HomeIcon from '@mui/icons-material/Home';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {logout} from "../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../store/store.ts";
-import {add} from "../server/api/userApi.ts"
 
 interface DrawerMenuProps {
     open: boolean;
@@ -15,6 +15,7 @@ interface DrawerMenuProps {
     onPinToggle: () => void;
     onNavigate: (path: string) => void;
     onClose: () => void;
+    onRegisterUser: () => void;
 }
 
 interface OnLogoutProps {
@@ -24,8 +25,9 @@ interface OnLogoutProps {
 
 const drawerWidth = 240;
 
-const DrawerMenu: React.FC<DrawerMenuProps> = ({open, pinned, onPinToggle, onNavigate, onClose}) => {
+const DrawerMenu: React.FC<DrawerMenuProps> = ({open, pinned, onPinToggle, onNavigate, onClose, onRegisterUser}) => {
     const dispatch = useDispatch();
+    // TODO AZAR-29
     return (
         <Drawer
             variant={pinned ? 'permanent' : 'temporary'}
@@ -42,7 +44,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({open, pinned, onPinToggle, onNav
         >
             <Toolbar/>
             <List>
-                <ListItem component={"div"} onClick={() => add()}>
+                <ListItem component={"div"} onClick={() => onNavigate('/option1')}>
                     <ListItemIcon>
                         <HomeIcon/>
                     </ListItemIcon>
@@ -53,6 +55,12 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({open, pinned, onPinToggle, onNav
                         <SettingsIcon/>
                     </ListItemIcon>
                     <ListItemText primary="Option2"/>
+                </ListItem>
+                <ListItem component={"div"} onClick={onRegisterUser}>
+                    <ListItemIcon>
+                        <PersonAddIcon/>
+                    </ListItemIcon>
+                    <ListItemText primary="Add User"/>
                 </ListItem>
                 <ListItem component={"div"} onClick={() => handleLogOut({onNavigate, dispatch})}>
                     <ListItemIcon>

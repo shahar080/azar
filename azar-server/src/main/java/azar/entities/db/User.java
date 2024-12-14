@@ -1,9 +1,6 @@
 package azar.entities.db;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 /**
@@ -35,6 +32,13 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
-    
+
+    @Enumerated(EnumType.STRING)  // Use STRING to store enum names in the DB
+    @Column(name = "user_type", nullable = false)
+    private UserType userType = UserType.STANDARD;
+
+    public boolean isAdmin() {
+        return this.userType.equals(UserType.ADMIN);
+    }
 }
 

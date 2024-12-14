@@ -1,7 +1,7 @@
 package azar.dal.service;
 
 import azar.dal.dao.UserDao;
-import azar.dal.entities.db.User;
+import azar.entities.db.User;
 import azar.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Future;

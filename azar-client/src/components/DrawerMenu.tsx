@@ -7,7 +7,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import {logout} from "../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../store/store.ts";
-
+import {add} from "../server/api/userApi.ts"
 
 interface DrawerMenuProps {
     open: boolean;
@@ -42,7 +42,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({open, pinned, onPinToggle, onNav
         >
             <Toolbar/>
             <List>
-                <ListItem component={"div"} onClick={() => onNavigate('/option1')}>
+                <ListItem component={"div"} onClick={() => add()}>
                     <ListItemIcon>
                         <HomeIcon/>
                     </ListItemIcon>
@@ -73,6 +73,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({open, pinned, onPinToggle, onNav
 
 function handleLogOut({onNavigate, dispatch}: OnLogoutProps): void {
     dispatch(logout());
+    localStorage.removeItem('authToken');
     onNavigate('/login');
 }
 

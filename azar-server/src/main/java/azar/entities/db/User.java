@@ -1,4 +1,4 @@
-package azar.dal.entities.db;
+package azar.entities.db;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,5 +35,6 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+    
 }
 

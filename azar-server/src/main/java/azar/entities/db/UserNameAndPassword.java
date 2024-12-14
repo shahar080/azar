@@ -1,4 +1,4 @@
-package azar.dal.entities.db;
+package azar.entities.db;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

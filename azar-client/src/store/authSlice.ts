@@ -7,7 +7,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-    isLoggedIn: false,
+    isLoggedIn: !!localStorage.getItem('authToken'),
     username: null,
 };
 

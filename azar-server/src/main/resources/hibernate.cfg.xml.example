@@ -17,7 +17,7 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
 
-        <mapping class="azar.dal.entities.db.User"/>
+        <mapping class="azar.entities.db.User"/>
 
     </session-factory>
 </hibernate-configuration>

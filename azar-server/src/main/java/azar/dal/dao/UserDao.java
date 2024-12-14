@@ -1,6 +1,6 @@
 package azar.dal.dao;
 
-import azar.dal.entities.db.User;
+import azar.entities.db.User;
 import azar.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Future;

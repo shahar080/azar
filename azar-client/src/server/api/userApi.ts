@@ -3,20 +3,28 @@ import {UserNameAndPassword} from "../../models/models.ts"
 
 export async function login(userNameAndPassword: UserNameAndPassword): Promise<boolean> {
     try {
-        // Make a POST request to the server
-        console.log(userNameAndPassword)
         const response = await apiClient.post('/user/login', userNameAndPassword);
-        console.log('Login successful:', response.data);
+        const {token} = response.data;
 
-        // Return the response data to the caller
-        return response.data;
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error('Error:', error.message);
-        } else {
-            console.error('Unexpected error:', error);
+        if (token) {
+            // Securely store the token
+            localStorage.setItem('authToken', token);
+            console.log('Login successful:', token);
+            return true;
         }
-        // Optionally rethrow the error to let the caller handle it
+        return false;
+    } catch (error) {
+        console.error('Login failed:', error);
         return false;
     }
+}
+
+export async function add() {
+    const user = {
+        "firstName": "test",
+        "lastName": "test",
+        "userName": "test",
+        "password": "test"
+    }
+    await apiClient.post('/user/ops/add', user);
 }

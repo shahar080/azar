@@ -10,7 +10,7 @@ const drawerWidth = 240;
 
 const HomePage: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [drawerPinned, setDrawerPinned] = useState(false);
+    const [drawerPinned, setDrawerPinned] = useState(true);
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const navigate = useNavigate();
 

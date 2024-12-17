@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 import {login} from '../server/api/userApi';
+import PasswordField from "./PasswordField.tsx";
+import {LoginResponse} from "../models/models.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;
-    onLoginSuccess: (username: string) => void;
+    onLoginSuccess: (loginResponse: LoginResponse) => void;
     onLoginFailure: () => void;
 }
 
@@ -19,7 +21,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSucces
             const response = await login(formData);
             console.log('Login successful:', response);
             if (response) {
-                onLoginSuccess(formData.userName);
+                onLoginSuccess(response);
             } else {
                 onLoginFailure();
             }
@@ -64,14 +66,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSucces
                 fullWidth
                 required
             />
-            <TextField
+            <PasswordField
                 label="Password"
                 name="password"
-                type="password"
                 value={formData.password}
                 onChange={handleChange}
-                fullWidth
-                required
             />
             <Button variant="contained" color="primary" type="submit" fullWidth>
                 Login

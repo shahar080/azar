@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
-import {Box, Button, IconButton, InputAdornment, Modal, TextField, Typography,} from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import {Box, Button, Modal, TextField, Typography,} from '@mui/material';
 import {User} from "../models/models.ts";
+import PasswordField from "./PasswordField.tsx";
 
 interface RegisterUserModalProps {
     open: boolean;
@@ -18,7 +17,6 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
         password: '',
         confirmPassword: '',
     });
-    const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({
         firstName: false,
         lastName: false,
@@ -47,10 +45,6 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
         setFormData({...formData, [name]: value});
-    };
-
-    const handleTogglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
     };
 
     const validateForm = () => {
@@ -132,46 +126,22 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
                     margin="normal"
                 />
 
-                <TextField
+                <PasswordField
                     label="Password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleInputChange}
                     error={errors.password}
                     helperText={errors.password ? 'Password is required' : ''}
-                    fullWidth
-                    margin="normal"
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={handleTogglePasswordVisibility}>
-                                    {showPassword ? <Visibility/> : <VisibilityOff/>}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
                 />
 
-                <TextField
+                <PasswordField
                     label="Confirm Password"
                     name="confirmPassword"
-                    type={showPassword ? 'text' : 'password'}
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     error={errors.confirmPassword}
                     helperText={errors.confirmPassword ? 'Passwords do not match' : ''}
-                    fullWidth
-                    margin="normal"
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={handleTogglePasswordVisibility}>
-                                    {showPassword ? <Visibility/> : <VisibilityOff/>}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
                 />
 
                 <Box mt={2} display="flex" justifyContent="flex-end" gap={2}>

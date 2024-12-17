@@ -17,6 +17,7 @@ const HomePage: React.FC = () => {
     const [isRegisterUserModalOpen, setRegisterUserModalOpen] = useState(false);
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
+    const userType = useSelector((state: RootState) => state.auth.userType);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -62,6 +63,7 @@ const HomePage: React.FC = () => {
                 onNavigate={navigateTo}
                 onRegisterUser={handleRegisterUser}
                 onClose={() => setDrawerOpen(false)}
+                userType={userType}
             />
 
             {/* Main Content */}

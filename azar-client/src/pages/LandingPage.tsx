@@ -4,6 +4,7 @@ import {LoginForm} from "../components/LoginForm.tsx"
 import {useDispatch} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import {login} from '../store/authSlice';
+import {LoginResponse} from "../models/models.ts";
 
 const LandingPage: React.FC = () => {
     const [showLoginForm, setShowLoginForm] = useState(false);
@@ -18,8 +19,8 @@ const LandingPage: React.FC = () => {
         setShowLoginForm(false);
     };
 
-    const onLoginSuccess = (username: string) => {
-        dispatch(login(username));
+    const onLoginSuccess = (loginResponse: LoginResponse) => {
+        dispatch(login(loginResponse));
         navigate('/');
     };
 

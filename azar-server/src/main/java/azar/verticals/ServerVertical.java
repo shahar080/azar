@@ -231,7 +231,7 @@ public class ServerVertical extends AbstractVerticle {
                                 new JWTOptions().setExpiresInSeconds(3600)
                         );
 
-                        LoginResponse response = new LoginResponse(true, token, "Login successful.");
+                        LoginResponse response = new LoginResponse(true, token, user.getUserType());
                         routingContext.response()
                                 .setStatusCode(200)
                                 .putHeader("Content-Type", "application/json")

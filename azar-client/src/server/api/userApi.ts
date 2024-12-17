@@ -1,21 +1,19 @@
 import apiClient from "./apiClient.ts";
-import {User, UserNameAndPassword} from "../../models/models.ts"
+import {LoginResponse, User, UserNameAndPassword} from "../../models/models.ts"
 
-export async function login(userNameAndPassword: UserNameAndPassword): Promise<boolean> {
+export async function login(userNameAndPassword: UserNameAndPassword): Promise<LoginResponse | undefined> {
     try {
         const response = await apiClient.post('/user/login', userNameAndPassword);
-        const {token} = response.data;
-
-        if (token) {
+        const loginResponse: LoginResponse = response.data;
+        if (loginResponse && loginResponse.success) {
             // Securely store the token
-            localStorage.setItem('authToken', token);
-            console.log('Login successful:', token);
-            return true;
+            localStorage.setItem('authToken', loginResponse.token);
+            return loginResponse;
         }
-        return false;
+        return undefined;
     } catch (error) {
         console.error('Login failed:', error);
-        return false;
+        return undefined;
     }
 }
 

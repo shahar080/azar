@@ -3,8 +3,9 @@ import {Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar} from '@mui/
 import HomeIcon from '@mui/icons-material/Home';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PushPinIcon from '@mui/icons-material/PushPin';
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import {logout} from "../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../store/store.ts";
@@ -80,9 +81,9 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                     </ListItemIcon>
                     <ListItemText primary="Logout"/>
                 </ListItem>
-                <ListItem component={"div"} onClick={onPinToggle}>
+                <ListItem component="div" onClick={onPinToggle} button>
                     <ListItemIcon>
-                        <MenuIcon/>
+                        {pinned ? <PushPinIcon/> : <PushPinOutlinedIcon/>}
                     </ListItemIcon>
                     <ListItemText primary={pinned ? 'Unpin Drawer' : 'Pin Drawer'}/>
                 </ListItem>

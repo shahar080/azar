@@ -15,7 +15,7 @@ const AppBarHeader: React.FC<AppBarHeaderProps> = ({onMenuToggle, onLogoClick}) 
                     <MenuIcon/>
                 </IconButton>
                 <Typography variant="h6" sx={{flexGrow: 1}}>
-                    My Website
+                    Azar Cloud
                 </Typography>
                 <img
                     src="/path-to-your-logo.png"

@@ -60,12 +60,21 @@ const HomePage: React.FC = () => {
     }, [isLoggedIn, navigate]);
 
     const handleSearch = (query: string, labels: string[]) => {
-        setFilteredPdfs(
-            pdfs.filter((pdf) =>
-                pdf.name.toLowerCase().includes(query.toLowerCase()) &&
-                (labels.length === 0 || labels.every((label) => pdf.labels.includes(label)))
-            )
-        );
+        const filteredResults = pdfs.filter((pdf) => {
+            const matchesQuery =
+                !query ||
+                pdf.name.toLowerCase().includes(query.toLowerCase()) ||
+                pdf.labels.some((label) =>
+                    label.toLowerCase().includes(query.toLowerCase())
+                );
+
+            const matchesLabels =
+                labels.length === 0 || labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
+
+            return matchesQuery && matchesLabels;
+        });
+
+        setFilteredPdfs(filteredResults);
     };
 
     const handleFileUpload = (file: File) => {

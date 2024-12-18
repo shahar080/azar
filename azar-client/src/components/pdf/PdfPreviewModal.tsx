@@ -1,7 +1,7 @@
 import {Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material";
 import {Close} from "@mui/icons-material";
-import {PdfFile} from "../models/models";
-import PdfPreview from "./PdfPreview";
+import {PdfFile} from "../../models/models.ts";
+import PdfPreview from "./PdfPreview.tsx";
 
 interface PdfPreviewModalProps {
     open: boolean;

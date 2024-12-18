@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Box, MenuItem, Select, SelectChangeEvent} from '@mui/material';
-import CustomLabel from './CustomLabel';
+import CustomLabel from './CustomLabel.tsx';
 
 interface CustomLabelManagerProps {
     availableLabels: string[];

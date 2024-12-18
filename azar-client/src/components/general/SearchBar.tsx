@@ -105,7 +105,7 @@ const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, 
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            placeholder="Search by Name or Add Labels"
+                            placeholder="Search.."
                             value={searchQuery}
                             onChange={handleSearchQueryChange}
                             onKeyDown={handleKeyPress}
@@ -121,7 +121,7 @@ const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, 
                     displayEmpty
                     onChange={handleDropdownChange}
                 >
-                    <MenuItem value="" disabled>Select Label</MenuItem>
+                    <MenuItem value="" disabled>Label</MenuItem>
                     {availableLabels
                         .filter((label) => !selectedLabels.includes(label))
                         .map((label) => (

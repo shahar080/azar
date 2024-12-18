@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from "react";
 import {Box, CssBaseline, Grid, Paper, Toolbar} from "@mui/material";
-import AppBarHeader from "../components/AppBarHeader";
-import DrawerMenu from "../components/DrawerMenu";
+import AppBarHeader from "../components/general/AppBarHeader.tsx";
+import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
-import RegisterUserModal from "../components/RegisterUserModal";
-import SearchBar from "../components/SearchBar";
-import PdfList from "../components/PdfList";
-import ExtendedPdfInfo from "../components/ExtendedPdfInfo";
+import RegisterUserModal from "../components/user/RegisterUserModal.tsx";
+import SearchBar from "../components/general/SearchBar.tsx";
+import PdfList from "../components/pdf/PdfList.tsx";
+import ExtendedPdfInfo from "../components/pdf/ExtendedPdfInfo.tsx";
 import {add} from "../server/api/userApi";
 import {PdfFile, User} from "../models/models";
 import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
-import EditPdfModal from "../components/EditPdfModal.tsx";
-import PdfGallery from "../components/PdfGallery.tsx";
+import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
+import PdfGallery from "../components/pdf/PdfGallery.tsx";
 
 const drawerWidth = 240;
 

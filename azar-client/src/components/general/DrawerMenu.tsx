@@ -1,15 +1,14 @@
 import React from 'react';
-import {Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar} from '@mui/material';
+import {ButtonBase, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
-import {logout} from "../store/authSlice.ts";
+import {logout} from "../../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
-import {AppDispatch} from "../store/store.ts";
-import {UserType} from "../models/models.ts";
+import {AppDispatch} from "../../store/store.ts";
+import {UserType} from "../../models/models.ts";
 
 interface DrawerMenuProps {
     open: boolean;
@@ -38,6 +37,12 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                                                    userType = UserType.STANDARD
                                                }) => {
     const dispatch = useDispatch();
+    const hoverStyles = {
+        "&:hover": {
+            backgroundColor: "action.hover",
+        },
+    };
+
     // TODO AZAR-29
     return (
         <Drawer
@@ -55,17 +60,11 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
         >
             <Toolbar/>
             <List>
-                <ListItem component={"div"} onClick={() => onNavigate('/option1')}>
+                <ListItem component={ButtonBase} onClick={() => onNavigate('/option1')} sx={hoverStyles}>
                     <ListItemIcon>
                         <HomeIcon/>
                     </ListItemIcon>
                     <ListItemText primary="Option1"/>
-                </ListItem>
-                <ListItem component={"div"} onClick={() => onNavigate('/option2')}>
-                    <ListItemIcon>
-                        <SettingsIcon/>
-                    </ListItemIcon>
-                    <ListItemText primary="Option2"/>
                 </ListItem>
                 {userType === UserType.ADMIN &&
                     <ListItem component={"div"} onClick={onRegisterUser}>
@@ -75,13 +74,13 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                         <ListItemText primary="Add User"/>
                     </ListItem>
                 }
-                <ListItem component={"div"} onClick={() => handleLogOut({onNavigate, dispatch})}>
+                <ListItem component={ButtonBase} onClick={() => handleLogOut({onNavigate, dispatch})} sx={hoverStyles}>
                     <ListItemIcon>
                         <LogoutIcon/>
                     </ListItemIcon>
                     <ListItemText primary="Logout"/>
                 </ListItem>
-                <ListItem component="div" onClick={onPinToggle} button>
+                <ListItem component={ButtonBase} onClick={onPinToggle} sx={hoverStyles}>
                     <ListItemIcon>
                         {pinned ? <PushPinIcon/> : <PushPinOutlinedIcon/>}
                     </ListItemIcon>

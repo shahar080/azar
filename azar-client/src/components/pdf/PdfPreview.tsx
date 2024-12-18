@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {fetchPdfPreview} from "../server/api/pdfFileApi";
+import {fetchPdfPreview} from "../../server/api/pdfFileApi.ts";
 
 const PdfPreview: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText}) => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);

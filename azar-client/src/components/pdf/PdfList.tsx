@@ -1,7 +1,7 @@
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,} from "@mui/material";
-import {PdfFile} from "../models/models.ts";
-import PdfContextMenu from "./PdfContextMenu";
+import {PdfFile} from "../../models/models.ts";
+import PdfContextMenu from "./PdfContextMenu.tsx";
 
 interface PdfListProps {
     pdfs: PdfFile[];

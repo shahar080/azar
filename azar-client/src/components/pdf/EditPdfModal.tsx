@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Autocomplete, Box, Button, Modal, Stack, TextField, Typography,} from "@mui/material";
-import {PdfFile} from "../models/models";
-import CustomLabel from "./CustomLabel"; // Your existing label component
+import {PdfFile} from "../../models/models.ts";
+import CustomLabel from "../label/CustomLabel.tsx"; // Your existing label component
 
 interface EditPdfModalProps {
     open: boolean;

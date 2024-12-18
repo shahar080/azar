@@ -1,9 +1,9 @@
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Box, Card, CardActionArea, CardContent, Grid, Typography} from "@mui/material";
-import {PdfFile} from "../models/models";
-import PdfPreviewModal from "./PdfPreviewModal";
+import {PdfFile} from "../../models/models.ts";
+import PdfPreviewModal from "./PdfPreviewModal.tsx";
 import PdfThumbnail from "./PdfThumbnail.tsx";
-import PdfContextMenu from "./PdfContextMenu";
+import PdfContextMenu from "./PdfContextMenu.tsx";
 
 interface PdfGalleryProps {
     pdfs: PdfFile[];
@@ -28,7 +28,6 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
 
     const handleCloseMenu = () => {
         setAnchorPosition(null);
-        setSelectedPdf(null);
     };
 
     const handleThumbnailClick = (pdf: PdfFile) => {

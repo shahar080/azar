@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from "react";
 import {Menu, MenuItem} from "@mui/material";
-import {PdfFile} from "../models/models";
+import {PdfFile} from "../../models/models.ts";
 
 interface PdfContextMenuProps {
     anchorPosition: { top: number; left: number } | null;

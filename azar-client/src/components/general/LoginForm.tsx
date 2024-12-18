@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
-import {login} from '../server/api/userApi';
+import {login} from '../../server/api/userApi.ts';
 import PasswordField from "./PasswordField.tsx";
-import {LoginResponse} from "../models/models.ts";
+import {LoginResponse} from "../../models/models.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;

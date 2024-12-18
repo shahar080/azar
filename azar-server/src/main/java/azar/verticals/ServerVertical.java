@@ -10,6 +10,7 @@ import azar.entities.requests.AddUserRequest;
 import azar.properties.AppProperties;
 import azar.utils.AuthService;
 import azar.utils.JsonManager;
+import azar.utils.PasswordManager;
 import azar.utils.Utilities;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
@@ -25,6 +26,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,16 +50,18 @@ public class ServerVertical extends AbstractVerticle {
     private final PdfFileService pdfFileService;
     private final AuthService authService;
     private final JWTAuth jwtAuth;
+    private final PasswordManager passwordManager;
 
     @Inject
     public ServerVertical(AppProperties appProperties, JsonManager jsonManager, UserService userService,
-                          PdfFileService pdfFileService) {
+                          PdfFileService pdfFileService, PasswordManager passwordManager) {
         this.appProperties = appProperties;
         this.userService = userService;
         this.pdfFileService = pdfFileService;
         this.jsonManager = jsonManager;
         this.authService = new AuthService(this.vertx);
         this.jwtAuth = authService.getJwtAuth();
+        this.passwordManager = passwordManager;
     }
 
     @Override
@@ -217,6 +221,7 @@ public class ServerVertical extends AbstractVerticle {
     }
 
     private void addUser(RoutingContext routingContext, User user) {
+        user.setPassword(passwordManager.hashPassword(user.getPassword()));
         userService.add(user)
                 .onSuccess(addedUser -> {
                     routingContext.response()
@@ -241,13 +246,13 @@ public class ServerVertical extends AbstractVerticle {
 
         userService.getUserByUserName(userNameAndPassword.getUserName())
                 .onSuccess(user -> {
-                    if (user != null && user.getPassword().equals(userNameAndPassword.getPassword())) {
+                    if (user != null && passwordManager.checkPassword(userNameAndPassword.getPassword(), user.getPassword())) {
                         String token = jwtAuth.generateToken(
                                 new JsonObject().put("userName", user.getUserName()),
                                 new JWTOptions().setExpiresInSeconds(3600)
                         );
 
-                        LoginResponse response = new LoginResponse(true, token, user.getUserType());
+                        LoginResponse response = new LoginResponse(true, token, user.getUserName(), user.getUserType());
                         routingContext.response()
                                 .setStatusCode(200)
                                 .putHeader("Content-Type", "application/json")

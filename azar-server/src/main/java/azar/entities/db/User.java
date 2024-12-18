@@ -30,6 +30,7 @@ public class User {
     @Column(name = "user_name", unique = true, nullable = false)
     private String userName;
 
+    @Setter
     @Column(name = "password", nullable = false)
     private String password;
 

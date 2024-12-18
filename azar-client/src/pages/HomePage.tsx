@@ -28,6 +28,7 @@ const HomePage: React.FC = () => {
     const [hasMore, setHasMore] = useState(true);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedPdfForEdit, setSelectedPdfForEdit] = useState<PdfFile | null>(null);
+    const [allLabels, setAllLabels] = useState<string[]>([]);
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
@@ -67,6 +68,7 @@ const HomePage: React.FC = () => {
                 setPdfs(uniquePdfs);         // Update state
                 setFilteredPdfs(uniquePdfs); // Update filtered list
                 setPage((prev) => prev + 1); // Increment page number
+                updateLabels(uniquePdfs)
             })
             .catch((err) => console.error("Failed to load more PDFs", err))
             .finally(() => setLoading(false));
@@ -154,13 +156,22 @@ const HomePage: React.FC = () => {
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
         // Replace the edited PDF in the list
-        setPdfs((prev) => prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf)));
+        const tempPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
+        setPdfs(tempPdfs);
         setFilteredPdfs((prev) =>
             prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
         );
+        updateLabels(tempPdfs)
         // Optionally, send an API call to save changes on the server
         updatePdf(updatedPdf);
     };
+
+    const updateLabels = (pdfs: PdfFile[]) => {
+        // Extract unique labels
+        const labels = Array.from(new Set(pdfs.flatMap((pdf) => pdf.labels || [])));
+        alert(labels)
+        setAllLabels(labels);
+    }
 
     return (
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
@@ -204,7 +215,7 @@ const HomePage: React.FC = () => {
                         <SearchBar
                             onSearch={handleSearch}
                             onFileUpload={handleFileUpload}
-                            availableLabels={[...new Set(pdfs.flatMap((pdf) => pdf.labels))]}
+                            availableLabels={allLabels}
                         />
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
                             <PdfList
@@ -220,6 +231,7 @@ const HomePage: React.FC = () => {
                                 pdf={selectedPdfForEdit}
                                 onClose={() => setEditModalOpen(false)}
                                 onSave={handleSaveEdit}
+                                allLabels={allLabels}
                             />
                         </Box>
                     </Grid>

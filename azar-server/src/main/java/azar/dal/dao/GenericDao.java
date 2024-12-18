@@ -1,6 +1,8 @@
 package azar.dal.dao;
 
+import azar.utils.Utilities;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.vertx.core.Future;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -26,7 +28,6 @@ public abstract class GenericDao<T> {
     public GenericDao() {
         sessionFactory = new Configuration().configure().buildSessionFactory();
         currentSession = null;
-        logger.info("Created sessionFactory successfully");
     }
 
     protected Session openSession() {
@@ -74,7 +75,21 @@ public abstract class GenericDao<T> {
         return Future.future(promise -> {
             try (Session session = openSession()) {
                 session.beginTransaction();
-                T res = session.merge(newItem);
+
+                // Fetch the existing entity by its ID
+                Object id = session.getEntityManagerFactory()
+                        .getPersistenceUnitUtil().getIdentifier(newItem);
+                T existingItem = session.find((Class<T>) newItem.getClass(), id);
+
+                if (existingItem == null) {
+                    throw new IllegalArgumentException("Entity not found for update");
+                }
+
+                // Retain fields from the existing item
+                Utilities.mergeNonNullFields(newItem, existingItem);
+
+                // Merge the updated entity
+                T res = session.merge(existingItem);
                 session.getTransaction().commit();
                 promise.complete(res);
             } catch (Exception e) {

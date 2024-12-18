@@ -9,6 +9,7 @@ interface CustomLabelProps {
 const CustomLabel: React.FC<CustomLabelProps> = ({label, onRemove}) => {
     return (
         <Chip
+            key={label}
             label={label}
             onDelete={() => onRemove(label)}
             color="primary"

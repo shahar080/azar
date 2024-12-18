@@ -1,20 +1,28 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Modal, Stack, TextField, Typography,} from "@mui/material";
+import {Autocomplete, Box, Button, Modal, Stack, TextField, Typography,} from "@mui/material";
 import {PdfFile} from "../models/models";
+import CustomLabel from "./CustomLabel"; // Your existing label component
 
 interface EditPdfModalProps {
     open: boolean;
     pdf: PdfFile | null;
     onClose: () => void;
     onSave: (updatedPdf: PdfFile) => void;
+    allLabels: string[];
 }
 
-const EditPdfModal: React.FC<EditPdfModalProps> = ({open, pdf, onClose, onSave}) => {
+const EditPdfModal: React.FC<EditPdfModalProps> = ({
+                                                       open,
+                                                       pdf,
+                                                       onClose,
+                                                       onSave,
+                                                       allLabels
+                                                   }) => {
     const [fileName, setFileName] = useState("");
     const [labels, setLabels] = useState<string[]>([]);
     const [description, setDescription] = useState("");
 
-    // Load PDF data when modal opens or the PDF changes
+    // Load PDF data when modal opens
     useEffect(() => {
         if (pdf) {
             setFileName(pdf.fileName || "");
@@ -23,6 +31,12 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({open, pdf, onClose, onSave})
         }
     }, [pdf]);
 
+    // Remove a label
+    const handleRemoveLabel = (labelToRemove: string) => {
+        setLabels(labels.filter((label) => label !== labelToRemove));
+    };
+
+    // Save the updated PDF
     const handleSave = () => {
         if (pdf) {
             onSave({
@@ -50,7 +64,11 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({open, pdf, onClose, onSave})
                     borderRadius: 2,
                 }}
             >
-                <Typography variant="h6" mb={2}>Edit PDF</Typography>
+                <Typography variant="h6" mb={2}>
+                    Edit PDF
+                </Typography>
+
+                {/* Name Field */}
                 <TextField
                     fullWidth
                     label="Name"
@@ -58,15 +76,34 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({open, pdf, onClose, onSave})
                     onChange={(e) => setFileName(e.target.value)}
                     margin="dense"
                 />
-                <TextField
-                    fullWidth
-                    label="Labels (comma-separated)"
-                    value={labels.join(", ")}
-                    onChange={(e) =>
-                        setLabels(e.target.value.split(",").map((label) => label.trim()))
+
+                {/* Labels with Autocomplete */}
+                <Autocomplete
+                    multiple
+                    freeSolo
+                    options={allLabels.filter((option) => !labels.includes(option))} // Filter existing labels
+                    value={labels}
+                    onChange={(_event, newValue) => setLabels(newValue)}
+                    renderTags={(value, getTagProps) =>
+                        value.map((label, index) => (
+                            <CustomLabel
+                                label={label}
+                                onRemove={() => handleRemoveLabel(label)}
+                                {...getTagProps({index})}
+                            />
+                        ))
                     }
-                    margin="dense"
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="outlined"
+                            placeholder="Labels"
+                            margin="dense"
+                        />
+                    )}
                 />
+
+                {/* Description Field */}
                 <TextField
                     fullWidth
                     label="Description"
@@ -76,9 +113,15 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({open, pdf, onClose, onSave})
                     multiline
                     rows={3}
                 />
+
+                {/* Actions */}
                 <Stack direction="row" spacing={2} mt={2}>
-                    <Button variant="contained" onClick={handleSave}>Save</Button>
-                    <Button variant="outlined" onClick={onClose}>Cancel</Button>
+                    <Button variant="contained" onClick={handleSave}>
+                        Save
+                    </Button>
+                    <Button variant="outlined" onClick={onClose}>
+                        Cancel
+                    </Button>
                 </Stack>
             </Box>
         </Modal>

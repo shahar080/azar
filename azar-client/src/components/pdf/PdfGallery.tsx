@@ -1,7 +1,7 @@
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Box, Card, CardActionArea, CardContent, Grid, Typography} from "@mui/material";
 import {PdfFile} from "../../models/models.ts";
-import PdfPreviewModal from "./PdfPreviewModal.tsx";
+import ShowPDFModal from "./ShowPDFModal.tsx";
 import PdfThumbnail from "./PdfThumbnail.tsx";
 import PdfContextMenu from "./PdfContextMenu.tsx";
 
@@ -15,7 +15,7 @@ interface PdfGalleryProps {
 
 const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, onEdit, onDelete}) => {
     const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
-    const [isPreviewOpen, setPreviewOpen] = useState(false);
+    const [isShowPDF, setShowPDF] = useState(false);
     const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
 
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -32,7 +32,7 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
 
     const handleThumbnailClick = (pdf: PdfFile) => {
         setSelectedPdf(pdf);
-        setPreviewOpen(true);
+        setShowPDF(true);
     };
 
     const handleOnViewMore = (pdf: PdfFile) => {
@@ -125,11 +125,11 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                 onDelete={handleDelete}
             />
 
-            {/* PDF Preview Modal */}
-            <PdfPreviewModal
-                open={isPreviewOpen}
+            {/* Show PDF Modal*/}
+            <ShowPDFModal
+                open={isShowPDF}
                 pdfFile={selectedPdf}
-                onClose={() => setPreviewOpen(false)}
+                onClose={() => setShowPDF(false)}
             />
         </>
     );

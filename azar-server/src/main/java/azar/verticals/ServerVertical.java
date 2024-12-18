@@ -74,7 +74,8 @@ public class ServerVertical extends AbstractVerticle {
             );
 
 
-            router.route().handler(BodyHandler.create());
+            router.route().handler(BodyHandler.create()
+                    .setBodyLimit(50 * 1024 * 1024));
             router.route("/user/ops/*").handler(JWTAuthHandler.create(jwtAuth));
 
 
@@ -87,8 +88,7 @@ public class ServerVertical extends AbstractVerticle {
             router.route("/pdf/delete/:id").handler(this::handleDeletePdf);
             router.route("/pdf/update").handler(this::handleUpdatePdf);
             router.route("/pdf/thumbnail/:id").handler(this::handleThumbnailRequest);
-            router.route("/pdf/preview/:id").handler(this::handlePdfPreview);
-
+            router.route("/pdf/get/:id").handler(this::handlePDFGet);
 
             int serverPort = appProperties.getIntProperty("server.port", 8080);
             String serverHost = appProperties.getProperty("server.host");
@@ -324,7 +324,7 @@ public class ServerVertical extends AbstractVerticle {
 
         int offset = (page - 1) * limit;
 
-        pdfFileService.getAllPaginated(offset, limit) // Fetch paginated results
+        pdfFileService.getAllClientPaginated(offset, limit) // Fetch paginated results
                 .onSuccess(pdfFiles -> {
                     routingContext.response()
                             .setStatusCode(200)
@@ -404,23 +404,22 @@ public class ServerVertical extends AbstractVerticle {
                     }
 
                     try {
-                        // Generate the thumbnail as a byte array
-                        byte[] thumbnail = Utilities.generateThumbnail(pdfFile);
+                        vertx.executeBlocking(() -> {
+                            // Generate the thumbnail as a byte array
+                            byte[] thumbnail = Utilities.generateThumbnail(pdfFile);
 
-                        // Write the response
-                        routingContext.response()
-                                .putHeader("Content-Type", "image/png")
-                                .putHeader("Content-Length", String.valueOf(thumbnail.length));
+                            // Set the response headers before writing content
+                            routingContext.response()
+                                    .putHeader("Content-Type", "image/png")
+                                    .putHeader("Content-Length", String.valueOf(thumbnail.length));
 
-                        // Write and then explicitly call end()
-                        routingContext.response().write(Buffer.buffer(thumbnail)).onComplete(res -> {
-                            if (res.succeeded()) {
-                                routingContext.response().end();
-                            } else {
-                                routingContext.response().setStatusCode(500).end("Failed to send thumbnail");
-                            }
+                            // Write the thumbnail data
+                            routingContext.response().write(Buffer.buffer(thumbnail));
+
+                            // End the response after writing
+                            routingContext.response().end();
+                            return null;
                         });
-
                     } catch (Exception e) {
                         routingContext.response()
                                 .setStatusCode(500)
@@ -434,7 +433,7 @@ public class ServerVertical extends AbstractVerticle {
                 });
     }
 
-    private void handlePdfPreview(RoutingContext routingContext) {
+    private void handlePDFGet(RoutingContext routingContext) {
         String pdfId = routingContext.pathParam("id");
 
         // Fetch the PDF file from your database/service

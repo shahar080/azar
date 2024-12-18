@@ -1,7 +1,9 @@
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,} from "@mui/material";
+import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel} from "@mui/material";
 import {PdfFile} from "../../models/models.ts";
 import PdfContextMenu from "./PdfContextMenu.tsx";
+import ShowPDFModal from "./ShowPDFModal.tsx";
+import {formatDate, parseSize} from "../../utils/utilities.ts";
 
 interface PdfListProps {
     pdfs: PdfFile[];
@@ -13,10 +15,11 @@ interface PdfListProps {
 
 const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete, onEdit}) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(
-        null
-    );
+    const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
     const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
+    const [isShowPDF, setShowPDF] = useState(false);
+    const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+    const [orderBy, setOrderBy] = useState<string>('fileName');
 
     // Infinite Scroll Logic
     useEffect(() => {
@@ -38,6 +41,35 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
         return () => container?.removeEventListener("scroll", handleScroll);
     }, [onLoadMore]);
 
+    // Sort function
+    const handleRequestSort = (property: string) => {
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    };
+
+    const sortData = (array: any[]) => {
+        return array.sort((a, b) => {
+            const isAsc = order === 'asc';
+
+            if (orderBy === 'size') {
+                const sizeA = parseSize(a.size);
+                const sizeB = parseSize(b.size);
+                return isAsc ? sizeA - sizeB : sizeB - sizeA;
+            }
+
+            if (a[orderBy] < b[orderBy]) {
+                return isAsc ? -1 : 1;
+            }
+            if (a[orderBy] > b[orderBy]) {
+                return isAsc ? 1 : -1;
+            }
+            return 0;
+        });
+    };
+
+    const sortedPdfs = sortData([...pdfs]);
+
     // Right-click logic
     const handleRightClick = (event: MouseEvent<HTMLTableRowElement>, pdf: PdfFile) => {
         event.preventDefault();
@@ -47,13 +79,12 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
 
     const handleCloseMenu = () => {
         setAnchorPosition(null);
-        setSelectedPdf(null);
     };
 
     const handleOnViewMore = (pdf: PdfFile) => {
         onRowClick(pdf);
         handleCloseMenu();
-    }
+    };
 
     const handleDelete = () => {
         if (selectedPdf) {
@@ -65,6 +96,13 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
     const handleEdit = () => {
         if (selectedPdf) {
             onEdit(selectedPdf);
+        }
+        handleCloseMenu();
+    };
+
+    const handleShowPDF = () => {
+        if (selectedPdf) {
+            setShowPDF(true);
         }
         handleCloseMenu();
     };
@@ -88,15 +126,55 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Size</TableCell>
-                            <TableCell>Uploaded At</TableCell>
-                            <TableCell>Labels</TableCell>
-                            <TableCell>Description</TableCell>
+                            <TableCell sortDirection={orderBy === 'fileName' ? order : false}>
+                                <TableSortLabel
+                                    active={orderBy === 'fileName'}
+                                    direction={orderBy === 'fileName' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('fileName')}
+                                >
+                                    Name
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell sortDirection={orderBy === 'size' ? order : false}>
+                                <TableSortLabel
+                                    active={orderBy === 'size'}
+                                    direction={orderBy === 'size' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('size')}
+                                >
+                                    Size
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell sortDirection={orderBy === 'uploadedAt' ? order : false}>
+                                <TableSortLabel
+                                    active={orderBy === 'uploadedAt'}
+                                    direction={orderBy === 'uploadedAt' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('uploadedAt')}
+                                >
+                                    Uploaded At
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell sortDirection={orderBy === 'labels' ? order : false}>
+                                <TableSortLabel
+                                    active={orderBy === 'labels'}
+                                    direction={orderBy === 'labels' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('labels')}
+                                >
+                                    Labels
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell sortDirection={orderBy === 'description' ? order : false}>
+                                <TableSortLabel
+                                    active={orderBy === 'description'}
+                                    direction={orderBy === 'description' ? order : 'asc'}
+                                    onClick={() => handleRequestSort('description')}
+                                >
+                                    Description
+                                </TableSortLabel>
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {pdfs.map((pdf) => (
+                        {sortedPdfs.map((pdf) => (
                             <TableRow
                                 key={pdf.id}
                                 hover
@@ -106,7 +184,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                             >
                                 <TableCell>{pdf.fileName}</TableCell>
                                 <TableCell>{pdf.size}</TableCell>
-                                <TableCell>{pdf.uploadedAt}</TableCell>
+                                <TableCell>{formatDate(pdf.uploadedAt)}</TableCell>
                                 <TableCell>
                                     {Array.isArray(pdf.labels)
                                         ? pdf.labels.join(", ")
@@ -127,6 +205,12 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                 onViewMore={handleOnViewMore}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onShowPDF={handleShowPDF}
+            />
+            <ShowPDFModal
+                open={isShowPDF}
+                pdfFile={selectedPdf}
+                onClose={() => setShowPDF(false)}
             />
         </>
     );

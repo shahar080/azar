@@ -19,11 +19,14 @@ public class PdfFileDao extends GenericDao<PdfFile> {
         return PdfFile.class;
     }
 
-    public Future<List<PdfFile>> getAllPaginated(int offset, int limit) {
+    public Future<List<azar.entities.client.PdfFile>> getAllClientPaginated(int offset, int limit) {
         return Future.future(listPromise -> {
             try (Session session = openSession()) {
-                List<PdfFile> paginatedResults = session
-                        .createQuery("SELECT p FROM PdfFile p", PdfFile.class)
+                List<azar.entities.client.PdfFile> paginatedResults = session
+                        .createQuery(
+                                "SELECT new azar.entities.client.PdfFile(p.id, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
+                                        " FROM PdfFile p",
+                                azar.entities.client.PdfFile.class)
                         .setFirstResult(offset) // Offset
                         .setMaxResults(limit)   // Limit
                         .getResultList();
@@ -34,4 +37,5 @@ public class PdfFileDao extends GenericDao<PdfFile> {
             }
         });
     }
+
 }

@@ -29,6 +29,8 @@
     <logger name="com.google.cloud.sql.core.Connector" level="WARN" />
     <logger name="com.google.cloud.sql.core.RefreshAheadStrategy" level="WARN" />
     <logger name="com.google.cloud.sql.core.DefaultConnectionInfoRepository" level="WARN" />
+    <logger name="org.apache.fontbox.cff" level="ERROR" />
+    <logger name="org.apache.fontbox.ttf" level="ERROR" />
 
 
     <!-- Example of package-specific logging -->

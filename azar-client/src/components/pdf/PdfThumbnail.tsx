@@ -10,8 +10,8 @@ const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altT
                 const blob = await fetchPdfThumbnail(pdfId);
                 const url = URL.createObjectURL(blob);
                 setThumbnailUrl(url);
-            } catch {
-                console.error("Error loading thumbnail");
+            } catch (error) {
+                console.error("Error loading thumbnail", error);
             }
         };
         loadThumbnail();

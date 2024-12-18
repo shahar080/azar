@@ -49,8 +49,8 @@ public class PdfFileService extends GenericService<PdfFile> {
         return pdfFileDao.removeById(id);
     }
 
-    public Future<List<PdfFile>> getAllPaginated(int offset, int limit) {
-        return pdfFileDao.getAllPaginated(offset, limit);
+    public Future<List<azar.entities.client.PdfFile>> getAllClientPaginated(int offset, int limit) {
+        return pdfFileDao.getAllClientPaginated(offset, limit);
     }
 
 }

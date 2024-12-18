@@ -66,15 +66,15 @@ export const fetchPdfThumbnail = async (pdfId: string): Promise<Blob> => {
 };
 
 
-export const fetchPdfPreview = async (pdfId: string): Promise<Blob> => {
+export const fetchPDF = async (pdfId: string): Promise<Blob> => {
     try {
-        const response = await apiClient.get(`/pdf/preview/${pdfId}`, {
+        const response = await apiClient.get(`/pdf/get/${pdfId}`, {
             responseType: "blob", // Fetch the response as a binary blob
         });
 
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch PDF preview:", error);
+        console.error("Failed to fetch PDF:", error);
         throw error;
     }
 };

@@ -4,7 +4,7 @@ import {logout} from "../../store/authSlice.ts";
 // Create an Axios instance
 const apiClient = axios.create({
     baseURL: 'http://localhost:8080',
-    timeout: 10000,
+    timeout: 30000,
     headers: {
         'Content-Type': 'application/json',
     },

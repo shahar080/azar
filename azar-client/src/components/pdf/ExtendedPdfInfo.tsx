@@ -1,5 +1,6 @@
 import React from 'react';
 import {Box, Paper, Typography} from '@mui/material';
+import {formatDate} from "../../utils/utilities.ts";
 
 interface ExtendedPdfInfoProps {
     name: string;
@@ -38,7 +39,7 @@ const ExtendedPdfInfo: React.FC<ExtendedPdfInfoProps> = ({
                     <strong>Size:</strong> {size}
                 </Typography>
                 <Typography>
-                    <strong>Uploaded At:</strong> {uploadedAt}
+                    <strong>Uploaded At:</strong> {formatDate(uploadedAt)}
                 </Typography>
                 <Typography>
                     <strong>Labels:</strong> {labels.join(', ')}

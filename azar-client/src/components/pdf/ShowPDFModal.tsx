@@ -1,15 +1,16 @@
 import {Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material";
 import {Close} from "@mui/icons-material";
 import {PdfFile} from "../../models/models.ts";
-import PdfPreview from "./PdfPreview.tsx";
+import ShowPDF from "./ShowPDF.tsx";
+import React from "react";
 
-interface PdfPreviewModalProps {
+interface ShowPDFModalProps {
     open: boolean;
     pdfFile: PdfFile | null;
     onClose: () => void;
 }
 
-const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({open, pdfFile, onClose}) => {
+const ShowPDFModal: React.FC<ShowPDFModalProps> = ({open, pdfFile, onClose}) => {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
             <DialogTitle>
@@ -24,7 +25,7 @@ const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({open, pdfFile, onClose
             </DialogTitle>
             <DialogContent>
                 {pdfFile && (
-                    <PdfPreview
+                    <ShowPDF
                         pdfId={pdfFile.id.toString()}
                         altText={`Preview of ${pdfFile.fileName}`}
                     />
@@ -34,4 +35,4 @@ const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({open, pdfFile, onClose
     );
 };
 
-export default PdfPreviewModal;
+export default ShowPDFModal;

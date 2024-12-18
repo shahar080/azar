@@ -53,28 +53,26 @@ const HomePage: React.FC = () => {
         if (!forceLoad && (loading || !hasMore)) return; // Stop if already loading or no more PDFs
         setLoading(true);
 
-        getAllPdfs(page, 20)
+        const currentPage = forceLoad ? 1 : page;
+
+        getAllPdfs(currentPage, 20)
             .then((newPdfs) => {
                 if (newPdfs.length < 20) {
                     setHasMore(false);
                 }
 
-                // Avoid duplicate entries
-                const uniquePdfs = [
-                    ...pdfs,
-                    ...newPdfs.filter(
-                        (newPdf) => !pdfs.some((existingPdf) => existingPdf.id === newPdf.id)
-                    ),
-                ];
+                // If forceLoad is true, replace PDFs; otherwise, append
+                setPdfs((prevPdfs) => (forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]));
+                setFilteredPdfs((prevPdfs) => (forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]));
 
-                setPdfs(uniquePdfs);         // Update state
-                setFilteredPdfs(uniquePdfs); // Update filtered list
-                setPage((prev) => prev + 1); // Increment page number
-                updateLabels(uniquePdfs)
+                if (!forceLoad) {
+                    setPage((prev) => prev + 1); // Increment page only if not forcing reload
+                }
             })
-            .catch((err) => console.error("Failed to load more PDFs", err))
+            .catch((err) => console.error("Failed to load PDFs:", err))
             .finally(() => setLoading(false));
     };
+
 
     const handleSearch = (query: string, labels: string[]) => {
         setPage(1);
@@ -101,13 +99,9 @@ const HomePage: React.FC = () => {
     const handleFileUpload = (file: File) => {
         uploadPdf(file).then((newPdf) => {
             if (newPdf !== undefined) {
-                // Reset pagination
-                setPage(1);
-                setHasMore(true);
-                // Reload PDFs from the first page
-                loadPdfs(true);
-
                 console.log("File uploaded successfully:", newPdf);
+                // Reset pagination and reload PDFs
+                resetPaginationAndReload();
             } else {
                 console.error("File upload failed.");
             }
@@ -115,13 +109,22 @@ const HomePage: React.FC = () => {
     };
 
     const handleDeletePdf = (pdfId: string) => {
-        // Make an API call to delete the PDF
-        deletePdf(pdfId).then(() => {
-            setPdfs((prevPdfs) => prevPdfs.filter((pdf) => pdf.id !== pdfId));
-            setFilteredPdfs((prevPdfs) => prevPdfs.filter((pdf) => pdf.id !== pdfId));
-        }).catch((error) => {
-            console.error("Failed to delete PDF:", error);
-        });
+        deletePdf(pdfId)
+            .then(() => {
+                console.log("File deleted successfully:", pdfId);
+                // Reset pagination and reload PDFs
+                resetPaginationAndReload();
+            })
+            .catch((error) => {
+                console.error("Failed to delete PDF:", error);
+            });
+    };
+
+    const resetPaginationAndReload = () => {
+        setPage(1);
+        setHasMore(true);
+        setPdfs([]); // Clear the list of PDFs
+        loadPdfs(true); // Force reload starting from page 1
     };
 
     const handleRowClick = (pdfFile: PdfFile) => {

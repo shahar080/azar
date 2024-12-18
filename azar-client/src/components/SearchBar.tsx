@@ -1,13 +1,26 @@
 import React, {useState} from 'react';
-import {Autocomplete, Box, Button, Chip, MenuItem, Select, SelectChangeEvent, TextField} from '@mui/material';
+import {
+    Autocomplete,
+    Box,
+    Button,
+    Chip,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup
+} from '@mui/material';
 
 interface SearchBarProps {
     onSearch: (query: string, labels: string[]) => void;
     onFileUpload: (file: File) => void;
+    viewMode: string;
+    handleViewToggle: (_event: React.MouseEvent<HTMLElement>, newView: 'list' | 'gallery') => void;
     availableLabels: string[];
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, availableLabels}) => {
+const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, handleViewToggle, availableLabels}) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
     const [dropdownLabel, setDropdownLabel] = useState('');
@@ -127,17 +140,40 @@ const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, availableL
                 </Button>
             </Box>
 
-            {/* File Upload */}
-            <Box>
-                <Button variant="contained" component="label" color="secondary">
-                    Upload PDF
-                    <input
-                        type="file"
-                        hidden
-                        onChange={handleFileInputChange}
-                        accept="application/pdf"
-                    />
-                </Button>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: 2,
+                    gap: 2,
+                }}
+            >
+                {/* Left Side: Upload PDF Button */}
+                <Box>
+                    <Button variant="contained" component="label" color="secondary">
+                        Upload PDF
+                        <input
+                            type="file"
+                            hidden
+                            onChange={handleFileInputChange}
+                            accept="application/pdf"
+                        />
+                    </Button>
+                </Box>
+
+                {/* Right Side: View Toggle Buttons */}
+                <Box>
+                    <ToggleButtonGroup
+                        value={viewMode}
+                        exclusive
+                        onChange={handleViewToggle}
+                        aria-label="view mode"
+                    >
+                        <ToggleButton value="list">List View</ToggleButton>
+                        <ToggleButton value="gallery">Gallery View</ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
             </Box>
         </Box>
     );

@@ -11,10 +11,10 @@ import azar.properties.AppProperties;
 import azar.utils.AuthService;
 import azar.utils.JsonManager;
 import azar.utils.Utilities;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
@@ -86,6 +86,8 @@ public class ServerVertical extends AbstractVerticle {
             router.route("/pdf/getAll").handler(this::handleGetAllPdfs);
             router.route("/pdf/delete/:id").handler(this::handleDeletePdf);
             router.route("/pdf/update").handler(this::handleUpdatePdf);
+            router.route("/pdf/thumbnail/:id").handler(this::handleThumbnailRequest);
+            router.route("/pdf/preview/:id").handler(this::handlePdfPreview);
 
 
             int serverPort = appProperties.getIntProperty("server.port", 8080);
@@ -388,6 +390,69 @@ public class ServerVertical extends AbstractVerticle {
                     routingContext.response()
                             .setStatusCode(500)
                             .end("Failed to delete PDF: " + err.getMessage());
+                });
+    }
+
+    public void handleThumbnailRequest(RoutingContext routingContext) {
+        pdfFileService.getById(Integer.valueOf(routingContext.pathParam("id")))
+                .onSuccess(pdfFile -> {
+                    if (pdfFile == null) {
+                        routingContext.response()
+                                .setStatusCode(404)
+                                .end("PDF not found");
+                        return;
+                    }
+
+                    try {
+                        // Generate the thumbnail as a byte array
+                        byte[] thumbnail = Utilities.generateThumbnail(pdfFile);
+
+                        // Write the response
+                        routingContext.response()
+                                .putHeader("Content-Type", "image/png")
+                                .putHeader("Content-Length", String.valueOf(thumbnail.length));
+
+                        // Write and then explicitly call end()
+                        routingContext.response().write(Buffer.buffer(thumbnail)).onComplete(res -> {
+                            if (res.succeeded()) {
+                                routingContext.response().end();
+                            } else {
+                                routingContext.response().setStatusCode(500).end("Failed to send thumbnail");
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        routingContext.response()
+                                .setStatusCode(500)
+                                .end("Failed to generate thumbnail: " + e.getMessage());
+                    }
+                })
+                .onFailure(err -> {
+                    routingContext.response()
+                            .setStatusCode(500)
+                            .end("Error retrieving PDF: " + err.getMessage());
+                });
+    }
+
+    private void handlePdfPreview(RoutingContext routingContext) {
+        String pdfId = routingContext.pathParam("id");
+
+        // Fetch the PDF file from your database/service
+        pdfFileService.getById(Integer.valueOf(pdfId))
+                .onSuccess(pdfFile -> {
+                    if (pdfFile == null) {
+                        routingContext.response().setStatusCode(404).end("PDF not found");
+                        return;
+                    }
+
+                    // Send the PDF data
+                    routingContext.response()
+                            .putHeader("Content-Type", "application/pdf")
+                            .putHeader("Content-Disposition", "inline; filename=" + pdfFile.getFileName())
+                            .end(Buffer.buffer(pdfFile.getData()));
+                })
+                .onFailure(err -> {
+                    routingContext.response().setStatusCode(500).end("Failed to retrieve PDF: " + err.getMessage());
                 });
     }
 

@@ -1,4 +1,14 @@
 package azar.utils;
+
+import azar.entities.db.PdfFile;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
@@ -70,6 +80,22 @@ public class Utilities {
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Failed to merge fields", e);
+        }
+    }
+
+    public static byte[] generateThumbnail(PdfFile pdfFile) throws IOException {
+        // Load the PDF document
+        try (PDDocument document = Loader.loadPDF(pdfFile.getData())) {
+            PDFRenderer renderer = new PDFRenderer(document);
+
+            // Render the first page as a BufferedImage (150 DPI for good quality)
+            BufferedImage image = renderer.renderImageWithDPI(0, 150);
+
+            // Write the image to a byte array
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "PNG", baos);
+
+            return baos.toByteArray();
         }
     }
 }

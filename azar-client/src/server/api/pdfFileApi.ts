@@ -52,3 +52,30 @@ export async function getAllPdfs(page: number = 1, limit: number = 20): Promise<
     }
 }
 
+export const fetchPdfThumbnail = async (pdfId: string): Promise<Blob> => {
+    try {
+        const response = await apiClient.get(`/pdf/thumbnail/${pdfId}`, {
+            responseType: "blob", // Fetch the response as a binary blob
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch PDF thumbnail:", error);
+        throw error;
+    }
+};
+
+
+export const fetchPdfPreview = async (pdfId: string): Promise<Blob> => {
+    try {
+        const response = await apiClient.get(`/pdf/preview/${pdfId}`, {
+            responseType: "blob", // Fetch the response as a binary blob
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch PDF preview:", error);
+        throw error;
+    }
+};
+

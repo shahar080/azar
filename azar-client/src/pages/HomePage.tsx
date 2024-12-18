@@ -13,6 +13,7 @@ import {add} from "../server/api/userApi";
 import {PdfFile, User} from "../models/models";
 import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
 import EditPdfModal from "../components/EditPdfModal.tsx";
+import PdfGallery from "../components/PdfGallery.tsx";
 
 const drawerWidth = 240;
 
@@ -29,6 +30,7 @@ const HomePage: React.FC = () => {
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedPdfForEdit, setSelectedPdfForEdit] = useState<PdfFile | null>(null);
     const [allLabels, setAllLabels] = useState<string[]>([]);
+    const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
@@ -169,9 +171,12 @@ const HomePage: React.FC = () => {
     const updateLabels = (pdfs: PdfFile[]) => {
         // Extract unique labels
         const labels = Array.from(new Set(pdfs.flatMap((pdf) => pdf.labels || [])));
-        alert(labels)
         setAllLabels(labels);
     }
+
+    const handleViewToggle = (_event: React.MouseEvent<HTMLElement>, newView: 'list' | 'gallery') => {
+        if (newView !== null) setViewMode(newView);
+    };
 
     return (
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
@@ -215,16 +220,27 @@ const HomePage: React.FC = () => {
                         <SearchBar
                             onSearch={handleSearch}
                             onFileUpload={handleFileUpload}
+                            viewMode={viewMode}
+                            handleViewToggle={handleViewToggle}
                             availableLabels={allLabels}
                         />
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
-                            <PdfList
-                                pdfs={filteredPdfs}
-                                onRowClick={handleRowClick}
-                                onLoadMore={loadPdfs}
-                                onDelete={handleDeletePdf}
-                                onEdit={handleEditPdf}
-                            />
+                            {viewMode === "list" ? (
+                                <PdfList
+                                    pdfs={filteredPdfs}
+                                    onRowClick={handleRowClick}
+                                    onLoadMore={loadPdfs}
+                                    onDelete={handleDeletePdf}
+                                    onEdit={handleEditPdf}
+                                />
+                            ) : (
+                                <PdfGallery
+                                    pdfs={filteredPdfs}
+                                    onRowClick={handleRowClick}
+                                    onLoadMore={loadPdfs}
+                                    onDelete={handleDeletePdf}
+                                    onEdit={handleEditPdf}/>
+                            )}
 
                             <EditPdfModal
                                 open={isEditModalOpen}

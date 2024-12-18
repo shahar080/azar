@@ -1,25 +1,18 @@
-import React, {useEffect, useState} from 'react';
-import {Box, CssBaseline, Grid, Paper, Toolbar,} from '@mui/material';
-import AppBarHeader from '../components/AppBarHeader';
-import DrawerMenu from '../components/DrawerMenu';
-import {useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import {RootState} from '../store/store';
+import React, {useEffect, useState} from "react";
+import {Box, CssBaseline, Grid, Paper, Toolbar} from "@mui/material";
+import AppBarHeader from "../components/AppBarHeader";
+import DrawerMenu from "../components/DrawerMenu";
+import {useSelector} from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {RootState} from "../store/store";
 import RegisterUserModal from "../components/RegisterUserModal";
 import SearchBar from "../components/SearchBar";
 import PdfList from "../components/PdfList";
 import ExtendedPdfInfo from "../components/ExtendedPdfInfo";
 import {add} from "../server/api/userApi";
-import {User} from "../models/models";
-
-interface Pdf {
-    id: number;
-    name: string;
-    size: string;
-    uploadedAt: string;
-    labels: string[];
-    description?: string;
-}
+import {PdfFile, User} from "../models/models";
+import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
+import EditPdfModal from "../components/EditPdfModal.tsx";
 
 const drawerWidth = 240;
 
@@ -27,26 +20,14 @@ const HomePage: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerPinned, setDrawerPinned] = useState(true);
     const [isRegisterUserModalOpen, setRegisterUserModalOpen] = useState(false);
-    const [pdfs, setPdfs] = useState<Pdf[]>([
-        {
-            id: 1,
-            name: "Report.pdf",
-            size: "2 MB",
-            uploadedAt: "2024-12-01",
-            labels: ["work", "finance"],
-            description: "Detailed financial report for Q4."
-        },
-        {
-            id: 2,
-            name: "Resume.pdf",
-            size: "1 MB",
-            uploadedAt: "2024-12-05",
-            labels: ["personal"],
-            description: "John Doe's professional resume."
-        },
-    ]);
-    const [filteredPdfs, setFilteredPdfs] = useState<Pdf[]>(pdfs);
-    const [selectedPdf, setSelectedPdf] = useState<Pdf | null>(null);
+    const [pdfs, setPdfs] = useState<PdfFile[]>([]);
+    const [filteredPdfs, setFilteredPdfs] = useState<PdfFile[]>([]);
+    const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [isEditModalOpen, setEditModalOpen] = useState(false);
+    const [selectedPdfForEdit, setSelectedPdfForEdit] = useState<PdfFile | null>(null);
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
@@ -55,21 +36,57 @@ const HomePage: React.FC = () => {
 
     useEffect(() => {
         if (!isLoggedIn) {
-            navigate('/login');
+            setPdfs([]);
+            setFilteredPdfs([]);
+            navigate("/login");
         }
     }, [isLoggedIn, navigate]);
 
+    useEffect(() => {
+        loadPdfs();
+    }, []);
+
+    const loadPdfs = (forceLoad: boolean = false) => {
+        if (!forceLoad && (loading || !hasMore)) return; // Stop if already loading or no more PDFs
+        setLoading(true);
+
+        getAllPdfs(page, 20)
+            .then((newPdfs) => {
+                if (newPdfs.length < 20) {
+                    setHasMore(false);
+                }
+
+                // Avoid duplicate entries
+                const uniquePdfs = [
+                    ...pdfs,
+                    ...newPdfs.filter(
+                        (newPdf) => !pdfs.some((existingPdf) => existingPdf.id === newPdf.id)
+                    ),
+                ];
+
+                setPdfs(uniquePdfs);         // Update state
+                setFilteredPdfs(uniquePdfs); // Update filtered list
+                setPage((prev) => prev + 1); // Increment page number
+            })
+            .catch((err) => console.error("Failed to load more PDFs", err))
+            .finally(() => setLoading(false));
+    };
+
     const handleSearch = (query: string, labels: string[]) => {
+        setPage(1);
+        setHasMore(true);
+
         const filteredResults = pdfs.filter((pdf) => {
             const matchesQuery =
                 !query ||
-                pdf.name.toLowerCase().includes(query.toLowerCase()) ||
+                pdf.fileName.toLowerCase().includes(query.toLowerCase()) ||
                 pdf.labels.some((label) =>
                     label.toLowerCase().includes(query.toLowerCase())
                 );
 
             const matchesLabels =
-                labels.length === 0 || labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
+                labels.length === 0 ||
+                labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
 
             return matchesQuery && matchesLabels;
         });
@@ -78,20 +95,33 @@ const HomePage: React.FC = () => {
     };
 
     const handleFileUpload = (file: File) => {
-        const newPdf: Pdf = {
-            id: pdfs.length + 1,
-            name: file.name,
-            size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-            uploadedAt: new Date().toISOString().split('T')[0],
-            labels: ['uploaded'],
-            description: "No description available.",
-        };
-        setPdfs([...pdfs, newPdf]);
-        setFilteredPdfs([...pdfs, newPdf]);
+        uploadPdf(file).then((newPdf) => {
+            if (newPdf !== undefined) {
+                // Reset pagination
+                setPage(1);
+                setHasMore(true);
+                // Reload PDFs from the first page
+                loadPdfs(true);
+
+                console.log("File uploaded successfully:", newPdf);
+            } else {
+                console.error("File upload failed.");
+            }
+        });
     };
 
-    const handleRowClick = (pdf: Pdf) => {
-        setSelectedPdf(pdf);
+    const handleDeletePdf = (pdfId: string) => {
+        // Make an API call to delete the PDF
+        deletePdf(pdfId).then(() => {
+            setPdfs((prevPdfs) => prevPdfs.filter((pdf) => pdf.id !== pdfId));
+            setFilteredPdfs((prevPdfs) => prevPdfs.filter((pdf) => pdf.id !== pdfId));
+        }).catch((error) => {
+            console.error("Failed to delete PDF:", error);
+        });
+    };
+
+    const handleRowClick = (pdfFile: PdfFile) => {
+        setSelectedPdf(pdfFile);
     };
 
     const handleRegisterUser = () => {
@@ -115,6 +145,21 @@ const HomePage: React.FC = () => {
             }
             return !prevPinned;
         });
+    };
+
+    const handleEditPdf = (pdf: PdfFile) => {
+        setSelectedPdfForEdit(pdf);
+        setEditModalOpen(true);
+    };
+
+    const handleSaveEdit = (updatedPdf: PdfFile) => {
+        // Replace the edited PDF in the list
+        setPdfs((prev) => prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf)));
+        setFilteredPdfs((prev) =>
+            prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
+        );
+        // Optionally, send an API call to save changes on the server
+        updatePdf(updatedPdf);
     };
 
     return (
@@ -155,14 +200,27 @@ const HomePage: React.FC = () => {
                 {/* Grid Layout */}
                 <Grid container spacing={2} sx={{height: '100%'}}>
                     {/* Left Section: Search and PDF Table */}
-                    <Grid item xs={8} sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Grid item xs={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <SearchBar
                             onSearch={handleSearch}
                             onFileUpload={handleFileUpload}
                             availableLabels={[...new Set(pdfs.flatMap((pdf) => pdf.labels))]}
                         />
-                        <Box sx={{flexGrow: 1, overflowY: 'auto'}}>
-                            <PdfList pdfs={filteredPdfs} onRowClick={handleRowClick}/>
+                        <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
+                            <PdfList
+                                pdfs={filteredPdfs}
+                                onRowClick={handleRowClick}
+                                onLoadMore={loadPdfs}
+                                onDelete={handleDeletePdf}
+                                onEdit={handleEditPdf}
+                            />
+
+                            <EditPdfModal
+                                open={isEditModalOpen}
+                                pdf={selectedPdfForEdit}
+                                onClose={() => setEditModalOpen(false)}
+                                onSave={handleSaveEdit}
+                            />
                         </Box>
                     </Grid>
 
@@ -170,11 +228,11 @@ const HomePage: React.FC = () => {
                     <Grid item xs={4} sx={{height: '100%'}}>
                         {selectedPdf ? (
                             <ExtendedPdfInfo
-                                name={selectedPdf.name}
+                                name={selectedPdf.fileName}
                                 size={selectedPdf.size}
                                 uploadedAt={selectedPdf.uploadedAt}
                                 labels={selectedPdf.labels}
-                                description={selectedPdf.description || "No description available"}
+                                description={selectedPdf.description || ""}
                             />
                         ) : (
                             <Paper

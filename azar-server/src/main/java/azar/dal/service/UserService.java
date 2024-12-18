@@ -107,8 +107,7 @@ public class UserService extends GenericService<User> {
     public boolean isInvalidUser(User user) {
         return user == null || user.getFirstName() == null ||
                 user.getLastName() == null || user.getUserName() == null ||
-                user.getPassword() == null || user.getUserType() == null; // TODO: 14/12/2024 Relevant UserType? Should be defaulted
-
+                user.getPassword() == null;
     }
 
     @Override

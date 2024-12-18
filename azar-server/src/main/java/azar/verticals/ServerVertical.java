@@ -1,13 +1,17 @@
 package azar.verticals;
 
+import azar.dal.service.PdfFileService;
 import azar.dal.service.UserService;
 import azar.entities.LoginResponse;
+import azar.entities.db.PdfFile;
 import azar.entities.db.User;
 import azar.entities.db.UserNameAndPassword;
 import azar.entities.requests.AddUserRequest;
 import azar.properties.AppProperties;
 import azar.utils.AuthService;
 import azar.utils.JsonManager;
+import azar.utils.Utilities;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -15,6 +19,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -23,7 +28,9 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 
 /**
@@ -38,13 +45,16 @@ public class ServerVertical extends AbstractVerticle {
     private final AppProperties appProperties;
     private final JsonManager jsonManager;
     private final UserService userService;
+    private final PdfFileService pdfFileService;
     private final AuthService authService;
     private final JWTAuth jwtAuth;
 
     @Inject
-    public ServerVertical(AppProperties appProperties, JsonManager jsonManager, UserService userService) {
+    public ServerVertical(AppProperties appProperties, JsonManager jsonManager, UserService userService,
+                          PdfFileService pdfFileService) {
         this.appProperties = appProperties;
         this.userService = userService;
+        this.pdfFileService = pdfFileService;
         this.jsonManager = jsonManager;
         this.authService = new AuthService(this.vertx);
         this.jwtAuth = authService.getJwtAuth();
@@ -63,6 +73,7 @@ public class ServerVertical extends AbstractVerticle {
                     .allowedHeader("Access-Control-Allow-Origin") // Required for some browsers
             );
 
+
             router.route().handler(BodyHandler.create());
             router.route("/user/ops/*").handler(JWTAuthHandler.create(jwtAuth));
 
@@ -71,6 +82,10 @@ public class ServerVertical extends AbstractVerticle {
             router.post("/refresh").handler(this::handleRefreshToken);
             router.route("/user/ops/add").handler(this::handleAddUser);
             router.route("/user/login").handler(this::handleUserLogin);
+            router.route("/pdf/upload").handler(this::handlePdfUpload);
+            router.route("/pdf/getAll").handler(this::handleGetAllPdfs);
+            router.route("/pdf/delete/:id").handler(this::handleDeletePdf);
+            router.route("/pdf/update").handler(this::handleUpdatePdf);
 
 
             int serverPort = appProperties.getIntProperty("server.port", 8080);
@@ -161,7 +176,6 @@ public class ServerVertical extends AbstractVerticle {
         }
     }
 
-
     private void handleAddUser(RoutingContext routingContext) {
         logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
 
@@ -244,7 +258,141 @@ public class ServerVertical extends AbstractVerticle {
                 .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while retrieving user by username: {}", err.getMessage()));
     }
 
-    private void sendErrorResponse(RoutingContext routingContext, int statusCode, String message, String logMessage, Object... logParams) {
+    private void handlePdfUpload(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+
+        List<FileUpload> fileUploads = routingContext.fileUploads();
+        if (fileUploads.isEmpty()) {
+            routingContext.response()
+                    .setStatusCode(400).end("No file uploaded");
+            return;
+        }
+
+        FileUpload fileUpload = fileUploads.getFirst();
+        String uploadedFilePath = fileUpload.uploadedFileName();
+
+        routingContext.vertx().fileSystem().readFile(uploadedFilePath)
+                .onSuccess(buffer -> {
+                    PdfFile pdfFile = new PdfFile();
+                    pdfFile.setFileName(fileUpload.fileName());
+                    pdfFile.setData(buffer.getBytes());
+                    pdfFile.setContentType(fileUpload.contentType());
+                    pdfFile.setLabels(new ArrayList<>());
+                    pdfFile.setSize(Utilities.getHumanReadableSize(buffer.getBytes()));
+
+                    try {
+                        pdfFileService.add(pdfFile)
+                                .onSuccess(savedPdfFile -> {
+                                    savedPdfFile.setData(new byte[0]);
+                                    routingContext.response()
+                                            .setStatusCode(201).end(jsonManager.toJson(savedPdfFile));
+                                    logger.info("File {} uploaded successfully", savedPdfFile.getFileName());
+                                })
+                                .onFailure(err -> {
+                                    logger.error("Error saving {}", fileUpload.fileName(), err);
+                                    routingContext.response()
+                                            .setStatusCode(500).end("Database save failed: " + err.getMessage());
+                                });
+                    } catch (Exception e) {
+                        logger.error("Error saving {}", fileUpload.fileName(), e);
+                        routingContext.response()
+                                .setStatusCode(500).end("Database save failed: " + e.getMessage());
+                    }
+                })
+                .onFailure(err -> {
+                    logger.error("Failed to read uploaded file {}", fileUpload.fileName(), err);
+                    routingContext.response()
+                            .setStatusCode(500).end("File read failed: " + err.getMessage());
+                });
+    }
+
+    private void handleGetAllPdfs(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+
+        // Default values for pagination
+        int page = Integer.parseInt(routingContext.queryParams().get("page"));
+        int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
+
+        if (page < 1 || limit < 1) {
+            routingContext.response()
+                    .setStatusCode(400)
+                    .end("Page and limit must be greater than 0.");
+            return;
+        }
+
+        int offset = (page - 1) * limit;
+
+        pdfFileService.getAllPaginated(offset, limit) // Fetch paginated results
+                .onSuccess(pdfFiles -> {
+                    routingContext.response()
+                            .setStatusCode(200)
+                            .putHeader("Content-Type", "application/json")
+                            .end(jsonManager.toJson(pdfFiles));
+                    logger.info("Returned {} PDFs to client (page: {}, limit: {})", pdfFiles.size(), page, limit);
+                })
+                .onFailure(err -> {
+                    logger.error("Error getting PDFs from DB", err);
+                    routingContext.response()
+                            .setStatusCode(500)
+                            .end("Error getting PDFs: " + err.getMessage());
+                });
+    }
+
+    private void handleDeletePdf(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+
+        // Extract the PDF ID from the request path
+        String pdfId = routingContext.pathParam("id");
+        if (pdfId == null || pdfId.isEmpty()) {
+            routingContext.response()
+                    .setStatusCode(400)
+                    .end("PDF ID is required");
+            return;
+        }
+
+        // Call the service to delete the PDF
+        pdfFileService.removeById(Integer.valueOf(pdfId))
+                .onSuccess(success -> {
+                    if (success) {
+                        logger.info("Successfully deleted PDF with ID: {}", pdfId);
+                        routingContext.response()
+                                .setStatusCode(200)
+                                .end("PDF deleted successfully");
+                    } else {
+                        logger.error("Failed to delete PDF with ID: {}", pdfId);
+                        routingContext.response()
+                                .setStatusCode(500)
+                                .end("Failed to delete PDF");
+                    }
+                })
+                .onFailure(err -> {
+                    logger.error("Failed to delete PDF with ID: {}", pdfId, err);
+                    routingContext.response()
+                            .setStatusCode(500)
+                            .end("Failed to delete PDF: " + err.getMessage());
+                });
+    }
+
+    private void handleUpdatePdf(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        PdfFile pdfFile = jsonManager.fromJson(routingContext.body().asString(), PdfFile.class);
+        pdfFileService.update(pdfFile)
+                .onSuccess(dbPdfFile -> {
+                    logger.info("Sending updated PDF {} back", pdfFile.getId());
+                    routingContext.response()
+                            .setStatusCode(200)
+                            .end(jsonManager.toJson(dbPdfFile));
+                })
+                .onFailure(err -> {
+                    logger.error("Failed to update PDF with ID: {}", pdfFile.getId(), err);
+                    routingContext.response()
+                            .setStatusCode(500)
+                            .end("Failed to delete PDF: " + err.getMessage());
+                });
+    }
+
+    private void sendErrorResponse(RoutingContext routingContext, int statusCode, String message, String
+            logMessage, Object... logParams) {
         routingContext.response()
                 .setStatusCode(statusCode)
                 .putHeader("Content-Type", "application/json")

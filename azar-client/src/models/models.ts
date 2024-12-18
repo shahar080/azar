@@ -22,3 +22,14 @@ export interface LoginResponse {
     token: string;
     userType: UserType;
 }
+
+export interface PdfFile {
+    id: string;
+    fileName: string;
+    data: string;
+    contentType: string;
+    labels: string[];
+    size: string;
+    uploadedAt: string;
+    description: string;
+}

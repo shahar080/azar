@@ -17,7 +17,9 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.FileUpload;
@@ -26,7 +28,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;
-import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +78,14 @@ public class ServerVertical extends AbstractVerticle {
                     .allowedHeader("Access-Control-Allow-Origin") // Required for some browsers
             );
 
+            // Set up the HttpServer with SSL enabled
+            PemKeyCertOptions pemOptions = new PemKeyCertOptions()
+                    .setKeyPath("D:\\dev\\cert\\key.pem")   // Private key in PEM format
+                    .setCertPath("D:\\dev\\cert\\cert.pem");  // Certificate in PEM format
+
+            HttpServerOptions options = new HttpServerOptions()
+                    .setSsl(true)
+                    .setKeyCertOptions(pemOptions);  // SSL configuration using PEM certificates
 
             router.route().handler(BodyHandler.create()
                     .setBodyLimit(50 * 1024 * 1024));
@@ -98,7 +107,7 @@ public class ServerVertical extends AbstractVerticle {
             String serverHost = appProperties.getProperty("server.host");
 
             vertx
-                    .createHttpServer()
+                    .createHttpServer(options)
                     .requestHandler(router)
                     .listen(
                             serverPort,

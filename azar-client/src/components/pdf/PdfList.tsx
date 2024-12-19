@@ -176,7 +176,14 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                                 onContextMenu={(e) => handleRightClick(e, pdf)}
                                 onTouchStart={(e) => handleTouchStart(e, pdf)}
                                 onTouchEnd={handleTouchEnd}
-                                style={{cursor: "pointer"}}
+                                sx={{
+                                    cursor: "pointer",
+                                    userSelect: "none",              // Prevents text selection
+                                    WebkitTouchCallout: "none",     // Disables iOS native menu
+                                    WebkitUserSelect: "none",       // Prevents Safari text selection
+                                    MozUserSelect: "none",          // Prevents Firefox text selection
+                                    msUserSelect: "none",           // Prevents IE/Edge text selection
+                                }}
                             >
                                 <TableCell>{pdf.fileName}</TableCell>
                                 <TableCell>{pdf.size}</TableCell>

@@ -126,6 +126,12 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                                 onTouchStart={(e) => handleTouchStart(e, pdf)}
                                 onTouchEnd={handleTouchEnd}
                                 style={{cursor: "context-menu"}}
+                                sx={{
+                                    cursor: "context-menu",
+                                    userSelect: "none", // Prevents text selection
+                                    WebkitTouchCallout: "none", // Disables the native iOS menu
+                                    WebkitUserSelect: "none", // Disables selection on Safari
+                                }}
                             >
                                 <CardActionArea onClick={() => handleThumbnailClick(pdf)}>
                                     <PdfThumbnail pdfId={pdf.id} altText={pdf.fileName}/>

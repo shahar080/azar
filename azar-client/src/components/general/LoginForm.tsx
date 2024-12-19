@@ -3,6 +3,7 @@ import {Box, Button, TextField, Typography} from '@mui/material';
 import {login} from '../../server/api/userApi.ts';
 import PasswordField from "./PasswordField.tsx";
 import {LoginResponse} from "../../models/models.ts";
+import {AxiosError} from "axios";
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -27,7 +28,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSucces
             }
             // Perform additional actions like saving a token or redirecting
         } catch (error: unknown) {
-            if (error instanceof Error) {
+            if (error instanceof AxiosError) {
                 setErrorMessage(error.response?.data?.message || 'Login failed');
             } else {
                 setErrorMessage('An unexpected error occurred');

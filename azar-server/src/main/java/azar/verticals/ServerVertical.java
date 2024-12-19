@@ -71,9 +71,10 @@ public class ServerVertical extends AbstractVerticle {
             Router router = Router.router(vertx);
             // TODO: 13/12/2024 AZAR-1
             router.route().handler(CorsHandler.create()
-                    .addOrigin(appProperties.getProperty("CLIENT_PATH"))// Allow requests from this origin
+                    .addOrigin("*")// Allow requests from this origin
                     .allowedMethod(HttpMethod.GET)           // Allow GET requests
                     .allowedMethod(HttpMethod.POST)          // Allow POST requests
+                    .allowedMethod(HttpMethod.OPTIONS)          // Allow POST requests
                     .allowedHeader("Content-Type")           // Allow Content-Type header
                     .allowedHeader("Authorization")          // Allow Authorization header
                     .allowedHeader("Access-Control-Allow-Origin") // Allow Access-Control-Allow-Origin header
@@ -82,20 +83,21 @@ public class ServerVertical extends AbstractVerticle {
                     .maxAgeSeconds(3600)  // Cache CORS preflight response for 1 hour
             );
 
-            // Set up the HttpServer with SSL enabled
-            PemKeyCertOptions pemOptions = new PemKeyCertOptions()
-                    .setKeyPath(appProperties.getProperty("CERT_KEY_PATH"))   // Private key in PEM format
-                    .setCertPath(appProperties.getProperty("CERT_VALUE_PATH"));  // Certificate in PEM format
-
-            HttpServerOptions options = new HttpServerOptions()
-                    .setSsl(true)
-                    .setKeyCertOptions(pemOptions);  // SSL configuration using PEM certificates
+//            // Set up the HttpServer with SSL enabled
+//            PemKeyCertOptions pemOptions = new PemKeyCertOptions()
+//                    .setKeyPath(appProperties.getProperty("CERT_KEY_PATH"))   // Private key in PEM format
+//                    .setCertPath(appProperties.getProperty("CERT_VALUE_PATH"));  // Certificate in PEM format
+//
+//            HttpServerOptions options = new HttpServerOptions()
+//                    .setSsl(true)
+//                    .setKeyCertOptions(pemOptions);  // SSL configuration using PEM certificates
 
             router.route().handler(BodyHandler.create()
                     .setBodyLimit((long) appProperties.getIntProperty("server.file.max.size.mb", 50)
                             * 1024 * 1024));
             router.route("/user/ops/*").handler(JWTAuthHandler.create(jwtAuth));
             router.post("/refresh").handler(this::handleRefreshToken);
+            router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
             router.route("/user/ops/add").handler(this::handleAddUser);
             router.route("/user/login").handler(this::handleUserLogin);
             router.route("/pdf/upload").handler(this::handlePdfUpload);
@@ -105,17 +107,26 @@ public class ServerVertical extends AbstractVerticle {
             router.route("/pdf/thumbnail/:id").handler(this::handleThumbnailRequest);
             router.route("/pdf/get/:id").handler(this::handlePDFGet);
 
+            router.route().method(HttpMethod.OPTIONS).handler(routingContext -> {
+                routingContext.response()
+                        .putHeader("Access-Control-Allow-Origin", "*")
+                        .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                        .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+                        .setStatusCode(200)
+                        .end();
+            });
+
             int serverPort = appProperties.getIntProperty("server.port", 8080);
             String serverHost = appProperties.getProperty("server.host");
 
             vertx
-                    .createHttpServer(options)
+                    .createHttpServer()
                     .requestHandler(router)
                     .listen(
                             serverPort,
-                            serverHost
+                            "0.0.0.0"
                     ).onSuccess(ignored -> {
-                        logger.info("Server is up and listening on {}", String.format("%s:%s", serverHost, serverPort));
+                        logger.info("1Server is up and listening on {}", String.format("%s:%s", serverHost, serverPort));
                         startPromise.complete();
                     })
                     .onFailure(err -> {

@@ -15,7 +15,6 @@ import java.util.Properties;
  **/
 
 public class AppProperties {
-    private final static String PROPERTIES_FILE_NAME = "app.properties"; // TODO: 12/12/2024 AZAR-8 get from env, if not exists, use default
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -23,13 +22,30 @@ public class AppProperties {
 
     public AppProperties() {
         properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE_NAME)) {
+        loadEnvironmentVariables();
+        loadPropertiesFromFile();
+    }
+
+    // Load environment variables and override the properties if set
+    private void loadEnvironmentVariables() {
+        // Iterate through system environment variables and override matching properties
+        for (String key : System.getenv().keySet()) {
+            String envValue = System.getenv(key);
+            if (envValue != null) {
+                properties.setProperty(key, envValue);
+            }
+        }
+    }
+
+    private void loadPropertiesFromFile() {
+        String propertiesFileName = properties.getProperty("PROPERTIES_FILE_NAME", "app.properties");
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(propertiesFileName)) {
             if (input == null) {
-                throw new IllegalArgumentException("Unable to find " + PROPERTIES_FILE_NAME);
+                throw new IllegalArgumentException("Unable to find " + propertiesFileName);
             }
             properties.load(input);
         } catch (IOException ex) {
-            throw new RuntimeException("Failed to load properties file: " + PROPERTIES_FILE_NAME, ex);
+            throw new RuntimeException("Failed to load properties file: " + propertiesFileName, ex);
         }
     }
 

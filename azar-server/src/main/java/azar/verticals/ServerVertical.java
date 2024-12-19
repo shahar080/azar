@@ -70,29 +70,31 @@ public class ServerVertical extends AbstractVerticle {
         try {
             Router router = Router.router(vertx);
             // TODO: 13/12/2024 AZAR-1
-            router.route().handler(CorsHandler.create() // Allow all origins; replace "*" with specific domains if needed
-                    .allowedMethod(HttpMethod.GET)            // Allow GET requests
-                    .allowedMethod(HttpMethod.POST)           // Allow POST requests
-                    .allowedHeader("Content-Type")            // Allow Content-Type header
-                    .allowedHeader("Authorization")           // Allow Authorization header, if needed
-                    .allowedHeader("Access-Control-Allow-Origin") // Required for some browsers
+            router.route().handler(CorsHandler.create()
+                    .addOrigin(appProperties.getProperty("CLIENT_PATH"))// Allow requests from this origin
+                    .allowedMethod(HttpMethod.GET)           // Allow GET requests
+                    .allowedMethod(HttpMethod.POST)          // Allow POST requests
+                    .allowedHeader("Content-Type")           // Allow Content-Type header
+                    .allowedHeader("Authorization")          // Allow Authorization header
+                    .allowedHeader("Access-Control-Allow-Origin") // Allow Access-Control-Allow-Origin header
+                    .allowedHeader("Access-Control-Allow-Methods") // Allow Allowed Methods header
+                    .allowedHeader("Access-Control-Allow-Headers") // Allow Allowed Headers
+                    .maxAgeSeconds(3600)  // Cache CORS preflight response for 1 hour
             );
 
             // Set up the HttpServer with SSL enabled
             PemKeyCertOptions pemOptions = new PemKeyCertOptions()
-                    .setKeyPath("D:\\dev\\cert\\key.pem")   // Private key in PEM format
-                    .setCertPath("D:\\dev\\cert\\cert.pem");  // Certificate in PEM format
+                    .setKeyPath(appProperties.getProperty("CERT_KEY_PATH"))   // Private key in PEM format
+                    .setCertPath(appProperties.getProperty("CERT_VALUE_PATH"));  // Certificate in PEM format
 
             HttpServerOptions options = new HttpServerOptions()
                     .setSsl(true)
                     .setKeyCertOptions(pemOptions);  // SSL configuration using PEM certificates
 
             router.route().handler(BodyHandler.create()
-                    .setBodyLimit(50 * 1024 * 1024));
+                    .setBodyLimit((long) appProperties.getIntProperty("server.file.max.size.mb", 50)
+                            * 1024 * 1024));
             router.route("/user/ops/*").handler(JWTAuthHandler.create(jwtAuth));
-
-
-            router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
             router.post("/refresh").handler(this::handleRefreshToken);
             router.route("/user/ops/add").handler(this::handleAddUser);
             router.route("/user/login").handler(this::handleUserLogin);

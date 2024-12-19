@@ -1,5 +1,6 @@
-import React, {MouseEvent, useEffect, useRef, useState} from "react";
-import {Box, Card, CardActionArea, CardContent, Grid, Typography} from "@mui/material";
+import React, {MouseEvent, TouchEvent, useEffect, useRef, useState} from "react";
+import {Box, Card, CardActionArea, CardContent, Grid, Typography, useMediaQuery} from "@mui/material";
+import {useTheme} from "@mui/material/styles";
 import {PdfFile} from "../../models/models.ts";
 import ShowPDFModal from "./ShowPDFModal.tsx";
 import PdfThumbnail from "./PdfThumbnail.tsx";
@@ -17,13 +18,36 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
     const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
     const [isShowPDF, setShowPDF] = useState(false);
     const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
-
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+    // Context Menu Handlers
     const handleRightClick = (event: MouseEvent<HTMLDivElement>, pdf: PdfFile) => {
-        event.preventDefault();
-        setAnchorPosition({top: event.clientY - 4, left: event.clientX - 4});
-        setSelectedPdf(pdf);
+        if (!isMobile) {
+            event.preventDefault();
+            setAnchorPosition({top: event.clientY - 4, left: event.clientX - 4});
+            setSelectedPdf(pdf);
+        }
+    };
+
+    const handleTouchStart = (event: TouchEvent<HTMLDivElement>, pdf: PdfFile) => {
+        if (isMobile) {
+            longPressTimer.current = setTimeout(() => {
+                setAnchorPosition({
+                    top: event.touches[0].clientY,
+                    left: event.touches[0].clientX,
+                });
+                setSelectedPdf(pdf);
+            }, 600); // Long press duration
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+        }
     };
 
     const handleCloseMenu = () => {
@@ -38,7 +62,7 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
     const handleOnViewMore = (pdf: PdfFile) => {
         onRowClick(pdf);
         handleCloseMenu();
-    }
+    };
 
     const handleDelete = () => {
         if (selectedPdf) {
@@ -99,6 +123,8 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                         <Grid item xs={12} sm={6} md={4} lg={3} key={pdf.id}>
                             <Card
                                 onContextMenu={(e) => handleRightClick(e, pdf)}
+                                onTouchStart={(e) => handleTouchStart(e, pdf)}
+                                onTouchEnd={handleTouchEnd}
                                 style={{cursor: "context-menu"}}
                             >
                                 <CardActionArea onClick={() => handleThumbnailClick(pdf)}>
@@ -125,7 +151,7 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                 onDelete={handleDelete}
             />
 
-            {/* Show PDF Modal*/}
+            {/* Show PDF Modal */}
             <ShowPDFModal
                 open={isShowPDF}
                 pdfFile={selectedPdf}

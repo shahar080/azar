@@ -1,5 +1,16 @@
-import React, {MouseEvent, useEffect, useRef, useState} from "react";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel} from "@mui/material";
+import React, {MouseEvent, TouchEvent, useEffect, useRef, useState} from "react";
+import {
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableSortLabel,
+    useMediaQuery,
+} from "@mui/material";
+import {useTheme} from "@mui/material/styles";
 import {PdfFile} from "../../models/models.ts";
 import PdfContextMenu from "./PdfContextMenu.tsx";
 import ShowPDFModal from "./ShowPDFModal.tsx";
@@ -15,13 +26,15 @@ interface PdfListProps {
 
 const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete, onEdit}) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const longPressTimer = useRef<NodeJS.Timeout | null>(null);
     const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
     const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
     const [isShowPDF, setShowPDF] = useState(false);
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
     const [orderBy, setOrderBy] = useState<string>('fileName');
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    // Infinite Scroll Logic
     useEffect(() => {
         const handleScroll = () => {
             const container = containerRef.current;
@@ -41,7 +54,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
         return () => container?.removeEventListener("scroll", handleScroll);
     }, [onLoadMore]);
 
-    // Sort function
+    // Sorting Logic
     const handleRequestSort = (property: string) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -51,13 +64,11 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
     const sortData = (array: any[]) => {
         return array.sort((a, b) => {
             const isAsc = order === 'asc';
-
             if (orderBy === 'size') {
                 const sizeA = parseSize(a.size);
                 const sizeB = parseSize(b.size);
                 return isAsc ? sizeA - sizeB : sizeB - sizeA;
             }
-
             if (a[orderBy] < b[orderBy]) {
                 return isAsc ? -1 : 1;
             }
@@ -70,11 +81,31 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
 
     const sortedPdfs = sortData([...pdfs]);
 
-    // Right-click logic
+    // Context Menu Logic
     const handleRightClick = (event: MouseEvent<HTMLTableRowElement>, pdf: PdfFile) => {
-        event.preventDefault();
-        setAnchorPosition({top: event.clientY - 4, left: event.clientX - 2});
-        setSelectedPdf(pdf);
+        if (!isMobile) {
+            event.preventDefault();
+            setAnchorPosition({top: event.clientY - 4, left: event.clientX - 2});
+            setSelectedPdf(pdf);
+        }
+    };
+
+    const handleTouchStart = (event: TouchEvent<HTMLTableRowElement>, pdf: PdfFile) => {
+        if (isMobile) {
+            longPressTimer.current = setTimeout(() => {
+                setAnchorPosition({
+                    top: event.touches[0].clientY,
+                    left: event.touches[0].clientX,
+                });
+                setSelectedPdf(pdf);
+            }, 600); // Long-press duration
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+        }
     };
 
     const handleCloseMenu = () => {
@@ -116,61 +147,24 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                     height: "calc(100vh - 250px)",
                     overflowY: "auto",
                     "&::-webkit-scrollbar": {width: "6px"},
-                    "&::-webkit-scrollbar-thumb": {
-                        backgroundColor: "#b0b0b0",
-                        borderRadius: "10px",
-                    },
+                    "&::-webkit-scrollbar-thumb": {backgroundColor: "#b0b0b0", borderRadius: "10px"},
                     "&::-webkit-scrollbar-track": {backgroundColor: "transparent"},
                 }}
             >
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            <TableCell sortDirection={orderBy === 'fileName' ? order : false}>
-                                <TableSortLabel
-                                    active={orderBy === 'fileName'}
-                                    direction={orderBy === 'fileName' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('fileName')}
-                                >
-                                    Name
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell sortDirection={orderBy === 'size' ? order : false}>
-                                <TableSortLabel
-                                    active={orderBy === 'size'}
-                                    direction={orderBy === 'size' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('size')}
-                                >
-                                    Size
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell sortDirection={orderBy === 'uploadedAt' ? order : false}>
-                                <TableSortLabel
-                                    active={orderBy === 'uploadedAt'}
-                                    direction={orderBy === 'uploadedAt' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('uploadedAt')}
-                                >
-                                    Uploaded At
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell sortDirection={orderBy === 'labels' ? order : false}>
-                                <TableSortLabel
-                                    active={orderBy === 'labels'}
-                                    direction={orderBy === 'labels' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('labels')}
-                                >
-                                    Labels
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell sortDirection={orderBy === 'description' ? order : false}>
-                                <TableSortLabel
-                                    active={orderBy === 'description'}
-                                    direction={orderBy === 'description' ? order : 'asc'}
-                                    onClick={() => handleRequestSort('description')}
-                                >
-                                    Description
-                                </TableSortLabel>
-                            </TableCell>
+                            {['fileName', 'size', 'uploadedAt', 'labels', 'description'].map((field) => (
+                                <TableCell key={field} sortDirection={orderBy === field ? order : false}>
+                                    <TableSortLabel
+                                        active={orderBy === field}
+                                        direction={orderBy === field ? order : 'asc'}
+                                        onClick={() => handleRequestSort(field)}
+                                    >
+                                        {field.charAt(0).toUpperCase() + field.slice(1)}
+                                    </TableSortLabel>
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -180,16 +174,14 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                                 hover
                                 onClick={() => onRowClick(pdf)}
                                 onContextMenu={(e) => handleRightClick(e, pdf)}
+                                onTouchStart={(e) => handleTouchStart(e, pdf)}
+                                onTouchEnd={handleTouchEnd}
                                 style={{cursor: "pointer"}}
                             >
                                 <TableCell>{pdf.fileName}</TableCell>
                                 <TableCell>{pdf.size}</TableCell>
                                 <TableCell>{formatDate(pdf.uploadedAt)}</TableCell>
-                                <TableCell>
-                                    {Array.isArray(pdf.labels)
-                                        ? pdf.labels.join(", ")
-                                        : "No labels available"}
-                                </TableCell>
+                                <TableCell>{pdf.labels?.join(", ") || "No labels available"}</TableCell>
                                 <TableCell>{pdf.description || "No description available"}</TableCell>
                             </TableRow>
                         ))}
@@ -197,7 +189,6 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                 </Table>
             </TableContainer>
 
-            {/* Context Menu */}
             <PdfContextMenu
                 anchorPosition={anchorPosition}
                 pdfFile={selectedPdf}

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, CssBaseline, Grid, Paper, Toolbar} from "@mui/material";
+import {Box, CssBaseline, Grid, Paper, Toolbar, useMediaQuery} from "@mui/material";
 import AppBarHeader from "../components/general/AppBarHeader.tsx";
 import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
@@ -14,12 +14,15 @@ import {PdfFile, User} from "../models/models";
 import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
+import {useTheme} from "@mui/material/styles";
 
 const drawerWidth = 240;
 
 const HomePage: React.FC = () => {
+    const theme = useTheme();
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [drawerPinned, setDrawerPinned] = useState(true);
+    const [drawerPinned, setDrawerPinned] = useState(isDesktop);
     const [isRegisterUserModalOpen, setRegisterUserModalOpen] = useState(false);
     const [pdfs, setPdfs] = useState<PdfFile[]>([]);
     const [filteredPdfs, setFilteredPdfs] = useState<PdfFile[]>([]);
@@ -206,20 +209,20 @@ const HomePage: React.FC = () => {
                 sx={{
                     flexGrow: 1,
                     padding: 2,
-                    width: drawerPinned ? `calc(100% - ${drawerWidth}px)` : '100%',
-                    transition: 'margin-left 0.3s ease, width 0.3s ease',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
+                    width: drawerPinned ? `calc(100% - ${drawerWidth}px)` : "100%",
+                    transition: "margin-left 0.3s ease, width 0.3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
                 }}
             >
                 {/* Ensures AppBar Offset */}
                 <Toolbar/>
 
                 {/* Grid Layout */}
-                <Grid container spacing={2} sx={{height: '100%'}}>
+                <Grid container spacing={2} sx={{height: "100%"}}>
                     {/* Left Section: Search and PDF Table */}
-                    <Grid item xs={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
+                    <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <SearchBar
                             onSearch={handleSearch}
                             onFileUpload={handleFileUpload}
@@ -242,7 +245,8 @@ const HomePage: React.FC = () => {
                                     onRowClick={handleRowClick}
                                     onLoadMore={loadPdfs}
                                     onDelete={handleDeletePdf}
-                                    onEdit={handleEditPdf}/>
+                                    onEdit={handleEditPdf}
+                                />
                             )}
 
                             <EditPdfModal
@@ -255,31 +259,33 @@ const HomePage: React.FC = () => {
                         </Box>
                     </Grid>
 
-                    {/* Right Section: Extended PDF Info */}
-                    <Grid item xs={4} sx={{height: '100%'}}>
-                        {selectedPdf ? (
-                            <ExtendedPdfInfo
-                                name={selectedPdf.fileName}
-                                size={selectedPdf.size}
-                                uploadedAt={selectedPdf.uploadedAt}
-                                labels={selectedPdf.labels}
-                                description={selectedPdf.description || ""}
-                            />
-                        ) : (
-                            <Paper
-                                sx={{
-                                    height: '100%',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    boxShadow: 3,
-                                }}
-                                elevation={3}
-                            >
-                                Select a PDF to view details here.
-                            </Paper>
-                        )}
-                    </Grid>
+                    {/* Right Section: Extended PDF Info (Only on Desktop) */}
+                    {isDesktop && (
+                        <Grid item md={4} sx={{height: "100%"}}>
+                            {selectedPdf ? (
+                                <ExtendedPdfInfo
+                                    name={selectedPdf.fileName}
+                                    size={selectedPdf.size}
+                                    uploadedAt={selectedPdf.uploadedAt}
+                                    labels={selectedPdf.labels}
+                                    description={selectedPdf.description || ""}
+                                />
+                            ) : (
+                                <Paper
+                                    sx={{
+                                        height: "100%",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        boxShadow: 3,
+                                    }}
+                                    elevation={3}
+                                >
+                                    Select a PDF to view details here.
+                                </Paper>
+                            )}
+                        </Grid>
+                    )}
                 </Grid>
             </Box>
 

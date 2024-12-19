@@ -1,5 +1,5 @@
 import React from 'react';
-import {ButtonBase, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar} from '@mui/material';
+import {ButtonBase, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, useMediaQuery} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -9,6 +9,7 @@ import {logout} from "../../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../../store/store.ts";
 import {UserType} from "../../models/models.ts";
+import {useTheme} from "@mui/material/styles";
 
 interface DrawerMenuProps {
     open: boolean;
@@ -36,7 +37,10 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                                                    onRegisterUser,
                                                    userType = UserType.STANDARD
                                                }) => {
+    const theme = useTheme();
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
     const dispatch = useDispatch();
+
     const hoverStyles = {
         "&:hover": {
             backgroundColor: "action.hover",
@@ -80,12 +84,14 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                     </ListItemIcon>
                     <ListItemText primary="Logout"/>
                 </ListItem>
-                <ListItem component={ButtonBase} onClick={onPinToggle} sx={hoverStyles}>
-                    <ListItemIcon>
-                        {pinned ? <PushPinIcon/> : <PushPinOutlinedIcon/>}
-                    </ListItemIcon>
-                    <ListItemText primary={pinned ? 'Unpin Drawer' : 'Pin Drawer'}/>
-                </ListItem>
+                {isDesktop &&
+                    <ListItem component={ButtonBase} onClick={onPinToggle} sx={hoverStyles}>
+                        <ListItemIcon>
+                            {pinned ? <PushPinIcon/> : <PushPinOutlinedIcon/>}
+                        </ListItemIcon>
+                        <ListItemText primary={pinned ? 'Unpin Drawer' : 'Pin Drawer'}/>
+                    </ListItem>
+                }
             </List>
         </Drawer>
     );

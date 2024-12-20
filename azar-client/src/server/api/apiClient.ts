@@ -18,7 +18,7 @@ if (token) {
 
 export async function refreshToken(): Promise<string | null> {
     try {
-        const response = await apiClient.post('/refresh', {}, {
+        const response = await apiClient.post('/token/refresh', {}, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Use old token
             },

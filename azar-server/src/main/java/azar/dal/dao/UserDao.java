@@ -15,7 +15,6 @@ import java.util.Set;
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
- * Purpose: //TODO add purpose for class UserDao
  **/
 public class UserDao extends GenericDao<User> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -37,7 +36,6 @@ public class UserDao extends GenericDao<User> {
      * A function to add a new user to the DB
      *
      * @param user - the new user
-     * @return - true if added, else, false // TODO: 12/12/2024 AZAR-11
      */
     @Override
     public Future<User> add(User user) {

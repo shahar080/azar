@@ -6,7 +6,6 @@ import lombok.*;
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
- * Purpose: //TODO add purpose for class User
  **/
 @Entity
 @Table(name = "Users")

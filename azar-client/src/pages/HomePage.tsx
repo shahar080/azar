@@ -93,7 +93,7 @@ const HomePage: React.FC = () => {
                 labels.length === 0 ||
                 labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
 
-            return matchesQuery && matchesLabels;
+            return matchesQuery || matchesLabels;
         });
 
         setFilteredPdfs(filteredResults);

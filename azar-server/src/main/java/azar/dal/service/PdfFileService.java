@@ -12,7 +12,6 @@ import java.util.Set;
 /**
  * Author: Shahar Azar
  * Date:   18/12/2024
- * Purpose: //TODO add purpose for class PdfFileService
  **/
 public class PdfFileService extends GenericService<PdfFile> {
 

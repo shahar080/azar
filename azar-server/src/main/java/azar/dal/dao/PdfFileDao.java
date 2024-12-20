@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * Author: Shahar Azar
  * Date:   18/12/2024
- * Purpose: //TODO add purpose for class PdfFileDao
  **/
 public class PdfFileDao extends GenericDao<PdfFile> {
 

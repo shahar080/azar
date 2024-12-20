@@ -10,6 +10,6 @@ export default defineConfig({
     //   key: fs.readFileSync(`D:\\dev\\cert\\key.pem`),
     //   cert: fs.readFileSync(`D:\\dev\\cert\\cert.pem`),
     // },
-    port: 8080,
+    port: 5173,
   },
 })

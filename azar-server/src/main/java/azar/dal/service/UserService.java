@@ -13,7 +13,6 @@ import java.util.Set;
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
- * Purpose: //TODO add purpose for class UserService
  **/
 public class UserService extends GenericService<User> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -28,7 +27,6 @@ public class UserService extends GenericService<User> {
      * A wrapper function to add a new user to the db
      *
      * @param newUser - the new user
-     * @return true if succeeded, else, false // TODO: 12/12/2024 AZAR-11
      */
     @Override
     public Future<User> add(User newUser) {
@@ -40,7 +38,6 @@ public class UserService extends GenericService<User> {
      * A wrapper function to update a user in the db
      *
      * @param updatedUser - the updated user
-     * @return true if succeeded, else, false // TODO: 12/12/2024 AZAR-11
      */
     @Override
     public Future<User> update(User updatedUser) {

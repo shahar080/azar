@@ -11,7 +11,6 @@ import java.time.Instant;
 /**
  * Author: Shahar Azar
  * Date:   18/12/2024
- * Purpose: //TODO add purpose for class GsonModule
  **/
 public class GsonModule extends AbstractModule {
     @Override

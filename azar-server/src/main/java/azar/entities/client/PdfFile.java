@@ -11,7 +11,6 @@ import java.util.List;
 /**
  * Author: Shahar Azar
  * Date:   18/12/2024
- * Purpose: //TODO add purpose for class PdfFile
  **/
 @Getter
 @Setter

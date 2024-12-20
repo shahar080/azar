@@ -10,7 +10,6 @@ import io.vertx.core.Vertx;
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
- * Purpose: //TODO add purpose for class AzarLauncher
  **/
 public class AzarLauncher {
     public static void main(String[] args) {

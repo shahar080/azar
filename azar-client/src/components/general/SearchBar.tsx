@@ -3,7 +3,6 @@ import {
     Autocomplete,
     Box,
     Button,
-    Chip,
     MenuItem,
     Select,
     SelectChangeEvent,
@@ -11,6 +10,7 @@ import {
     ToggleButton,
     ToggleButtonGroup
 } from '@mui/material';
+import CustomLabel from "../label/CustomLabel.tsx";
 
 interface SearchBarProps {
     onSearch: (query: string, labels: string[]) => void;
@@ -94,11 +94,10 @@ const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, 
                     }}
                     renderTags={(value, getTagProps) =>
                         value.map((label, index) => (
-                            <Chip
+                            <CustomLabel
                                 label={label}
+                                onRemove={() => handleRemoveLabel(label)}
                                 {...getTagProps({index})}
-                                onDelete={() => handleRemoveLabel(label)}
-                                color="primary"
                             />
                         ))
                     }

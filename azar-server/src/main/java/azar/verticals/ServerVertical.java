@@ -39,7 +39,6 @@ import java.util.List;
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
- * Purpose: //TODO add purpose for class ServerVertical
  **/
 public class ServerVertical extends AbstractVerticle {
 

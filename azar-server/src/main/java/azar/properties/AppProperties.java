@@ -11,7 +11,6 @@ import java.util.Properties;
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
- * Purpose: //TODO add purpose for class AppProperties
  **/
 
 public class AppProperties {
@@ -65,7 +64,7 @@ public class AppProperties {
                 return defaultValue;
             } else {
                 logger.error("{} not found in properties file", key);
-                throw new RuntimeException(); // TODO: 12/12/2024 AZAR-11
+                throw new RuntimeException();
             }
         }
         return propertyValue;
@@ -87,7 +86,7 @@ public class AppProperties {
                 return defaultValue;
             } else {
                 logger.error("{} not found in properties file", key);
-                throw new RuntimeException(); // TODO: 12/12/2024 AZAR-11
+                throw new RuntimeException();
             }
         }
         return Integer.parseInt(propertyValue);
@@ -109,7 +108,7 @@ public class AppProperties {
                 return defaultValue;
             } else {
                 logger.error("{} not found in properties file", key);
-                throw new RuntimeException(); // TODO: 12/12/2024 AZAR-11
+                throw new RuntimeException();
             }
         }
         return Boolean.parseBoolean(propertyValue);

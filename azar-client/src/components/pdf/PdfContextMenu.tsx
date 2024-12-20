@@ -1,6 +1,8 @@
 import React, {useEffect, useRef} from "react";
-import {Menu, MenuItem} from "@mui/material";
+import {Menu, MenuItem, useMediaQuery} from "@mui/material";
 import {PdfFile} from "../../models/models.ts";
+import {useTheme} from "@mui/material/styles";
+
 
 interface PdfContextMenuProps {
     anchorPosition: { top: number; left: number } | null;
@@ -22,6 +24,8 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
                                                            onShowPDF = undefined,
                                                        }) => {
     const menuRef = useRef<HTMLDivElement>(null);
+    const theme = useTheme();
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
 
     // Close menu when mouse leaves the menu area
     const handleMouseLeave = () => {
@@ -50,7 +54,8 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
             }}
             ref={menuRef}
         >
-            <MenuItem onClick={() => pdfFile && onViewMore(pdfFile)}>View more</MenuItem>
+            {isDesktop &&
+                <MenuItem onClick={() => pdfFile && onViewMore(pdfFile)}>View more</MenuItem>}
             <MenuItem onClick={() => pdfFile && onEdit(pdfFile)}>Edit</MenuItem>
             <MenuItem onClick={() => pdfFile && onDelete(pdfFile.id.toString())}>Delete</MenuItem>
             {onShowPDF &&

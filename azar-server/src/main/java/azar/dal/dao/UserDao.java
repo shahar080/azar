@@ -44,7 +44,6 @@ public class UserDao extends GenericDao<User> {
 
     private User createUserWithId(User user) {
         return User.builder()
-                .id(getAvailableId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .userName(user.getUserName())
@@ -52,25 +51,6 @@ public class UserDao extends GenericDao<User> {
                 .userType(user.getUserType())
                 .build();
     }
-
-    private Integer getAvailableId() {
-        try (Session session = openSession()) {
-            String hql = "FROM User U WHERE U.id = (SELECT max(id) from User )"; // TODO: 12/12/2024 AZAR-13
-            Query<User> query = session.createQuery(hql, User.class);
-            List<User> results = query.list();
-            if (results.size() == 1) {
-                closeSession();
-                return results.getFirst().getId() + 1;
-            } else {
-                return 1;
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-        closeSession();
-        return null;
-    }
-
 
     /**
      * A function to update an existing user

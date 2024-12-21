@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {Box, Button, Modal, TextField, Typography,} from '@mui/material';
-import {User} from "../../models/models.ts";
+import React, { useState } from 'react';
+import { Box, Button, MenuItem, Modal, TextField, Typography } from '@mui/material';
+import {User, UserType} from "../../models/models.ts";
 import PasswordField from "../general/PasswordField.tsx";
 
 interface RegisterUserModalProps {
@@ -9,14 +9,16 @@ interface RegisterUserModalProps {
     onSubmit: (data: User) => void;
 }
 
-const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onSubmit}) => {
+const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         userName: '',
         password: '',
         confirmPassword: '',
+        userType: 'STANDARD', // Default value
     });
+
     const [errors, setErrors] = useState({
         firstName: false,
         lastName: false,
@@ -32,6 +34,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
             userName: '',
             password: '',
             confirmPassword: '',
+            userType: 'STANDARD',
         });
         setErrors({
             firstName: false,
@@ -43,8 +46,8 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        setFormData({...formData, [name]: value});
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
 
     const validateForm = () => {
@@ -62,8 +65,8 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
 
     const handleSubmit = () => {
         if (validateForm()) {
-            const {firstName, lastName, userName, password} = formData;
-            onSubmit({firstName, lastName, userName, password, userType: "STANDARD"}); // TODO AZAR-28
+            const { firstName, lastName, userName, password, userType } = formData;
+            onSubmit({ firstName, lastName, userName, password, userType });
             resetForm(); // Clear the form after successful submission
             onClose();   // Close the modal
         }
@@ -143,6 +146,22 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
                     error={errors.confirmPassword}
                     helperText={errors.confirmPassword ? 'Passwords do not match' : ''}
                 />
+
+                <TextField
+                    label="User Type"
+                    name="userType"
+                    value={formData.userType}
+                    onChange={handleInputChange}
+                    select
+                    fullWidth
+                    margin="normal"
+                >
+                    {Object.values(UserType).map((option) => (
+                        <MenuItem key={option} value={option}>
+                            {option}
+                        </MenuItem>
+                    ))}
+                </TextField>
 
                 <Box mt={2} display="flex" justifyContent="flex-end" gap={2}>
                     <Button variant="contained" color="primary" onClick={handleSubmit}>

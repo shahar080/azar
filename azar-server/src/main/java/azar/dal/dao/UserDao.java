@@ -122,6 +122,24 @@ public class UserDao extends GenericDao<User> {
         return super.removeById(id);
     }
 
+    public Future<List<User>> getAllClientPaginated(int offset, int limit) {
+        return Future.future(listPromise -> {
+            try (Session session = openSession()) {
+                List<User> paginatedResults = session
+                        .createQuery(
+                                "FROM User",
+                                User.class)
+                        .setFirstResult(offset) // Offset
+                        .setMaxResults(limit)   // Limit
+                        .getResultList();
+
+                listPromise.complete(paginatedResults);
+            } catch (Exception e) {
+                listPromise.fail(e);
+            }
+        });
+    }
+
     @Override
     protected Class<User> getType() {
         return User.class;

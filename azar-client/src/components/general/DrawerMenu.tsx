@@ -10,6 +10,7 @@ import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../../store/store.ts";
 import {UserType} from "../../models/models.ts";
 import {useTheme} from "@mui/material/styles";
+import {useNavigate} from "react-router-dom";
 
 interface DrawerMenuProps {
     open: boolean;
@@ -40,6 +41,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const hoverStyles = {
         "&:hover": {
@@ -47,7 +49,6 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
         },
     };
 
-    // TODO AZAR-29
     return (
         <Drawer
             variant={pinned ? 'permanent' : 'temporary'}
@@ -64,18 +65,18 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
         >
             <Toolbar/>
             <List>
-                <ListItem component={ButtonBase} onClick={() => onNavigate('/option1')} sx={hoverStyles}>
+                <ListItem component={ButtonBase} onClick={() => navigate("/")} sx={hoverStyles}>
                     <ListItemIcon>
                         <HomeIcon/>
                     </ListItemIcon>
-                    <ListItemText primary="Option1"/>
+                    <ListItemText primary="Home"/>
                 </ListItem>
                 {userType === UserType.ADMIN &&
-                    <ListItem component={"div"} onClick={onRegisterUser}>
+                    <ListItem component={ButtonBase} onClick={onRegisterUser} sx={hoverStyles}>
                         <ListItemIcon>
                             <PersonAddIcon/>
                         </ListItemIcon>
-                        <ListItemText primary="Add User"/>
+                        <ListItemText primary="Manage Users"/>
                     </ListItem>
                 }
                 <ListItem component={ButtonBase} onClick={() => handleLogOut({onNavigate, dispatch})} sx={hoverStyles}>

@@ -20,7 +20,7 @@ interface SearchBarProps {
     availableLabels: string[];
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, handleViewToggle, availableLabels}) => {
+const PDFSearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, handleViewToggle, availableLabels}) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
     const [dropdownLabel, setDropdownLabel] = useState('');
@@ -51,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, 
     const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
-        triggerSearch(query, selectedLabels);
+        triggerSearch(e.target.value, selectedLabels);
     };
 
     /** Handle pressing Enter in search bar */
@@ -178,4 +178,4 @@ const SearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, 
     );
 };
 
-export default SearchBar;
+export default PDFSearchBar;

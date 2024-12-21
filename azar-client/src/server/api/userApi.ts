@@ -29,5 +29,39 @@ export async function add(userName: string, userToAdd: User): Promise<boolean> {
         console.error('Create user failed:', error);
         return false;
     }
+}
 
+export async function getAllUsers(page: number = 1, limit: number = 20): Promise<User[]> {
+    try {
+        const response = await apiClient.get<User[]>(`/user/getAll?page=${page}&limit=${limit}`);
+        const users: User[] = response.data;
+        return users || []; // Return empty array if no data
+    } catch (error) {
+        console.error(`Error getting users from server (page: ${page})!`, error);
+        return [];
+    }
+}
+
+export async function deleteUser(userId: string): Promise<boolean> {
+    try {
+        const response = await apiClient.post(`/user/ops/delete/${userId}`);
+        if (response.status === 200) {
+            return true;
+        }
+    } catch (error) {
+        console.error('Delete user ' + userId + ' failed', error);
+    }
+    return false;
+}
+
+export async function updateUser(updatedUser: User): Promise<User | undefined> {
+    try {
+        const response = await apiClient.post('/user/ops/update', updatedUser);
+        if (response.status === 200) {
+            return response.data;
+        }
+    } catch (error) {
+        console.error('Update user ' + updatedUser.id + ' failed', error);
+    }
+    return undefined;
 }

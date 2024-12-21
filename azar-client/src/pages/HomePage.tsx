@@ -5,12 +5,10 @@ import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
-import RegisterUserModal from "../components/user/RegisterUserModal.tsx";
-import SearchBar from "../components/general/SearchBar.tsx";
+import PDFSearchBar from "../components/pdf/PDFSearchBar.tsx";
 import PdfList from "../components/pdf/PdfList.tsx";
 import ExtendedPdfInfo from "../components/pdf/ExtendedPdfInfo.tsx";
-import {add} from "../server/api/userApi";
-import {PdfFile, User} from "../models/models";
+import {PdfFile} from "../models/models";
 import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
@@ -23,7 +21,6 @@ const HomePage: React.FC = () => {
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerPinned, setDrawerPinned] = useState(isDesktop);
-    const [isRegisterUserModalOpen, setRegisterUserModalOpen] = useState(false);
     const [pdfs, setPdfs] = useState<PdfFile[]>([]);
     const [filteredPdfs, setFilteredPdfs] = useState<PdfFile[]>([]);
     const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
@@ -36,7 +33,6 @@ const HomePage: React.FC = () => {
     const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userName = useSelector((state: RootState) => state.auth.username);
     const userType = useSelector((state: RootState) => state.auth.userType);
     const navigate = useNavigate();
 
@@ -93,7 +89,7 @@ const HomePage: React.FC = () => {
                 labels.length === 0 ||
                 labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
 
-            return matchesQuery || matchesLabels;
+            return matchesQuery && matchesLabels;
         });
 
         setFilteredPdfs(filteredResults);
@@ -135,11 +131,7 @@ const HomePage: React.FC = () => {
     };
 
     const handleRegisterUser = () => {
-        setRegisterUserModalOpen(true);
-    };
-
-    const handleUserRegistration = (userToAdd: User) => {
-        add(userName, userToAdd);
+        navigate("/manage-users")
     };
 
     const toggleDrawer = () => {
@@ -163,14 +155,12 @@ const HomePage: React.FC = () => {
     };
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
-        // Replace the edited PDF in the list
         const tempPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
         setPdfs(tempPdfs);
         setFilteredPdfs((prev) =>
             prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
         );
         updateLabels(tempPdfs)
-        // Optionally, send an API call to save changes on the server
         updatePdf(updatedPdf);
     };
 
@@ -223,7 +213,7 @@ const HomePage: React.FC = () => {
                 <Grid container spacing={2} sx={{height: "100%"}}>
                     {/* Left Section: Search and PDF Table */}
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
-                        <SearchBar
+                        <PDFSearchBar
                             onSearch={handleSearch}
                             onFileUpload={handleFileUpload}
                             viewMode={viewMode}
@@ -288,13 +278,6 @@ const HomePage: React.FC = () => {
                     )}
                 </Grid>
             </Box>
-
-            {/* Register User Modal */}
-            <RegisterUserModal
-                open={isRegisterUserModalOpen}
-                onClose={() => setRegisterUserModalOpen(false)}
-                onSubmit={handleUserRegistration}
-            />
         </Box>
     );
 };

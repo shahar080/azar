@@ -45,7 +45,10 @@ public class UserRouter extends BaseRouter {
 
         userRouter.route("/ops/*").handler(JWTAuthHandler.create(jwtAuth));
         userRouter.route("/login").handler(this::handleUserLogin);
+        userRouter.route("/getAll").handler(this::getAllUsers);
         userRouter.route("/ops/add").handler(this::handleAddUser);
+        userRouter.route("/ops/update").handler(this::handleUpdateUser);
+        userRouter.route("/ops/delete/:id").handler(this::handleDeleteUser);
 
         return userRouter;
     }
@@ -131,6 +134,82 @@ public class UserRouter extends BaseRouter {
                     logger.info("User '{}' has registered successfully.", user.getUserName());
                 })
                 .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while adding user: {}", err.getMessage()));
+    }
+
+    private void getAllUsers(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+
+        // Default values for pagination
+        int page = Integer.parseInt(routingContext.queryParams().get("page"));
+        int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
+
+        if (page < 1 || limit < 1) {
+            routingContext.response()
+                    .setStatusCode(400)
+                    .end("Page and limit must be greater than 0.");
+            return;
+        }
+
+        int offset = (page - 1) * limit;
+
+        userService.getAllClientPaginated(offset, limit) // Fetch paginated results
+                .onSuccess(users -> {
+                    routingContext.response()
+                            .setStatusCode(200)
+                            .putHeader("Content-Type", "application/json")
+                            .end(jsonManager.toJson(users));
+                    logger.info("Returned {} users to client (page: {}, limit: {})", users.size(), page, limit);
+                })
+                .onFailure(err -> sendErrorResponse(routingContext, "Error getting users from DB", err.getMessage()));
+    }
+
+    private void handleDeleteUser(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+
+        String userId = routingContext.pathParam("id");
+        if (userId == null || userId.isEmpty()) {
+            routingContext.response()
+                    .setStatusCode(400)
+                    .end("user ID is required");
+            return;
+        }
+
+        userService.getById(Integer.valueOf(userId))
+                .onSuccess(dbUser -> {
+                    // TODO: 21/12/2024 AZAR-54
+
+                    if (dbUser.getUserName().equalsIgnoreCase("admin")) {
+                        sendErrorResponse(routingContext, 401, "User admin can't be deleted", "User admin can't be deleted");
+                        return;
+                    }
+
+                    userService.removeById(Integer.valueOf(userId))
+                            .onSuccess(success -> {
+                                if (success) {
+                                    logger.info("Successfully deleted user with ID: {}", userId);
+                                    routingContext.response()
+                                            .setStatusCode(200)
+                                            .end("user deleted successfully");
+                                } else {
+                                    sendErrorResponse(routingContext, "Failed to delete user with ID: " + userId, "Failed to delete user with ID: " + userId);
+                                }
+                            })
+                            .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete user with ID: " + userId, err.getMessage()));
+                })
+                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete user with ID: " + userId, err.getMessage()));
+    }
+
+    private void handleUpdateUser(RoutingContext routingContext) {
+        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        User user = jsonManager.fromJson(routingContext.body().asString(), User.class);
+        userService.update(user)
+                .onSuccess(dbUser -> {
+                    logger.info("Sending updated user {} back", user.getId());
+                    routingContext.response()
+                            .setStatusCode(200)
+                            .end(jsonManager.toJson(dbUser));
+                })
+                .onFailure(err -> sendErrorResponse(routingContext, "Failed to update user with ID: " + user.getId(), err.getMessage()));
     }
 
 }

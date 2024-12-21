@@ -8,6 +8,7 @@ import io.vertx.core.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -105,6 +106,10 @@ public class UserService extends GenericService<User> {
         return user == null || user.getFirstName() == null ||
                 user.getLastName() == null || user.getUserName() == null ||
                 user.getPassword() == null;
+    }
+
+    public Future<List<User>> getAllClientPaginated(int offset, int limit) {
+        return userDao.getAllClientPaginated(offset, limit);
     }
 
     @Override

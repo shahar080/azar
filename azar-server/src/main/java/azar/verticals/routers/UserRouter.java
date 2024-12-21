@@ -5,6 +5,7 @@ import azar.entities.LoginResponse;
 import azar.entities.db.User;
 import azar.entities.db.UserNameAndPassword;
 import azar.entities.requests.AddUserRequest;
+import azar.utils.AuthService;
 import azar.utils.JsonManager;
 import azar.utils.PasswordManager;
 import com.google.inject.Inject;
@@ -32,11 +33,11 @@ public class UserRouter extends BaseRouter {
 
     @Inject
     public UserRouter(UserService userService, JsonManager jsonManager, PasswordManager passwordManager,
-                      JWTAuth jwtAuth) {
+                      AuthService authService) {
         this.userService = userService;
         this.jsonManager = jsonManager;
         this.passwordManager = passwordManager;
-        this.jwtAuth = jwtAuth;
+        this.jwtAuth = authService.getJwtAuth();
     }
 
     public Router create(Vertx vertx) {

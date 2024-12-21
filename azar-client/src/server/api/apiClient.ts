@@ -3,7 +3,7 @@ import {logout} from "../../store/authSlice.ts";
 
 // Create an Axios instance
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: "https://shahar-azar.com/api",
     timeout: 30000,
     headers: {
         'Content-Type': 'application/json',

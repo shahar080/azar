@@ -40,9 +40,9 @@ public class ServerVertical extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
         try {
-            Router router = Router.router(vertx);
+            Router mainRouter = Router.router(vertx);
             // TODO: 13/12/2024 AZAR-1
-            router.route().handler(CorsHandler.create()
+            mainRouter.route().handler(CorsHandler.create()
                     .addOrigin("*")// Allow requests from this origin
                     .allowedMethod(HttpMethod.GET)           // Allow GET requests
                     .allowedMethod(HttpMethod.POST)          // Allow POST requests
@@ -55,26 +55,21 @@ public class ServerVertical extends AbstractVerticle {
                     .maxAgeSeconds(3600)  // Cache CORS preflight response for 1 hour
             );
 
-//            // Set up the HttpServer with SSL enabled
-//            PemKeyCertOptions pemOptions = new PemKeyCertOptions()
-//                    .setKeyPath(appProperties.getProperty("CERT_KEY_PATH"))   // Private key in PEM format
-//                    .setCertPath(appProperties.getProperty("CERT_VALUE_PATH"));  // Certificate in PEM format
-//
-//            HttpServerOptions options = new HttpServerOptions()
-//                    .setSsl(true)
-//                    .setKeyCertOptions(pemOptions);  // SSL configuration using PEM certificates
-
-            router.route().handler(BodyHandler.create()
+            mainRouter.route().handler(BodyHandler.create()
                     .setBodyLimit((long) appProperties.getIntProperty("server.file.max.size.mb", 50)
                             * 1024 * 1024));
 
-            router.route("/pdf/*").subRouter(pdfRouter.create(vertx));
-            router.route("/user/*").subRouter(userRouter.create(vertx));
-            router.route("/token/*").subRouter(tokenRouter.create(vertx));
+            Router apiRouter = Router.router(vertx);
 
-            router.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
+            apiRouter.route("/pdf/*").subRouter(pdfRouter.create(vertx));
+            apiRouter.route("/user/*").subRouter(userRouter.create(vertx));
+            apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx));
 
-            router.route().method(HttpMethod.OPTIONS).handler(routingContext -> {
+            apiRouter.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
+
+            mainRouter.route("/api/*").subRouter(apiRouter);
+
+            mainRouter.route().method(HttpMethod.OPTIONS).handler(routingContext -> {
                 routingContext.response()
                         .putHeader("Access-Control-Allow-Origin", "*")
                         .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -88,7 +83,7 @@ public class ServerVertical extends AbstractVerticle {
 
             vertx
                     .createHttpServer()
-                    .requestHandler(router)
+                    .requestHandler(mainRouter)
                     .listen(
                             serverPort,
                             "0.0.0.0"

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import io.vertx.core.Vertx;
 
 import java.time.Instant;
 
@@ -15,7 +16,7 @@ import java.time.Instant;
 public class GsonModule extends AbstractModule {
     @Override
     protected void configure() {
-        // Other bindings if needed
+        bind(Vertx.class).toInstance(Vertx.vertx());
     }
 
     @Provides

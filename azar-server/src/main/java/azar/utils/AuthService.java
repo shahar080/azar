@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import lombok.Getter;
 
 /**
  * Author: Shahar Azar
@@ -12,6 +13,7 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
  **/
 
 
+@Getter
 public class AuthService {
     private final JWTAuth jwtAuth;
 
@@ -20,11 +22,8 @@ public class AuthService {
         this.jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions()
                 .addPubSecKey(new PubSecKeyOptions()
                         .setAlgorithm("HS256")
-                        .setBuffer("your-secret-key")
+                        .setBuffer("your-secret-key") // TODO: 21/12/2024 AZAR-51
                 ));
     }
 
-    public JWTAuth getJwtAuth() {
-        return jwtAuth;
-    }
 }

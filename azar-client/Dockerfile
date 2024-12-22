@@ -19,6 +19,8 @@ WORKDIR /app
 # Copy the build output
 COPY --from=build /app/dist /app/dist
 
+COPY public/ /app/public/
+
 # Install dependencies for the production server
 COPY package.json package-lock.json ./
 RUN npm install --only=production

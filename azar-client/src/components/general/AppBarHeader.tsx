@@ -18,7 +18,7 @@ const AppBarHeader: React.FC<AppBarHeaderProps> = ({onMenuToggle, onLogoClick}) 
                     Azar Cloud
                 </Typography>
                 <img
-                    src="../../../logo.png"
+                    src="/logo.png"
                     alt="Logo"
                     style={{height: 40, cursor: 'pointer'}}
                     onClick={onLogoClick}

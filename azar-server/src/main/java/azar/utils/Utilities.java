@@ -1,6 +1,8 @@
 package azar.utils;
 
 import azar.entities.db.PdfFile;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -82,19 +84,18 @@ public class Utilities {
         }
     }
 
-    public static byte[] generateThumbnail(PdfFile pdfFile) throws IOException {
-        // Load the PDF document
-        try (PDDocument document = Loader.loadPDF(pdfFile.getData())) {
-            PDFRenderer renderer = new PDFRenderer(document);
+    public static Future<byte[]> generateThumbnail(PdfFile pdfFile, Vertx vertx) {
+        return vertx.executeBlocking(() -> {
+            try (PDDocument document = Loader.loadPDF(pdfFile.getData())) {
+                PDFRenderer renderer = new PDFRenderer(document);
 
-            // Render the first page as a BufferedImage (150 DPI for good quality)
-            BufferedImage image = renderer.renderImageWithDPI(0, 150);
+                BufferedImage image = renderer.renderImageWithDPI(0, 150);
 
-            // Write the image to a byte array
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "PNG", baos);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(image, "PNG", baos);
 
-            return baos.toByteArray();
-        }
+                return baos.toByteArray();
+            }
+        });
     }
 }

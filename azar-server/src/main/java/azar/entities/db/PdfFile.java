@@ -43,6 +43,10 @@ public class PdfFile {
     @Column
     private String description;
 
+    @Lob
+    @Column(nullable = false)
+    private byte[] thumbnail;
+
     @PrePersist
     protected void onCreate() {
         uploadedAt = Instant.now(); // Set current time before persisting

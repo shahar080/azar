@@ -4,7 +4,6 @@ import azar.dal.dao.PdfFileDao;
 import azar.entities.db.PdfFile;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 
 import java.util.List;
 import java.util.Set;
@@ -36,6 +35,10 @@ public class PdfFileService extends GenericService<PdfFile> {
     @Override
     public Future<PdfFile> getById(Integer id) {
         return pdfFileDao.getById(id);
+    }
+
+    public Future<byte[]> getThumbnailById(Integer id) {
+        return pdfFileDao.getThumbnailById(id);
     }
 
     @Override

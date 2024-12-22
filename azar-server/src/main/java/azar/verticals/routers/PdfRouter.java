@@ -2,6 +2,7 @@ package azar.verticals.routers;
 
 import azar.dal.service.PdfFileService;
 import azar.entities.db.PdfFile;
+import azar.utils.CacheManager;
 import azar.utils.JsonManager;
 import azar.utils.Utilities;
 import com.google.inject.Inject;
@@ -25,11 +26,15 @@ public class PdfRouter extends BaseRouter {
 
     private final PdfFileService pdfFileService;
     private final JsonManager jsonManager;
+    private final CacheManager redisAPI;
+    private final Vertx vertx;
 
     @Inject
-    public PdfRouter(PdfFileService pdfFileService, JsonManager jsonManager) {
+    public PdfRouter(PdfFileService pdfFileService, JsonManager jsonManager, CacheManager cacheManager, Vertx vertx) {
         this.pdfFileService = pdfFileService;
         this.jsonManager = jsonManager;
+        this.redisAPI = cacheManager;
+        this.vertx = vertx;
     }
 
     public Router create(Vertx vertx) {
@@ -39,7 +44,7 @@ public class PdfRouter extends BaseRouter {
         pdfRouter.route("/getAll").handler(this::handleGetAllPdfs);
         pdfRouter.route("/delete/:id").handler(this::handleDeletePdf);
         pdfRouter.route("/update").handler(this::handleUpdatePdf);
-        pdfRouter.route("/thumbnail/:id").handler(routingContext -> handleThumbnailRequest(routingContext, vertx));
+        pdfRouter.route("/thumbnail/:id").handler(this::handleThumbnailRequest);
         pdfRouter.route("/get/:id").handler(this::handlePDFGet);
 
         return pdfRouter;
@@ -69,16 +74,23 @@ public class PdfRouter extends BaseRouter {
                     pdfFile.setSize(Utilities.getHumanReadableSize(buffer.getBytes()));
 
                     try {
-                        pdfFileService.add(pdfFile)
-                                .onSuccess(savedPdfFile -> {
-                                    savedPdfFile.setData(new byte[0]);
-                                    routingContext.response()
-                                            .setStatusCode(201).end(jsonManager.toJson(savedPdfFile));
-                                    logger.info("File {} uploaded successfully", savedPdfFile.getFileName());
+                        Utilities.generateThumbnail(pdfFile, vertx)
+                                .onSuccess(thumbnail -> {
+                                    pdfFile.setThumbnail(thumbnail); // TODO: 22/12/2024 AZAR-64
+                                    pdfFileService.add(pdfFile)
+                                            .onSuccess(savedPdfFile -> {
+                                                savedPdfFile.setData(new byte[0]);
+                                                routingContext.response()
+                                                        .setStatusCode(201).end(jsonManager.toJson(savedPdfFile));
+                                                logger.info("File {} uploaded successfully", savedPdfFile.getFileName());
+                                            })
+                                            .onFailure(err -> sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage()));
                                 })
-                                .onFailure(err -> sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage()));
-                    } catch (Exception e) {
-                        sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), e.getMessage());
+                                .onFailure(err -> {
+                                    sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage());
+                                });
+                    } catch (Exception err) {
+                        sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage());
                     }
                 })
                 .onFailure(err -> sendErrorResponse(routingContext, "Failed to read uploaded file" + fileUpload.fileName(), err.getMessage()));
@@ -151,39 +163,30 @@ public class PdfRouter extends BaseRouter {
                 .onFailure(err -> sendErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId(), err.getMessage()));
     }
 
-    public void handleThumbnailRequest(RoutingContext routingContext, Vertx vertx) {
+    public void handleThumbnailRequest(RoutingContext routingContext) {
         String pdfId = routingContext.pathParam("id");
-        pdfFileService.getById(Integer.valueOf(pdfId))
-                .onSuccess(pdfFile -> {
-                    if (pdfFile == null) {
-                        routingContext.response()
-                                .setStatusCode(404)
-                                .end("PDF not found");
-                        return;
-                    }
+        byte[] cachedThumbnail = redisAPI.get("thumbnail:" + pdfId);
 
-                    try {
-                        vertx.executeBlocking(() -> {
-                            // Generate the thumbnail as a byte array
-                            byte[] thumbnail = Utilities.generateThumbnail(pdfFile);
+        if (cachedThumbnail != null) {
+            logger.info("Sending cached thumbnail for {}", pdfId);
+            sendThumbnailResponse(routingContext, cachedThumbnail);
+        } else {
+            logger.info("Calculating thumbnail for {}", pdfId);
+            pdfFileService.getThumbnailById(Integer.valueOf(pdfId))
+                    .onSuccess(dbThumbnail -> {
+                        redisAPI.put("thumbnail:" + pdfId, dbThumbnail);
+                        logger.info("Sending thumbnail for {}", pdfId);
+                        sendThumbnailResponse(routingContext, dbThumbnail);
+                    })
+                    .onFailure(err -> sendErrorResponse(routingContext, "Database error", err.getMessage()));
+        }
+    }
 
-                            // Set the response headers before writing content
-                            routingContext.response()
-                                    .putHeader("Content-Type", "image/png")
-                                    .putHeader("Content-Length", String.valueOf(thumbnail.length));
-
-                            // Write the thumbnail data
-                            routingContext.response().write(Buffer.buffer(thumbnail));
-
-                            // End the response after writing
-                            routingContext.response().end();
-                            return null;
-                        });
-                    } catch (Exception e) {
-                        sendErrorResponse(routingContext, "Failed to generate thumbnail: " + pdfFile.getId(), e.getMessage());
-                    }
-                })
-                .onFailure(err -> sendErrorResponse(routingContext, "Error retrieving PDF: " + pdfId, err.getMessage()));
+    private void sendThumbnailResponse(RoutingContext routingContext, byte[] thumbnail) {
+        routingContext.response()
+                .putHeader("Content-Type", "image/png")
+                .putHeader("Content-Length", String.valueOf(thumbnail.length))
+                .end(Buffer.buffer(thumbnail));
     }
 
     private void handlePDFGet(RoutingContext routingContext) {

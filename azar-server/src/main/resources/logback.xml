@@ -31,6 +31,9 @@
     <logger name="com.google.cloud.sql.core.DefaultConnectionInfoRepository" level="WARN" />
     <logger name="org.apache.fontbox.cff" level="ERROR" />
     <logger name="org.apache.fontbox.ttf" level="ERROR" />
+    <logger name="org.apache.fontbox.util" level="ERROR" />
+    <logger name="org.apache.pdfbox.pdmodel" level="ERROR" />
+
 
 
     <!-- Example of package-specific logging -->

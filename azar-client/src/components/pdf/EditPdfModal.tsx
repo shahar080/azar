@@ -114,6 +114,22 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                             variant="outlined"
                             placeholder="Labels"
                             margin="dense"
+                            inputProps={{
+                                ...params.inputProps,
+                                inputMode: 'text', // Ensure proper input mode
+                                type: 'text',      // Prevent "Next" from appearing
+                                enterKeyHint: 'done', // Suggest "Enter" instead of "Next" on the keyboard
+                            }}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter' && (event.target as HTMLInputElement).value) {
+                                    event.preventDefault(); // Prevent default behavior
+                                    const inputValue = (event.target as HTMLInputElement).value.trim(); // Type casting
+                                    if (inputValue && !labels.includes(inputValue)) {
+                                        setLabels([...labels, inputValue]); // Add the new label
+                                    }
+                                    (event.target as HTMLInputElement).value = ''; // Clear the input
+                                }
+                            }}
                         />
                     )}
                 />

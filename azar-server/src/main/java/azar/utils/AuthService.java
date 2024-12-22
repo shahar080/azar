@@ -1,5 +1,6 @@
 package azar.utils;
 
+import azar.properties.AppProperties;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.PubSecKeyOptions;
@@ -18,11 +19,11 @@ public class AuthService {
     private final JWTAuth jwtAuth;
 
     @Inject
-    public AuthService(Vertx vertx) {
+    public AuthService(Vertx vertx, AppProperties appProperties) {
         this.jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions()
                 .addPubSecKey(new PubSecKeyOptions()
                         .setAlgorithm("HS256")
-                        .setBuffer("your-secret-key") // TODO: 21/12/2024 AZAR-51
+                        .setBuffer(appProperties.getProperty("JWT_SECRET_KEY"))
                 ));
     }
 

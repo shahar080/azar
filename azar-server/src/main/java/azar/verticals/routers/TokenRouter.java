@@ -1,6 +1,7 @@
 package azar.verticals.routers;
 
 import azar.dal.service.UserService;
+import azar.properties.AppProperties;
 import azar.utils.AuthService;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
@@ -22,17 +23,19 @@ public class TokenRouter extends BaseRouter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final UserService userService;
+    private final AppProperties appProperties;
     private JWTAuth jwtAuth;
 
     @Inject
-    public TokenRouter(UserService userService) {
+    public TokenRouter(UserService userService, AppProperties appProperties) {
         this.userService = userService;
+        this.appProperties = appProperties;
     }
 
     public Router create(Vertx vertx) {
         Router tokenRouter = Router.router(vertx);
 
-        this.jwtAuth = new AuthService(vertx).getJwtAuth();
+        this.jwtAuth = new AuthService(vertx, appProperties).getJwtAuth();
 
         tokenRouter.post("/refresh").handler(this::handleRefreshToken);
 

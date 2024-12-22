@@ -148,23 +148,29 @@ public class PdfRouter extends BaseRouter {
                         userService.isAdmin(currentUser)
                                 .onSuccess(isAdmin -> {
                                     if (isAdmin) {
-                                        pdfFileService.removeById(Integer.valueOf(pdfId))
-                                                .onSuccess(success -> {
-                                                    if (success) {
-                                                        logger.info("Successfully deleted PDF with ID: {}", pdfId);
-                                                        routingContext.response()
-                                                                .setStatusCode(200)
-                                                                .end("PDF deleted successfully");
-                                                    } else {
-                                                        sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, "Failed to delete PDF with ID: " + pdfId);
-                                                    }
-                                                })
-                                                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+                                        handleRemovePdfById(routingContext, pdfId);
                                     } else {
                                         sendErrorResponse(routingContext, 401, "Unauthorized", "Deleting other people PDFs isn't allowed unless you're admin");
                                     }
                                 })
                                 .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+                    } else {
+                        handleRemovePdfById(routingContext, pdfId);
+                    }
+                })
+                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+    }
+
+    private void handleRemovePdfById(RoutingContext routingContext, String pdfId) {
+        pdfFileService.removeById(Integer.valueOf(pdfId))
+                .onSuccess(success -> {
+                    if (success) {
+                        logger.info("Successfully deleted PDF with ID: {}", pdfId);
+                        routingContext.response()
+                                .setStatusCode(200)
+                                .end("PDF deleted successfully");
+                    } else {
+                        sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, "Failed to delete PDF with ID: " + pdfId);
                     }
                 })
                 .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));

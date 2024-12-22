@@ -23,7 +23,7 @@ public class PdfFileDao extends GenericDao<PdfFile> {
             try (Session session = openSession()) {
                 List<azar.entities.client.PdfFile> paginatedResults = session
                         .createQuery(
-                                "SELECT new azar.entities.client.PdfFile(p.id, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
+                                "SELECT new azar.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
                                         " FROM PdfFile p",
                                 azar.entities.client.PdfFile.class)
                         .setFirstResult(offset) // Offset

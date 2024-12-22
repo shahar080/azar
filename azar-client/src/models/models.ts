@@ -26,6 +26,7 @@ export interface LoginResponse {
 
 export interface PdfFile {
     id: string;
+    uploadedBy: string;
     fileName: string;
     data: string;
     contentType: string;

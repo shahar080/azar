@@ -154,7 +154,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            {['fileName', 'size', 'uploadedAt', 'labels', 'description'].map((field) => (
+                            {['fileName', 'size', 'upload date', 'labels', 'description', 'uploaded by'].map((field) => (
                                 <TableCell key={field} sortDirection={orderBy === field ? order : false}>
                                     <TableSortLabel
                                         active={orderBy === field}
@@ -168,7 +168,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {sortedPdfs.map((pdf) => (
+                        {sortedPdfs.map((pdf: PdfFile) => (
                             <TableRow
                                 key={pdf.id}
                                 hover
@@ -190,6 +190,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                                 <TableCell>{formatDate(pdf.uploadedAt)}</TableCell>
                                 <TableCell>{pdf.labels?.join(", ") || "No labels available"}</TableCell>
                                 <TableCell>{pdf.description || "No description available"}</TableCell>
+                                <TableCell>{pdf.uploadedBy}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

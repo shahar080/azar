@@ -13,6 +13,7 @@ import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFile
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
+import {formatDate} from "../utils/utilities.ts";
 
 const drawerWidth = 240;
 
@@ -34,6 +35,7 @@ const HomePage: React.FC = () => {
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userType = useSelector((state: RootState) => state.auth.userType);
+    const userName = useSelector((state: RootState) => state.auth.username);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -85,10 +87,12 @@ const HomePage: React.FC = () => {
             const matchesQuery =
                 !query ||
                 pdf.fileName.toLowerCase().includes(query.toLowerCase()) ||
+                formatDate(pdf.uploadedAt).toLowerCase().includes(query.toLowerCase()) ||
+                pdf.description?.toLowerCase().includes(query.toLowerCase()) ||
+                pdf.uploadedBy.toLowerCase().includes(query.toLowerCase()) ||
                 pdf.labels.some((label) =>
                     label.toLowerCase().includes(query.toLowerCase())
                 );
-
             const matchesLabels =
                 labels.length === 0 ||
                 labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
@@ -100,7 +104,7 @@ const HomePage: React.FC = () => {
     };
 
     const handleFileUpload = (file: File) => {
-        uploadPdf(file).then((newPdf) => {
+        uploadPdf(file, userName).then((newPdf) => {
             if (newPdf !== undefined) {
                 console.log("File uploaded successfully:", newPdf);
                 // Reset pagination and reload PDFs

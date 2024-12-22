@@ -23,6 +23,9 @@ public class PdfFile {
     private Long id;
 
     @Column(nullable = false)
+    private String uploadedBy;
+
+    @Column(nullable = false)
     private String fileName;
 
     @Lob

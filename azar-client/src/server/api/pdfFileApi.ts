@@ -1,10 +1,11 @@
 import apiClient from "./apiClient.ts";
 import {PdfFile} from "../../models/models.ts";
 
-export async function uploadPdf(pdfFile: File): Promise<PdfFile | undefined> {
+export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFile | undefined> {
     try {
         const formData = new FormData();
         formData.append("file", pdfFile);
+        formData.append("userName", userName);
         const response = await apiClient.post('/pdf/upload', formData, {
             headers: {"Content-Type": "multipart/form-data"},
         });

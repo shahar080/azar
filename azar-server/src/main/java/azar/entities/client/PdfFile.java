@@ -18,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PdfFile {
     private Long id;
+    private String uploadedBy;
     private String fileName;
     private String contentType;
     private List<String> labels;

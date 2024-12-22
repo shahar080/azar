@@ -60,6 +60,7 @@ public class PdfRouter extends BaseRouter {
                     .setStatusCode(400).end("No file uploaded");
             return;
         }
+        String userName = routingContext.request().getFormAttribute("userName");
 
         FileUpload fileUpload = fileUploads.getFirst();
         String uploadedFilePath = fileUpload.uploadedFileName();
@@ -67,6 +68,7 @@ public class PdfRouter extends BaseRouter {
         routingContext.vertx().fileSystem().readFile(uploadedFilePath)
                 .onSuccess(buffer -> {
                     PdfFile pdfFile = new PdfFile();
+                    pdfFile.setUploadedBy(userName);
                     pdfFile.setFileName(fileUpload.fileName());
                     pdfFile.setData(buffer.getBytes());
                     pdfFile.setContentType(fileUpload.contentType());

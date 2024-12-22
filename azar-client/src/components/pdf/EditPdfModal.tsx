@@ -75,7 +75,13 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     fullWidth
                     label="Name"
                     value={fileName}
-                    onChange={(e) => setFileName(e.target.value)}
+                    onChange={(e) => setFileName(e.target.value)} // Update the name as the user types
+                    onBlur={() => {
+                        if (!fileName.endsWith('.pdf')) {
+                            const baseName = fileName.replace(/\.[^/.]+$/, ''); // Remove any existing extension
+                            setFileName(`${baseName}.pdf`); // Enforce .pdf extension on blur
+                        }
+                    }}
                     margin="dense"
                     InputProps={{
                         startAdornment: (

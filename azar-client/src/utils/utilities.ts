@@ -1,3 +1,6 @@
+import {fetchPDF} from "../server/api/pdfFileApi.ts";
+import {PdfFile} from "../models/models.ts";
+
 export function formatDate(dateString: string): string {
     const date = new Date(dateString);
 
@@ -38,5 +41,25 @@ export function parseSize(size: string): number {
             return value / 1024; // Convert Bytes to KB
         default:
             return 0;
+    }
+}
+
+export async function downloadPdf(pdfFile: PdfFile) {
+    try {
+        const blob = await fetchPDF(pdfFile.id); // Fetch the PDF from the database
+        const url = URL.createObjectURL(blob);
+
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `${pdfFile.fileName}`; // Set the desired filename
+        anchor.style.display = "none";
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+
+        URL.revokeObjectURL(url); // Clean up the object URL after the download
+    } catch (error) {
+        console.error("Failed to download the PDF:", error);
     }
 }

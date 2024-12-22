@@ -9,6 +9,7 @@ interface PdfContextMenuProps {
     pdfFile: PdfFile | null;
     onClose: () => void;
     onViewMore: (pdfFile: PdfFile) => void;
+    onDownloadPdf: (pdfFile: PdfFile) => void;
     onEdit: (pdf: PdfFile) => void;
     onDelete: (pdfId: string) => void;
     onShowPDF?: (pdf: PdfFile) => void;
@@ -19,6 +20,7 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
                                                            pdfFile,
                                                            onClose,
                                                            onViewMore,
+                                                           onDownloadPdf,
                                                            onEdit,
                                                            onDelete,
                                                            onShowPDF = undefined,
@@ -56,6 +58,7 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
         >
             {isDesktop &&
                 <MenuItem onClick={() => pdfFile && onViewMore(pdfFile)}>View more</MenuItem>}
+            <MenuItem onClick={() => pdfFile && onDownloadPdf(pdfFile)}>Download</MenuItem>
             <MenuItem onClick={() => pdfFile && onEdit(pdfFile)}>Edit</MenuItem>
             <MenuItem onClick={() => pdfFile && onDelete(pdfFile.id.toString())}>Delete</MenuItem>
             {onShowPDF &&

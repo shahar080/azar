@@ -5,6 +5,7 @@ import {PdfFile} from "../../models/models.ts";
 import ShowPDFModal from "./ShowPDFModal.tsx";
 import PdfThumbnail from "./PdfThumbnail.tsx";
 import PdfContextMenu from "./PdfContextMenu.tsx";
+import {downloadPdf} from "../../utils/utilities.ts";
 
 interface PdfGalleryProps {
     pdfs: PdfFile[];
@@ -153,6 +154,7 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                 pdfFile={selectedPdf}
                 onClose={handleCloseMenu}
                 onViewMore={handleOnViewMore}
+                onDownloadPdf={downloadPdf}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
             />

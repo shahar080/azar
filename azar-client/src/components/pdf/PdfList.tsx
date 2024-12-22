@@ -14,7 +14,7 @@ import {useTheme} from "@mui/material/styles";
 import {PdfFile} from "../../models/models.ts";
 import PdfContextMenu from "./PdfContextMenu.tsx";
 import ShowPDFModal from "./ShowPDFModal.tsx";
-import {formatDate, parseSize} from "../../utils/utilities.ts";
+import {downloadPdf, formatDate, parseSize} from "../../utils/utilities.ts";
 
 interface PdfListProps {
     pdfs: PdfFile[];
@@ -202,6 +202,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                 pdfFile={selectedPdf}
                 onClose={handleCloseMenu}
                 onViewMore={handleOnViewMore}
+                onDownloadPdf={downloadPdf}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onShowPDF={handleShowPDF}

@@ -48,6 +48,10 @@ const HomePage: React.FC = () => {
         loadPdfs();
     }, []);
 
+    useEffect(() => {
+        updateLabels(pdfs);
+    }, [pdfs]);
+
     const loadPdfs = (forceLoad: boolean = false) => {
         if (!forceLoad && (loading || !hasMore)) return; // Stop if already loading or no more PDFs
         setLoading(true);

@@ -42,9 +42,9 @@ export async function getAllUsers(page: number = 1, limit: number = 20): Promise
     }
 }
 
-export async function deleteUser(userId: string): Promise<boolean> {
+export async function deleteUser(userId: string, userName: string): Promise<boolean> {
     try {
-        const response = await apiClient.post(`/user/ops/delete/${userId}`);
+        const response = await apiClient.post(`/user/ops/delete/${userId}`, userName);
         if (response.status === 200) {
             return true;
         }

@@ -39,17 +39,7 @@ public class UserDao extends GenericDao<User> {
      */
     @Override
     public Future<User> add(User user) {
-        return super.add(createUserWithId(user));
-    }
-
-    private User createUserWithId(User user) {
-        return User.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .userName(user.getUserName())
-                .password(user.getPassword())
-                .userType(user.getUserType())
-                .build();
+        return super.add(user);
     }
 
     /**

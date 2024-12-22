@@ -191,6 +191,7 @@ const HomePage: React.FC = () => {
                 onRegisterUser={handleRegisterUser}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
+                page={"home"}
             />
 
             {/* Main Content */}

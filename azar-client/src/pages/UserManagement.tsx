@@ -86,7 +86,7 @@ const UserManagement: React.FC = () => {
     };
 
     const handleDeleteUser = (userId: string) => {
-        deleteUser(userId)
+        deleteUser(userId, userName)
             .then(() => {
                 console.log("User deleted successfully:", userId);
                 // Reset pagination and reload PDFs
@@ -163,6 +163,7 @@ const UserManagement: React.FC = () => {
                 onRegisterUser={handleRegisterUser}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
+                page={"manage-users"}
             />
 
             {/* Main Content */}

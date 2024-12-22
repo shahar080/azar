@@ -5,6 +5,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
+import PeopleIcon from '@mui/icons-material/People';
 import {logout} from "../../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../../store/store.ts";
@@ -20,6 +21,7 @@ interface DrawerMenuProps {
     onClose: () => void;
     onRegisterUser: () => void;
     userType: UserType;
+    page: "home" | "manage-users"; // Determines whether the modal is for viewing or editing
 }
 
 interface OnLogoutProps {
@@ -36,7 +38,8 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                                                    onNavigate,
                                                    onClose,
                                                    onRegisterUser,
-                                                   userType = UserType.STANDARD
+                                                   userType = UserType.STANDARD,
+                                                   page
                                                }) => {
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
@@ -73,10 +76,19 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                 </ListItem>
                 {userType === UserType.ADMIN &&
                     <ListItem component={ButtonBase} onClick={onRegisterUser} sx={hoverStyles}>
-                        <ListItemIcon>
-                            <PersonAddIcon/>
-                        </ListItemIcon>
-                        <ListItemText primary="Manage Users"/>
+                        {page === "home" ?
+                            <>
+                                <ListItemIcon>
+                                    <PeopleIcon/>
+                                </ListItemIcon>
+                                <ListItemText primary="Manage Users"/>
+                            </>
+                            : <>
+                                <ListItemIcon>
+                                    <PersonAddIcon/>
+                                </ListItemIcon>
+                                <ListItemText primary="Add User"/>
+                            </>}
                     </ListItem>
                 }
                 <ListItem component={ButtonBase} onClick={() => handleLogOut({onNavigate, dispatch})} sx={hoverStyles}>

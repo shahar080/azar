@@ -176,7 +176,12 @@ public class UserRouter extends BaseRouter {
 
         userService.getById(Integer.valueOf(userId))
                 .onSuccess(dbUser -> {
-                    // TODO: 21/12/2024 AZAR-54
+                    String initiatorUsername = jsonManager.fromJson(routingContext.body().asString(), String.class);
+
+                    if (dbUser.getUserName().equalsIgnoreCase(initiatorUsername)) {
+                        sendErrorResponse(routingContext, 400, "Current user can't delete itself", "Current user can't delete itself");
+                        return;
+                    }
 
                     if (dbUser.getUserName().equalsIgnoreCase("admin")) {
                         sendErrorResponse(routingContext, 401, "User admin can't be deleted", "User admin can't be deleted");

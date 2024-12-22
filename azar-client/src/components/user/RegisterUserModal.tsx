@@ -11,7 +11,7 @@ interface RegisterUserModalProps {
     onSubmit: (data: User) => void;
 }
 
-const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, onSubmit }) => {
+const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onSubmit}) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -48,8 +48,8 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, on
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        const {name, value} = e.target;
+        setFormData({...formData, [name]: value});
     };
 
     const validateForm = () => {
@@ -67,8 +67,8 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, on
 
     const handleSubmit = () => {
         if (validateForm()) {
-            const { firstName, lastName, userName, password, userType } = formData;
-            onSubmit({ firstName, lastName, userName, password, userType });
+            const {firstName, lastName, userName, password, userType} = formData;
+            onSubmit({firstName, lastName, userName, password, userType});
             resetForm(); // Clear the form after successful submission
             onClose();   // Close the modal
         }

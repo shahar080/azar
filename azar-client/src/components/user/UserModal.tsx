@@ -12,7 +12,7 @@ interface UserModalProps {
     mode: "view" | "edit"; // Determines whether the modal is for viewing or editing
 }
 
-const UserModal: React.FC<UserModalProps> = ({ open, user, onClose, onSave, mode }) => {
+const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}) => {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [userName, setUserName] = useState("");

@@ -88,7 +88,7 @@ public class ServerVertical extends AbstractVerticle {
                             serverPort,
                             "0.0.0.0"
                     ).onSuccess(ignored -> {
-                        logger.info("1Server is up and listening on {}", String.format("%s:%s", serverHost, serverPort));
+                        logger.info("Server is up and listening on {}", String.format("%s:%s", serverHost, serverPort));
                         startPromise.complete();
                     })
                     .onFailure(err -> {

@@ -59,4 +59,8 @@ public class PdfFileService extends GenericService<PdfFile> {
         return pdfFileDao.getOwnerByPdfId(id);
     }
 
+    public Future<Boolean> updatePartial(PdfFile pdfFile) {
+        return pdfFileDao.updatePartial(pdfFile);
+    }
+
 }

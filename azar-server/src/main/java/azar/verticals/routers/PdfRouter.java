@@ -179,12 +179,16 @@ public class PdfRouter extends BaseRouter {
     private void handleUpdatePdf(RoutingContext routingContext) {
         logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
         PdfFile pdfFile = jsonManager.fromJson(routingContext.body().asString(), PdfFile.class);
-        pdfFileService.update(pdfFile)
-                .onSuccess(dbPdfFile -> {
-                    logger.info("Sending updated PDF {} back", pdfFile.getId());
-                    routingContext.response()
-                            .setStatusCode(200)
-                            .end(jsonManager.toJson(dbPdfFile));
+        pdfFileService.updatePartial(pdfFile)
+                .onSuccess(isSuccess -> {
+                    if (isSuccess) {
+                        logger.info("Sending updated PDF {} back", pdfFile.getId());
+                        routingContext.response()
+                                .setStatusCode(200)
+                                .end(jsonManager.toJson(pdfFile));
+                    } else {
+                        sendErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId(), "Failed to update PDF with ID: " + pdfFile.getId());
+                    }
                 })
                 .onFailure(err -> sendErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId(), err.getMessage()));
     }

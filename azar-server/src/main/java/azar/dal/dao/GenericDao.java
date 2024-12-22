@@ -1,6 +1,6 @@
 package azar.dal.dao;
 
-import azar.utils.Utilities;
+import azar.factory.SessionFactoryProvider;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.vertx.core.Future;
@@ -21,14 +21,13 @@ import java.util.Set;
  * Purpose: Generic Dao definition
  **/
 public abstract class GenericDao<T> {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
     protected SessionFactory sessionFactory;
     private Session currentSession;
-    private final Vertx vertx;
+    protected final Vertx vertx;
 
     @Inject
-    public GenericDao(Vertx vertx) {
-        sessionFactory = new Configuration().configure().buildSessionFactory();
+    public GenericDao(Vertx vertx, SessionFactoryProvider sessionFactoryProvider) {
+        sessionFactory = sessionFactoryProvider.getSessionFactory();
         currentSession = null;
         this.vertx = vertx;
     }
@@ -74,20 +73,8 @@ public abstract class GenericDao<T> {
                 try (Session session = openSession()) {
                     session.beginTransaction();
 
-                    // Fetch the existing entity by its ID
-                    Object id = session.getEntityManagerFactory()
-                            .getPersistenceUnitUtil().getIdentifier(newItem);
-                    T existingItem = session.find((Class<T>) newItem.getClass(), id);
+                    T res = session.merge(newItem);
 
-                    if (existingItem == null) {
-                        throw new IllegalArgumentException("Entity not found for update");
-                    }
-
-                    // Retain fields from the existing item
-                    Utilities.mergeNonNullFields(newItem, existingItem);
-
-                    // Merge the updated entity
-                    T res = session.merge(existingItem);
                     session.getTransaction().commit();
                     promise.complete(res);
                 } catch (Exception e) {
@@ -97,6 +84,7 @@ public abstract class GenericDao<T> {
             });
         });
     }
+
 
     public Future<T> getById(Integer id) {
         return Future.future(promise -> {

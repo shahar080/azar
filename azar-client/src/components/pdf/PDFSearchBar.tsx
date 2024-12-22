@@ -20,7 +20,13 @@ interface SearchBarProps {
     availableLabels: string[];
 }
 
-const PDFSearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMode, handleViewToggle, availableLabels}) => {
+const PDFSearchBar: React.FC<SearchBarProps> = ({
+                                                    onSearch,
+                                                    onFileUpload,
+                                                    viewMode,
+                                                    handleViewToggle,
+                                                    availableLabels
+                                                }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
     const [dropdownLabel, setDropdownLabel] = useState('');

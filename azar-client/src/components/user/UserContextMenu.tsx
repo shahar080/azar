@@ -12,13 +12,13 @@ interface PdfContextMenuProps {
 }
 
 const UserContextMenu: React.FC<PdfContextMenuProps> = ({
-                                                           anchorPosition,
-                                                           user,
-                                                           onClose,
-                                                           onEdit,
-                                                           onDelete,
-                                                           onShowUser,
-                                                       }) => {
+                                                            anchorPosition,
+                                                            user,
+                                                            onClose,
+                                                            onEdit,
+                                                            onDelete,
+                                                            onShowUser,
+                                                        }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
     // Close menu when mouse leaves the menu area

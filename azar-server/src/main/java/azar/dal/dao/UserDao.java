@@ -2,8 +2,10 @@ package azar.dal.dao;
 
 import azar.entities.db.User;
 import azar.entities.db.UserType;
+import azar.factory.SessionFactoryProvider;
 import azar.utils.JsonManager;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import org.hibernate.Session;
@@ -19,6 +21,7 @@ import java.util.Set;
  * Author: Shahar Azar
  * Date:   12/12/2024
  **/
+@Singleton
 public class UserDao extends GenericDao<User> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -26,8 +29,8 @@ public class UserDao extends GenericDao<User> {
     private JsonManager jsonManager;
 
     @Inject
-    public UserDao(Vertx vertx) {
-        super(vertx);
+    public UserDao(Vertx vertx, SessionFactoryProvider sessionFactoryProvider) {
+        super(vertx, sessionFactoryProvider);
     }
 
     /**

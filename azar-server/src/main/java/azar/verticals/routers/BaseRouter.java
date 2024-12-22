@@ -21,6 +21,6 @@ public abstract class BaseRouter {
                 .setStatusCode(statusCode)
                 .putHeader("Content-Type", "application/json")
                 .end(message);
-        logger.warn(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage), logParams);
+        logger.warn(String.format("%s - %s - %s", routingContext.currentRoute().getPath(), logMessage, message), logParams);
     }
 }

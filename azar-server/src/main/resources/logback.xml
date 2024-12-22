@@ -23,17 +23,16 @@
     <logger name="io.netty" level="WARN"/>
     <logger name="io.vertx" level="WARN"/>
     <logger name="org.hibernate" level="WARN"/>
-    <logger name="org.jboss.logging" level="WARN" />
-    <logger name="org.hibernate.orm.connections.pooling" level="WARN" />
-    <logger name="com.google.cloud.sql.core.InternalConnectorRegistry" level="WARN" />
-    <logger name="com.google.cloud.sql.core.Connector" level="WARN" />
-    <logger name="com.google.cloud.sql.core.RefreshAheadStrategy" level="WARN" />
-    <logger name="com.google.cloud.sql.core.DefaultConnectionInfoRepository" level="WARN" />
-    <logger name="org.apache.fontbox.cff" level="ERROR" />
-    <logger name="org.apache.fontbox.ttf" level="ERROR" />
-    <logger name="org.apache.fontbox.util" level="ERROR" />
-    <logger name="org.apache.pdfbox.pdmodel" level="ERROR" />
-
+    <logger name="org.jboss.logging" level="WARN"/>
+    <logger name="org.hibernate.orm.connections.pooling" level="WARN"/>
+    <logger name="com.google.cloud.sql.core.InternalConnectorRegistry" level="WARN"/>
+    <logger name="com.google.cloud.sql.core.Connector" level="WARN"/>
+    <logger name="com.google.cloud.sql.core.RefreshAheadStrategy" level="WARN"/>
+    <logger name="com.google.cloud.sql.core.DefaultConnectionInfoRepository" level="WARN"/>
+    <logger name="org.apache.fontbox.cff" level="ERROR"/>
+    <logger name="org.apache.fontbox.ttf" level="ERROR"/>
+    <logger name="org.apache.fontbox.util" level="ERROR"/>
+    <logger name="org.apache.pdfbox.pdmodel" level="ERROR"/>
 
 
     <!-- Example of package-specific logging -->

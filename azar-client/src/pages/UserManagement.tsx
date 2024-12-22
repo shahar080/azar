@@ -176,11 +176,11 @@ const UserManagement: React.FC = () => {
         }
         add(userName, user).then((success) => {
                 resetPaginationAndReload();
-            if (success) {
-                showToast("user \"" + user.userName + "\" added successfully.", "success");
-            } else {
-                showToast("Error adding user \"" + user.userName + "\"", "error");
-            }
+                if (success) {
+                    showToast("user \"" + user.userName + "\" added successfully.", "success");
+                } else {
+                    showToast("Error adding user \"" + user.userName + "\"", "error");
+                }
             }
         ).finally(() => setLoadingAnimation(false))
     }

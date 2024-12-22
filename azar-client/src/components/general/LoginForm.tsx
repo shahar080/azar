@@ -6,6 +6,7 @@ import {LoginResponse} from "../../models/models.ts";
 import {AxiosError} from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 import {AccountCircle} from "@mui/icons-material";
+import {useLoading} from "../../utils/LoadingContext.tsx";
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -16,13 +17,15 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSuccess, onLoginFailure}) => {
     const [formData, setFormData] = useState({userName: '', password: ''});
     const [errorMessage, setErrorMessage] = useState('');
+    const {setLoadingAnimation} = useLoading();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
+            setLoadingAnimation(true);
             const response = await login(formData);
-            console.log('Login successful:', response);
+            setLoadingAnimation(false);
             if (response) {
                 onLoginSuccess(response);
             } else {

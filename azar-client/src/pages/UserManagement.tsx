@@ -11,6 +11,7 @@ import {useTheme} from "@mui/material/styles";
 import UserSearchBar from "../components/user/UserSearchBar.tsx";
 import UserList from "../components/user/UserList.tsx";
 import UserModal from "../components/user/UserModal.tsx";
+import {useLoading} from "../utils/LoadingContext.tsx";
 
 const drawerWidth = 240;
 
@@ -28,6 +29,7 @@ const UserManagement: React.FC = () => {
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedUserForOp, setSelectedUserForOp] = useState<User | null>(null);
     const [isAddUser, setAddUser] = useState<boolean>(false);
+    const {setLoadingAnimation} = useLoading();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
@@ -51,7 +53,7 @@ const UserManagement: React.FC = () => {
         setLoading(true);
 
         const currentPage = forceLoad ? 1 : page;
-
+        setLoadingAnimation(true);
         getAllUsers(currentPage, 20)
             .then((newUsers) => {
                 if (newUsers.length < 20) {
@@ -65,9 +67,13 @@ const UserManagement: React.FC = () => {
                 if (!forceLoad) {
                     setPage((prev) => prev + 1); // Increment page only if not forcing reload
                 }
+                ;
             })
             .catch((err) => console.error("Failed to load users:", err))
-            .finally(() => setLoading(false));
+            .finally(() => {
+                setLoading(false);
+                setLoadingAnimation(false);
+            });
     };
 
 
@@ -85,15 +91,15 @@ const UserManagement: React.FC = () => {
     };
 
     const handleDeleteUser = (userId: string) => {
+        setLoadingAnimation(true);
         deleteUser(userId, userName)
             .then(() => {
-                console.log("User deleted successfully:", userId);
-                // Reset pagination and reload PDFs
                 resetPaginationAndReload();
             })
             .catch((error) => {
                 console.error("Failed to delete user:", error);
-            });
+            })
+            .finally(() => setLoadingAnimation(false));
     };
 
     const handleEditUser = (user: User) => {
@@ -107,12 +113,15 @@ const UserManagement: React.FC = () => {
     }
 
     const handleSaveEdit = (updatedUser: User) => {
+        setLoadingAnimation(true);
         const tempUsers = users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
         setUsers(tempUsers);
         setFilteredUsers((prev) =>
             prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
         );
-        updateUser(updatedUser);
+        updateUser(updatedUser).finally(() => {
+            setLoadingAnimation(false);
+        })
     };
 
     const resetPaginationAndReload = () => {
@@ -142,9 +151,11 @@ const UserManagement: React.FC = () => {
     }
 
     const handleUserRegistration = (user: User) => {
-        add(userName, user).then(() =>
-            resetPaginationAndReload()
-        )
+        setLoadingAnimation(true);
+        add(userName, user).then(() => {
+                resetPaginationAndReload();
+            }
+        ).finally(() => setLoadingAnimation(false))
     }
 
     return (

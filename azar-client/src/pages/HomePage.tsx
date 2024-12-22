@@ -14,6 +14,7 @@ import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
 import {formatDate} from "../utils/utilities.ts";
+import {useLoading} from "../utils/LoadingContext.tsx";
 
 const drawerWidth = 240;
 
@@ -32,6 +33,7 @@ const HomePage: React.FC = () => {
     const [selectedPdfForEdit, setSelectedPdfForEdit] = useState<PdfFile | null>(null);
     const [allLabels, setAllLabels] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
+    const {setLoadingAnimation} = useLoading();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userType = useSelector((state: RootState) => state.auth.userType);
@@ -57,7 +59,7 @@ const HomePage: React.FC = () => {
     const loadPdfs = (forceLoad: boolean = false) => {
         if (!forceLoad && (loading || !hasMore)) return; // Stop if already loading or no more PDFs
         setLoading(true);
-
+        setLoadingAnimation(true)
         const currentPage = forceLoad ? 1 : page;
 
         getAllPdfs(currentPage, 20)
@@ -75,7 +77,10 @@ const HomePage: React.FC = () => {
                 }
             })
             .catch((err) => console.error("Failed to load PDFs:", err))
-            .finally(() => setLoading(false));
+            .finally(() => {
+                setLoading(false);
+                setLoadingAnimation(false);
+            });
     };
 
 
@@ -104,28 +109,28 @@ const HomePage: React.FC = () => {
     };
 
     const handleFileUpload = (file: File) => {
+        setLoadingAnimation(true);
         uploadPdf(file, userName).then((newPdf) => {
             if (newPdf !== undefined) {
-                console.log("File uploaded successfully:", newPdf);
                 // Reset pagination and reload PDFs
                 resetPaginationAndReload();
             } else {
                 console.error("File upload failed.");
             }
-        });
+        }).finally(() => setLoading(false));
     };
 
     const handleDeletePdf = (pdfId: string) => {
+        setLoadingAnimation(true);
         deletePdf(pdfId)
             .then(() => {
-                console.log("File deleted successfully:", pdfId);
                 // Reset pagination and reload PDFs
                 resetPaginationAndReload();
                 setSelectedPdf(null);
             })
             .catch((error) => {
                 console.error("Failed to delete PDF:", error);
-            });
+            }).finally(() => setLoadingAnimation(false));
     };
 
     const resetPaginationAndReload = () => {
@@ -164,6 +169,7 @@ const HomePage: React.FC = () => {
     };
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
+        setLoadingAnimation(true);
         const tempPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
         setPdfs(tempPdfs);
         setFilteredPdfs((prev) =>
@@ -174,7 +180,7 @@ const HomePage: React.FC = () => {
             if (updatedPdf.id === selectedPdf?.id) {
                 setSelectedPdf(updatedPdf);
             }
-        })
+        }).finally(() => setLoading(false));
     };
 
     const updateLabels = (pdfs: PdfFile[]) => {

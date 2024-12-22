@@ -1,6 +1,7 @@
 package azar.dal.dao;
 
 import azar.entities.db.User;
+import azar.entities.db.UserType;
 import azar.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -131,6 +133,24 @@ public class UserDao extends GenericDao<User> {
                 listPromise.complete(paginatedResults);
             } catch (Exception e) {
                 listPromise.fail(e);
+            }
+        });
+    }
+
+    public Future<Boolean> isAdmin(String userName) {
+        return Future.future(pdfOwnerPromise -> {
+            try (Session session = openSession()) {
+                String userType = session
+                        .createNativeQuery(
+                                "SELECT u.user_type FROM users u WHERE u.user_name = :userName",
+                                String.class
+                        )
+                        .setParameter("userName", userName)
+                        .getSingleResult();
+
+                pdfOwnerPromise.complete(Objects.equals(userType, UserType.ADMIN.getType()));
+            } catch (Exception e) {
+                pdfOwnerPromise.fail(e);
             }
         });
     }

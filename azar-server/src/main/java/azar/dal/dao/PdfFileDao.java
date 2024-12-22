@@ -60,4 +60,22 @@ public class PdfFileDao extends GenericDao<PdfFile> {
             }
         });
     }
+
+    public Future<String> getOwnerByPdfId(Integer id) {
+        return Future.future(pdfOwnerPromise -> {
+            try (Session session = openSession()) {
+                String pdfOwner = session
+                        .createNativeQuery(
+                                "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
+                                String.class
+                        )
+                        .setParameter("id", id)
+                        .getSingleResult();
+
+                pdfOwnerPromise.complete(pdfOwner);
+            } catch (Exception e) {
+                pdfOwnerPromise.fail(e);
+            }
+        });
+    }
 }

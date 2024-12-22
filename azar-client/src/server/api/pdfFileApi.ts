@@ -18,16 +18,17 @@ export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFil
     return undefined;
 }
 
-export async function deletePdf(pdfId: string): Promise<boolean> {
+export async function deletePdf(pdfId: string, userName: string): Promise<number> {
     try {
-        const response = await apiClient.post(`/pdf/delete/${pdfId}`);
-        if (response.status === 200) {
-            return true;
-        }
-    } catch (error) {
+        const response = await apiClient.post(`/pdf/delete/${pdfId}`, userName);
+        return response.status;
+    } catch (error: any) {
         console.error('Delete pdf ' + pdfId + ' failed', error);
+        if (error.response && error.response.status) {
+            return error.response.status; // Return the actual status code (e.g., 401)
+        }
     }
-    return false;
+    return 400;
 }
 
 export async function updatePdf(updatedPdf: PdfFile): Promise<PdfFile | undefined> {

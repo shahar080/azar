@@ -55,4 +55,8 @@ public class PdfFileService extends GenericService<PdfFile> {
         return pdfFileDao.getAllClientPaginated(offset, limit);
     }
 
+    public Future<String> getOwnerByPdfId(Integer id) {
+        return pdfFileDao.getOwnerByPdfId(id);
+    }
+
 }

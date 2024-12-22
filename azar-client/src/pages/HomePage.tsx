@@ -132,12 +132,23 @@ const HomePage: React.FC = () => {
 
     const handleDeletePdf = (pdf: PdfFile) => {
         setLoadingAnimation(true);
-        deletePdf(pdf.id)
-            .then(() => {
+        if (userName === null) {
+            showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
+            return;
+        }
+        deletePdf(pdf.id, userName)
+            .then((res) => {
+                console.log(res)
+                if (res === 200) {
+                    showToast("PDF \"" + pdf.fileName + "\" deleted successfully.", "success");
+                } else if (res === 401) {
+                    showToast("Current user can't delete PDF \"" + pdf.fileName + "\"", "error")
+                } else {
+                    showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error")
+                }
                 // Reset pagination and reload PDFs
                 resetPaginationAndReload();
                 setSelectedPdf(null);
-                showToast("PDF \"" + pdf.fileName + "\" deleted successfully.", "success");
             })
             .catch(() => {
                 showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");

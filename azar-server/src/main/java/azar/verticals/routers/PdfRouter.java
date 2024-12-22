@@ -1,6 +1,7 @@
 package azar.verticals.routers;
 
 import azar.dal.service.PdfFileService;
+import azar.dal.service.UserService;
 import azar.entities.db.PdfFile;
 import azar.utils.CacheManager;
 import azar.utils.JsonManager;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Author: Shahar Azar
@@ -25,13 +27,15 @@ public class PdfRouter extends BaseRouter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final PdfFileService pdfFileService;
+    private final UserService userService;
     private final JsonManager jsonManager;
     private final CacheManager redisAPI;
     private final Vertx vertx;
 
     @Inject
-    public PdfRouter(PdfFileService pdfFileService, JsonManager jsonManager, CacheManager cacheManager, Vertx vertx) {
+    public PdfRouter(PdfFileService pdfFileService, UserService userService, JsonManager jsonManager, CacheManager cacheManager, Vertx vertx) {
         this.pdfFileService = pdfFileService;
+        this.userService = userService;
         this.jsonManager = jsonManager;
         this.redisAPI = cacheManager;
         this.vertx = vertx;
@@ -136,17 +140,31 @@ public class PdfRouter extends BaseRouter {
                     .end("PDF ID is required");
             return;
         }
+        String currentUser = jsonManager.fromJson(routingContext.body().asString(), String.class);
 
-        // Call the service to delete the PDF
-        pdfFileService.removeById(Integer.valueOf(pdfId))
-                .onSuccess(success -> {
-                    if (success) {
-                        logger.info("Successfully deleted PDF with ID: {}", pdfId);
-                        routingContext.response()
-                                .setStatusCode(200)
-                                .end("PDF deleted successfully");
-                    } else {
-                        sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, "Failed to delete PDF with ID: " + pdfId);
+        pdfFileService.getOwnerByPdfId(Integer.valueOf(pdfId))
+                .onSuccess(dbPdfOwner -> {
+                    if (!Objects.equals(currentUser, dbPdfOwner)) {
+                        userService.isAdmin(currentUser)
+                                .onSuccess(isAdmin -> {
+                                    if (isAdmin) {
+                                        pdfFileService.removeById(Integer.valueOf(pdfId))
+                                                .onSuccess(success -> {
+                                                    if (success) {
+                                                        logger.info("Successfully deleted PDF with ID: {}", pdfId);
+                                                        routingContext.response()
+                                                                .setStatusCode(200)
+                                                                .end("PDF deleted successfully");
+                                                    } else {
+                                                        sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, "Failed to delete PDF with ID: " + pdfId);
+                                                    }
+                                                })
+                                                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+                                    } else {
+                                        sendErrorResponse(routingContext, 401, "Unauthorized", "Deleting other people PDFs isn't allowed unless you're admin");
+                                    }
+                                })
+                                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
                     }
                 })
                 .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));

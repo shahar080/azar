@@ -112,6 +112,10 @@ public class UserService extends GenericService<User> {
         return userDao.getAllClientPaginated(offset, limit);
     }
 
+    public Future<Boolean> isAdmin(String userName) {
+        return userDao.isAdmin(userName);
+    }
+
     @Override
     public String toString() {
         return jsonManager.toJson(this.getAll());

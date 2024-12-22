@@ -79,7 +79,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSucces
             <>
             </>
             <Button
-                variant="text"
+                variant="outlined"
                 color="secondary"
                 onClick={handleCancel}
                 fullWidth

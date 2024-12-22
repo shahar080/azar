@@ -2,7 +2,6 @@ import React from 'react';
 import {ButtonBase, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, useMediaQuery} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import LogoutIcon from '@mui/icons-material/Logout';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import PeopleIcon from '@mui/icons-material/People';
@@ -19,9 +18,8 @@ interface DrawerMenuProps {
     onPinToggle: () => void;
     onNavigate: (path: string) => void;
     onClose: () => void;
-    onRegisterUser: () => void;
+    onManageUser?: () => void;
     userType: UserType;
-    page: "home" | "manage-users"; // Determines whether the modal is for viewing or editing
 }
 
 interface OnLogoutProps {
@@ -37,9 +35,8 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                                                    onPinToggle,
                                                    onNavigate,
                                                    onClose,
-                                                   onRegisterUser,
+                                                   onManageUser,
                                                    userType = UserType.STANDARD,
-                                                   page
                                                }) => {
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
@@ -74,21 +71,12 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                     </ListItemIcon>
                     <ListItemText primary="Home"/>
                 </ListItem>
-                {userType === UserType.ADMIN &&
-                    <ListItem component={ButtonBase} onClick={onRegisterUser} sx={hoverStyles}>
-                        {page === "home" ?
-                            <>
-                                <ListItemIcon>
-                                    <PeopleIcon/>
-                                </ListItemIcon>
-                                <ListItemText primary="Manage Users"/>
-                            </>
-                            : <>
-                                <ListItemIcon>
-                                    <PersonAddIcon/>
-                                </ListItemIcon>
-                                <ListItemText primary="Add User"/>
-                            </>}
+                {userType === UserType.ADMIN && onManageUser &&
+                    <ListItem component={ButtonBase} onClick={onManageUser} sx={hoverStyles}>
+                        <ListItemIcon>
+                            <PeopleIcon/>
+                        </ListItemIcon>
+                        <ListItemText primary="Manage Users"/>
                     </ListItem>
                 }
                 <ListItem component={ButtonBase} onClick={() => handleLogOut({onNavigate, dispatch})} sx={hoverStyles}>

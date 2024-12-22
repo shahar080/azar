@@ -5,7 +5,6 @@ import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
-import RegisterUserModal from "../components/user/RegisterUserModal.tsx";
 import {add, deleteUser, getAllUsers, updateUser} from "../server/api/userApi";
 import {User} from "../models/models";
 import {useTheme} from "@mui/material/styles";
@@ -20,7 +19,6 @@ const UserManagement: React.FC = () => {
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerPinned, setDrawerPinned] = useState(isDesktop);
-    const [isRegisterUserModalOpen, setRegisterUserModalOpen] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const [page, setPage] = useState(1);
@@ -29,6 +27,7 @@ const UserManagement: React.FC = () => {
     const [isViewModalOpen, setViewModalOpen] = useState(false);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedUserForOp, setSelectedUserForOp] = useState<User | null>(null);
+    const [isAddUser, setAddUser] = useState<boolean>(false);
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
@@ -123,14 +122,6 @@ const UserManagement: React.FC = () => {
         loadUsers(true); // Force reload starting from page 1
     };
 
-    const handleRegisterUser = () => {
-        setRegisterUserModalOpen(true);
-    };
-
-    const handleUserRegistration = (userToAdd: User) => {
-        add(userName, userToAdd);
-    };
-
     const toggleDrawer = () => {
         if (!drawerPinned) {
             setDrawerOpen(!drawerOpen);
@@ -146,6 +137,16 @@ const UserManagement: React.FC = () => {
         });
     };
 
+    const handleAddUser = () => {
+        setAddUser(true);
+    }
+
+    const handleUserRegistration = (user: User) => {
+        add(userName, user).then(() =>
+            resetPaginationAndReload()
+        )
+    }
+
     return (
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
             <CssBaseline/>
@@ -160,10 +161,8 @@ const UserManagement: React.FC = () => {
                 onPinToggle={pinDrawer}
                 onNavigate={() => {
                 }}
-                onRegisterUser={handleRegisterUser}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
-                page={"manage-users"}
             />
 
             {/* Main Content */}
@@ -188,6 +187,7 @@ const UserManagement: React.FC = () => {
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <UserSearchBar
                             onSearch={handleSearch}
+                            onAddUser={handleAddUser}
                         />
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
                             <UserList
@@ -196,17 +196,14 @@ const UserManagement: React.FC = () => {
                                 onDelete={handleDeleteUser}
                                 onEdit={handleEditUser}
                                 onShowUser={handleShowUser}
+                                isAddUser={isAddUser}
+                                setIsAddUser={() => setAddUser(false)}
+                                handleUserRegistration={handleUserRegistration}
                             />
                         </Box>
                     </Grid>
                 </Grid>
             </Box>
-
-            <RegisterUserModal
-                open={isRegisterUserModalOpen}
-                onClose={() => setRegisterUserModalOpen(false)}
-                onSubmit={handleUserRegistration}
-            />
 
             <UserModal
                 open={isViewModalOpen}

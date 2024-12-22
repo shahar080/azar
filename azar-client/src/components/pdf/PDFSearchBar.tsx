@@ -131,7 +131,7 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMod
                 </Select>
 
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     color="primary"
                     onClick={() => triggerSearch(searchQuery, selectedLabels)}
                 >
@@ -150,7 +150,7 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({onSearch, onFileUpload, viewMod
             >
                 {/* Left Side: Upload PDF Button */}
                 <Box>
-                    <Button variant="contained" component="label" color="secondary">
+                    <Button variant="outlined" component="label" color="secondary">
                         Upload PDF
                         <input
                             type="file"

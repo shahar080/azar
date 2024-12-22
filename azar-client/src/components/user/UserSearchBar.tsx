@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {Box, TextField, Button} from '@mui/material';
+import {Box, Button, TextField} from '@mui/material';
 
 interface SearchBarProps {
     onSearch: (query: string) => void;
+    onAddUser: () => void;
 }
 
-const UserSearchBar: React.FC<SearchBarProps> = ({onSearch}) => {
+const UserSearchBar: React.FC<SearchBarProps> = ({onSearch, onAddUser}) => {
     const [searchQuery, setSearchQuery] = useState('');
 
     /** Handle search bar text input */
@@ -20,17 +21,28 @@ const UserSearchBar: React.FC<SearchBarProps> = ({onSearch}) => {
     };
 
     return (
-        <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
-            <TextField
-                value={searchQuery}
-                onChange={handleSearchQueryChange}
-                placeholder="Search..."
-                fullWidth
-            />
-            <Button variant="contained" color="primary" onClick={handleSearchClick}>
-                Search
-            </Button>
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+            {/* Search Bar */}
+            <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
+                <TextField
+                    value={searchQuery}
+                    onChange={handleSearchQueryChange}
+                    placeholder="Search..."
+                    fullWidth
+                />
+                <Button variant="outlined" color="primary" onClick={handleSearchClick}>
+                    Search
+                </Button>
+            </Box>
+
+            {/* Button Under Search Bar */}
+            <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
+                <Button variant="outlined" color="secondary" onClick={onAddUser}>
+                    Add user
+                </Button>
+            </Box>
         </Box>
+
     );
 };
 

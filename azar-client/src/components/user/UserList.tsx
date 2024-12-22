@@ -13,6 +13,7 @@ import {
 import {useTheme} from "@mui/material/styles";
 import {User} from "../../models/models.ts";
 import UserContextMenu from "./UserContextMenu.tsx";
+import RegisterUserModal from "./RegisterUserModal.tsx";
 
 interface UserListProps {
     users: User[];
@@ -20,9 +21,21 @@ interface UserListProps {
     onDelete: (userId: string) => void;
     onEdit: (user: User) => void;
     onShowUser: (user: User) => void;
+    isAddUser: boolean;
+    setIsAddUser: () => void;
+    handleUserRegistration: (user: User) => void;
 }
 
-const UserList: React.FC<UserListProps> = ({users, onLoadMore, onDelete, onEdit, onShowUser}) => {
+const UserList: React.FC<UserListProps> = ({
+                                               users,
+                                               onLoadMore,
+                                               onDelete,
+                                               onEdit,
+                                               onShowUser,
+                                               isAddUser,
+                                               setIsAddUser,
+                                               handleUserRegistration
+                                           }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const longPressTimer = useRef<NodeJS.Timeout | null>(null);
     const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
@@ -188,6 +201,12 @@ const UserList: React.FC<UserListProps> = ({users, onLoadMore, onDelete, onEdit,
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onShowUser={handleShowUser}
+            />
+
+            <RegisterUserModal
+                open={isAddUser}
+                onClose={setIsAddUser}
+                onSubmit={handleUserRegistration}
             />
         </>
     );

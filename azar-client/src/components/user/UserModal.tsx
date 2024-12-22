@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
-import { User } from "../../models/models.ts";
+import React, {useEffect, useState} from "react";
+import {Box, Button, Modal, Stack, TextField, Typography} from "@mui/material";
+import {User} from "../../models/models.ts";
 
 interface UserModalProps {
     open: boolean;
@@ -86,7 +86,7 @@ const UserModal: React.FC<UserModalProps> = ({ open, user, onClose, onSave, mode
                 {/* Actions */}
                 <Stack direction="row" spacing={2} mt={2}>
                     {mode === "edit" && (
-                        <Button variant="contained" onClick={handleSave}>
+                        <Button variant="outlined" onClick={handleSave}>
                             Save
                         </Button>
                     )}

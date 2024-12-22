@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Button, MenuItem, Modal, TextField, Typography } from '@mui/material';
+import React, {useState} from 'react';
+import {Box, Button, MenuItem, Modal, TextField, Typography} from '@mui/material';
 import {User, UserType} from "../../models/models.ts";
 import PasswordField from "../general/PasswordField.tsx";
 
@@ -164,7 +164,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, on
                 </TextField>
 
                 <Box mt={2} display="flex" justifyContent="flex-end" gap={2}>
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
+                    <Button variant="outlined" color="primary" onClick={handleSubmit}>
                         Register New User
                     </Button>
                     <Button variant="outlined" color="secondary" onClick={handleCancel}>

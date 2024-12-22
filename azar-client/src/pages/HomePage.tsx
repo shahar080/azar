@@ -192,10 +192,9 @@ const HomePage: React.FC = () => {
                 onPinToggle={pinDrawer}
                 onNavigate={() => {
                 }}
-                onRegisterUser={handleRegisterUser}
+                onManageUser={handleRegisterUser}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
-                page={"home"}
             />
 
             {/* Main Content */}

@@ -116,7 +116,7 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
 
                 {/* Actions */}
                 <Stack direction="row" spacing={2} mt={2}>
-                    <Button variant="contained" onClick={handleSave}>
+                    <Button variant="outlined" onClick={handleSave}>
                         Save
                     </Button>
                     <Button variant="outlined" onClick={onClose}>

@@ -7,7 +7,6 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . ./
-COPY cert/ /cert/
 
 # Build the React app
 RUN npm run build

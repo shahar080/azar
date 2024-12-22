@@ -121,6 +121,7 @@ const HomePage: React.FC = () => {
                 console.log("File deleted successfully:", pdfId);
                 // Reset pagination and reload PDFs
                 resetPaginationAndReload();
+                setSelectedPdf(null);
             })
             .catch((error) => {
                 console.error("Failed to delete PDF:", error);
@@ -169,7 +170,11 @@ const HomePage: React.FC = () => {
             prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
         );
         updateLabels(tempPdfs)
-        updatePdf(updatedPdf);
+        updatePdf(updatedPdf).then(() => {
+            if (updatedPdf.id === selectedPdf?.id) {
+                setSelectedPdf(updatedPdf);
+            }
+        })
     };
 
     const updateLabels = (pdfs: PdfFile[]) => {

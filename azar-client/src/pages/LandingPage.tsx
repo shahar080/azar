@@ -54,12 +54,6 @@ const LandingPage: React.FC = () => {
             </Typography>
 
             {!showLoginForm && (
-                <Typography variant="h6" sx={{marginBottom: 4}}>
-                    Some cool text
-                </Typography>
-            )}
-
-            {!showLoginForm && (
                 <Button
                     variant="contained"
                     color="primary"

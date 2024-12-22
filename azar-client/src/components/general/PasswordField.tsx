@@ -4,6 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Lock from '@mui/icons-material/Lock';
 
 interface PasswordFieldProps {
     label: string;
@@ -20,7 +21,7 @@ function PasswordField({
                            value,
                            onChange,
                            error = false,
-                           helperText = ''
+                           helperText = '',
                        }: PasswordFieldProps) {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -39,6 +40,11 @@ function PasswordField({
             required
             margin="normal"
             InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <Lock/>
+                    </InputAdornment>
+                ),
                 endAdornment: (
                     <InputAdornment position="end">
                         <IconButton

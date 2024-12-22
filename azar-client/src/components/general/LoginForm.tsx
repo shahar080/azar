@@ -4,6 +4,8 @@ import {login} from '../../server/api/userApi.ts';
 import PasswordField from "./PasswordField.tsx";
 import {LoginResponse} from "../../models/models.ts";
 import {AxiosError} from "axios";
+import InputAdornment from "@mui/material/InputAdornment";
+import {AccountCircle} from "@mui/icons-material";
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -66,6 +68,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onLoginSucces
                 onChange={handleChange}
                 fullWidth
                 required
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <AccountCircle/>
+                        </InputAdornment>
+                    ),
+                }}
             />
             <PasswordField
                 label="Password"

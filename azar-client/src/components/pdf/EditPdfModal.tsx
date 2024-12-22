@@ -1,7 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {Autocomplete, Box, Button, Modal, Stack, TextField, Typography,} from "@mui/material";
 import {PdfFile} from "../../models/models.ts";
-import CustomLabel from "../label/CustomLabel.tsx"; // Your existing label component
+import CustomLabel from "../label/CustomLabel.tsx";
+import InputAdornment from "@mui/material/InputAdornment";
+import {Description, Label, Notes} from "@mui/icons-material"; // Your existing label component
 
 interface EditPdfModalProps {
     open: boolean;
@@ -75,6 +77,13 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     value={fileName}
                     onChange={(e) => setFileName(e.target.value)}
                     margin="dense"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Description/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 {/* Labels with Autocomplete */}
@@ -99,6 +108,13 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                             variant="outlined"
                             placeholder="Labels"
                             margin="dense"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Label/>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                     )}
                 />
@@ -112,6 +128,13 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     margin="dense"
                     multiline
                     rows={3}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Notes/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 {/* Actions */}

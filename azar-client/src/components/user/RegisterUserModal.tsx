@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import {Box, Button, MenuItem, Modal, TextField, Typography} from '@mui/material';
 import {User, UserType} from "../../models/models.ts";
 import PasswordField from "../general/PasswordField.tsx";
+import InputAdornment from "@mui/material/InputAdornment";
+import {AccountCircle, Person} from "@mui/icons-material";
 
 interface RegisterUserModalProps {
     open: boolean;
@@ -105,6 +107,13 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, on
                     helperText={errors.firstName ? 'First Name is required' : ''}
                     fullWidth
                     margin="normal"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Person/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 <TextField
@@ -116,6 +125,13 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, on
                     helperText={errors.lastName ? 'Last Name is required' : ''}
                     fullWidth
                     margin="normal"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Person/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 <TextField
@@ -127,6 +143,13 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({ open, onClose, on
                     helperText={errors.userName ? 'User Name is required' : ''}
                     fullWidth
                     margin="normal"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <AccountCircle/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 <PasswordField

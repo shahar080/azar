@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, Modal, Stack, TextField, Typography} from "@mui/material";
 import {User} from "../../models/models.ts";
+import {AccountCircle, Person} from "@mui/icons-material";
+import InputAdornment from "@mui/material/InputAdornment";
 
 interface UserModalProps {
     open: boolean;
@@ -62,6 +64,13 @@ const UserModal: React.FC<UserModalProps> = ({ open, user, onClose, onSave, mode
                     onChange={(e) => setFirstName(e.target.value)}
                     margin="dense"
                     disabled={mode === "view"}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Person/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 {/* Last Name Field */}
@@ -72,6 +81,13 @@ const UserModal: React.FC<UserModalProps> = ({ open, user, onClose, onSave, mode
                     onChange={(e) => setLastName(e.target.value)}
                     margin="dense"
                     disabled={mode === "view"}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Person/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 {/* Username Field */}
@@ -81,6 +97,13 @@ const UserModal: React.FC<UserModalProps> = ({ open, user, onClose, onSave, mode
                     value={userName}
                     margin="dense"
                     disabled
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <AccountCircle/>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
 
                 {/* Actions */}

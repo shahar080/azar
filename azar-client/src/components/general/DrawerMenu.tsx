@@ -101,6 +101,8 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
 function handleLogOut({onNavigate, dispatch}: OnLogoutProps): void {
     dispatch(logout());
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userType');
     onNavigate('/login');
 }
 

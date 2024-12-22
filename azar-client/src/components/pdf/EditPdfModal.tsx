@@ -3,7 +3,7 @@ import {Autocomplete, Box, Button, Modal, Stack, TextField, Typography,} from "@
 import {PdfFile} from "../../models/models.ts";
 import CustomLabel from "../label/CustomLabel.tsx";
 import InputAdornment from "@mui/material/InputAdornment";
-import {Description, Label, Notes} from "@mui/icons-material"; // Your existing label component
+import {Description, Notes} from "@mui/icons-material"; // Your existing label component
 
 interface EditPdfModalProps {
     open: boolean;
@@ -108,13 +108,6 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                             variant="outlined"
                             placeholder="Labels"
                             margin="dense"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Label/>
-                                    </InputAdornment>
-                                ),
-                            }}
                         />
                     )}
                 />

@@ -4,6 +4,7 @@ import azar.utils.Utilities;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -23,11 +24,13 @@ public abstract class GenericDao<T> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     protected SessionFactory sessionFactory;
     private Session currentSession;
+    private final Vertx vertx;
 
     @Inject
-    public GenericDao() {
+    public GenericDao(Vertx vertx) {
         sessionFactory = new Configuration().configure().buildSessionFactory();
         currentSession = null;
+        this.vertx = vertx;
     }
 
     protected Session openSession() {
@@ -35,13 +38,6 @@ public abstract class GenericDao<T> {
             currentSession = sessionFactory.openSession();
         }
         return currentSession;
-    }
-
-    protected void closeSession() {
-//        if (currentSession != null) {
-//            currentSession.close();
-//        }
-//        currentSession = null;
     }
 
     public Future<Set<T>> getAll() {
@@ -53,49 +49,52 @@ public abstract class GenericDao<T> {
             } catch (Exception e) {
                 promise.fail(e);
             }
-            closeSession();
         });
     }
 
     public Future<T> add(T t) {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                session.beginTransaction();
-                T addedObj = session.merge(t);
-                session.getTransaction().commit();
-                promise.complete(addedObj);
-            } catch (Exception e) {
-                promise.fail(e);
-                closeSession();
-            }
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    session.beginTransaction();
+                    T addedObj = session.merge(t);
+                    session.getTransaction().commit();
+                    promise.complete(addedObj);
+                } catch (Exception e) {
+                    promise.fail(e);
+                }
+                return null;
+            });
         });
     }
 
     public Future<T> update(T newItem) {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                session.beginTransaction();
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    session.beginTransaction();
 
-                // Fetch the existing entity by its ID
-                Object id = session.getEntityManagerFactory()
-                        .getPersistenceUnitUtil().getIdentifier(newItem);
-                T existingItem = session.find((Class<T>) newItem.getClass(), id);
+                    // Fetch the existing entity by its ID
+                    Object id = session.getEntityManagerFactory()
+                            .getPersistenceUnitUtil().getIdentifier(newItem);
+                    T existingItem = session.find((Class<T>) newItem.getClass(), id);
 
-                if (existingItem == null) {
-                    throw new IllegalArgumentException("Entity not found for update");
+                    if (existingItem == null) {
+                        throw new IllegalArgumentException("Entity not found for update");
+                    }
+
+                    // Retain fields from the existing item
+                    Utilities.mergeNonNullFields(newItem, existingItem);
+
+                    // Merge the updated entity
+                    T res = session.merge(existingItem);
+                    session.getTransaction().commit();
+                    promise.complete(res);
+                } catch (Exception e) {
+                    promise.fail(e);
                 }
-
-                // Retain fields from the existing item
-                Utilities.mergeNonNullFields(newItem, existingItem);
-
-                // Merge the updated entity
-                T res = session.merge(existingItem);
-                session.getTransaction().commit();
-                promise.complete(res);
-            } catch (Exception e) {
-                promise.fail(e);
-                closeSession();
-            }
+                return null;
+            });
         });
     }
 
@@ -109,7 +108,6 @@ public abstract class GenericDao<T> {
             } catch (Exception e) {
                 promise.fail(e);
             }
-            closeSession();
         });
     }
 
@@ -123,7 +121,6 @@ public abstract class GenericDao<T> {
             } catch (Exception e) {
                 promise.fail(e);
             }
-            closeSession();
         });
     }
 
@@ -137,7 +134,6 @@ public abstract class GenericDao<T> {
             } catch (Exception e) {
                 promise.fail(e);
             }
-            closeSession();
         });
     }
 

@@ -17,6 +17,18 @@ export enum UserType {
     STANDARD = "STANDARD",
 }
 
+export function getUserType(value: string | null): UserType {
+    if (value === null || value === undefined) {
+        return UserType.STANDARD;
+    }
+    // Check if the value exists in the enum
+    if (Object.values(UserType).includes(value as UserType)) {
+        return value as UserType;
+    }
+    // Return the default value if not found
+    return UserType.STANDARD;
+}
+
 export interface LoginResponse {
     success: boolean;
     token: string;

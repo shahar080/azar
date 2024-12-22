@@ -8,6 +8,8 @@ export async function login(userNameAndPassword: UserNameAndPassword): Promise<L
         if (loginResponse && loginResponse.success) {
             // Securely store the token
             localStorage.setItem('authToken', loginResponse.token);
+            localStorage.setItem('userName', loginResponse.userName); // TODO: AZAR-68
+            localStorage.setItem('userType', loginResponse.userType);
             return loginResponse;
         }
         return undefined;

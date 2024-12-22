@@ -6,7 +6,7 @@ import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
 import {add, deleteUser, getAllUsers, updateUser} from "../server/api/userApi";
-import {User} from "../models/models";
+import {getUserType, User} from "../models/models";
 import {useTheme} from "@mui/material/styles";
 import UserSearchBar from "../components/user/UserSearchBar.tsx";
 import UserList from "../components/user/UserList.tsx";
@@ -34,8 +34,8 @@ const UserManagement: React.FC = () => {
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userName = useSelector((state: RootState) => state.auth.username);
-    const userType = useSelector((state: RootState) => state.auth.userType);
+    const userName = localStorage.getItem('userName');
+    const userType = getUserType(localStorage.getItem('userType'));
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -93,7 +93,7 @@ const UserManagement: React.FC = () => {
 
     const handleDeleteUser = (user: User) => {
         setLoadingAnimation(true);
-        if (user.id === undefined) {
+        if (user.id === undefined || userName === null) {
             setLoadingAnimation(false);
             return false;
         }
@@ -170,6 +170,10 @@ const UserManagement: React.FC = () => {
 
     const handleUserRegistration = (user: User) => {
         setLoadingAnimation(true);
+        if (userName === null) {
+            showToast("Error adding user \"" + user.userName + "\"", "error");
+            return;
+        }
         add(userName, user).then((success) => {
                 resetPaginationAndReload();
             if (success) {

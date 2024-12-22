@@ -8,7 +8,7 @@ import {RootState} from "../store/store";
 import PDFSearchBar from "../components/pdf/PDFSearchBar.tsx";
 import PdfList from "../components/pdf/PdfList.tsx";
 import ExtendedPdfInfo from "../components/pdf/ExtendedPdfInfo.tsx";
-import {PdfFile} from "../models/models";
+import {getUserType, PdfFile} from "../models/models";
 import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
@@ -38,8 +38,8 @@ const HomePage: React.FC = () => {
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userType = useSelector((state: RootState) => state.auth.userType);
-    const userName = useSelector((state: RootState) => state.auth.username);
+    const userType = getUserType(localStorage.getItem('userType'));
+    const userName = localStorage.getItem('userName');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -112,6 +112,10 @@ const HomePage: React.FC = () => {
 
     const handleFileUpload = (file: File) => {
         setLoadingAnimation(true);
+        if (userName === null) {
+            showToast("Error uploading PDF \"" + file.name + "\"", "error");
+            return;
+        }
         uploadPdf(file, userName).then((newPdf) => {
             if (newPdf !== undefined) {
                 // Reset pagination and reload PDFs
@@ -183,10 +187,10 @@ const HomePage: React.FC = () => {
             prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
         );
         updateLabels(tempPdfs)
-        updatePdf(updatedPdf).then(() => {
-            if (updatedPdf && updatedPdf.id === selectedPdf?.id) {
-                setSelectedPdf(updatedPdf);
-                showToast("PDF \"" + updatedPdf.fileName + "\" updated successfully.", "success");
+        updatePdf(updatedPdf).then((res) => {
+            if (res && res.id === updatedPdf.id) {
+                setSelectedPdf(res);
+                showToast("PDF \"" + res.fileName + "\" updated successfully.", "success");
             } else {
                 showToast("Error updating PDF \"" + updatedPdf.fileName + "\"", "error");
             }

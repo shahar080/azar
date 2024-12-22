@@ -1,7 +1,9 @@
 package azar.dal.dao;
 
 import azar.entities.db.PdfFile;
+import com.google.inject.Inject;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -12,6 +14,10 @@ import java.util.List;
  **/
 public class PdfFileDao extends GenericDao<PdfFile> {
 
+    @Inject
+    public PdfFileDao(Vertx vertx) {
+        super(vertx);
+    }
 
     @Override
     protected Class<PdfFile> getType() {

@@ -4,6 +4,7 @@ import azar.entities.db.User;
 import azar.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -21,6 +22,11 @@ public class UserDao extends GenericDao<User> {
 
     @Inject
     private JsonManager jsonManager;
+
+    @Inject
+    public UserDao(Vertx vertx) {
+        super(vertx);
+    }
 
     /**
      * A function to get all the users as a Map
@@ -86,7 +92,6 @@ public class UserDao extends GenericDao<User> {
             } catch (Exception e) {
                 promise.fail(e.getMessage());
             }
-            closeSession();
         });
     }
 

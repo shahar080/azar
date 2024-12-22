@@ -24,10 +24,6 @@ const LandingPage: React.FC = () => {
         navigate('/');
     };
 
-    const onLoginFailure = () => {
-        alert("Failure");
-    };
-
     return (
         <Box
             sx={{
@@ -67,8 +63,7 @@ const LandingPage: React.FC = () => {
 
             {showLoginForm && (
                 <LoginForm handleCancel={handleCancel}
-                           onLoginSuccess={onLoginSuccess}
-                           onLoginFailure={onLoginFailure}/>
+                           onLoginSuccess={onLoginSuccess}/>
             )}
         </Box>
     );

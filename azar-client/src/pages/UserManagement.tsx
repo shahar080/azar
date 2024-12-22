@@ -12,6 +12,7 @@ import UserSearchBar from "../components/user/UserSearchBar.tsx";
 import UserList from "../components/user/UserList.tsx";
 import UserModal from "../components/user/UserModal.tsx";
 import {useLoading} from "../utils/LoadingContext.tsx";
+import {useToast} from "../utils/ToastContext.tsx";
 
 const drawerWidth = 240;
 
@@ -30,6 +31,7 @@ const UserManagement: React.FC = () => {
     const [selectedUserForOp, setSelectedUserForOp] = useState<User | null>(null);
     const [isAddUser, setAddUser] = useState<boolean>(false);
     const {setLoadingAnimation} = useLoading();
+    const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = useSelector((state: RootState) => state.auth.username);
@@ -67,7 +69,6 @@ const UserManagement: React.FC = () => {
                 if (!forceLoad) {
                     setPage((prev) => prev + 1); // Increment page only if not forcing reload
                 }
-                ;
             })
             .catch((err) => console.error("Failed to load users:", err))
             .finally(() => {
@@ -90,11 +91,20 @@ const UserManagement: React.FC = () => {
         setFilteredUsers(filteredResults);
     };
 
-    const handleDeleteUser = (userId: string) => {
+    const handleDeleteUser = (user: User) => {
         setLoadingAnimation(true);
-        deleteUser(userId, userName)
-            .then(() => {
+        if (user.id === undefined) {
+            setLoadingAnimation(false);
+            return false;
+        }
+        deleteUser(user.id, userName)
+            .then((res) => {
                 resetPaginationAndReload();
+                if (res) {
+                    showToast("User \"" + user.userName + "\" deleted successfully.", "success")
+                } else {
+                    showToast("Error deleting user: \"" + user.userName + "\"", "error")
+                }
             })
             .catch((error) => {
                 console.error("Failed to delete user:", error);
@@ -119,9 +129,17 @@ const UserManagement: React.FC = () => {
         setFilteredUsers((prev) =>
             prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
         );
-        updateUser(updatedUser).finally(() => {
-            setLoadingAnimation(false);
-        })
+        updateUser(updatedUser)
+            .then((res) => {
+                if (res) {
+                    showToast("User \"" + res.userName + "\" updated successfully.", "success")
+                } else {
+                    showToast("Error updating user \"" + updatedUser.userName + "\"", "error")
+                }
+            })
+            .finally(() => {
+                setLoadingAnimation(false);
+            })
     };
 
     const resetPaginationAndReload = () => {
@@ -152,8 +170,13 @@ const UserManagement: React.FC = () => {
 
     const handleUserRegistration = (user: User) => {
         setLoadingAnimation(true);
-        add(userName, user).then(() => {
+        add(userName, user).then((success) => {
                 resetPaginationAndReload();
+            if (success) {
+                showToast("user \"" + user.userName + "\" added successfully.", "success");
+            } else {
+                showToast("Error adding user \"" + user.userName + "\"", "error");
+            }
             }
         ).finally(() => setLoadingAnimation(false))
     }

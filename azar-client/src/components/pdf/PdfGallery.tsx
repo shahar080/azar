@@ -11,7 +11,7 @@ interface PdfGalleryProps {
     onLoadMore: () => void;
     onRowClick: (pdf: PdfFile) => void;
     onEdit: (pdf: PdfFile) => void;
-    onDelete: (pdfId: string) => void;
+    onDelete: (pdf: PdfFile) => void;
 }
 
 const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, onEdit, onDelete}) => {
@@ -66,7 +66,7 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
 
     const handleDelete = () => {
         if (selectedPdf) {
-            onDelete(selectedPdf.id);
+            onDelete(selectedPdf);
         }
         handleCloseMenu();
     };

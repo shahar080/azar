@@ -18,7 +18,7 @@ import RegisterUserModal from "./RegisterUserModal.tsx";
 interface UserListProps {
     users: User[];
     onLoadMore: () => void;
-    onDelete: (userId: string) => void;
+    onDelete: (user: User) => void;
     onEdit: (user: User) => void;
     onShowUser: (user: User) => void;
     isAddUser: boolean;
@@ -119,7 +119,7 @@ const UserList: React.FC<UserListProps> = ({
 
     const handleDelete = () => {
         if (selectedUser && selectedUser.id) {
-            onDelete(selectedUser.id);
+            onDelete(selectedUser);
         }
         handleCloseMenu();
     };

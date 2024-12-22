@@ -5,13 +5,16 @@ import App from './App.tsx'
 import {Provider} from 'react-redux';
 import store from './store/store';
 import {LoadingProvider} from './utils/LoadingContext.tsx';
+import {ToastProvider} from "./utils/ToastContext.tsx";
 
 
 createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
         <BrowserRouter>
             <LoadingProvider>
-                <App/>
+                <ToastProvider>
+                    <App/>
+                </ToastProvider>
             </LoadingProvider>
         </BrowserRouter>
     </Provider>

@@ -20,7 +20,7 @@ interface PdfListProps {
     pdfs: PdfFile[];
     onRowClick: (pdf: PdfFile) => void;
     onLoadMore: () => void;
-    onDelete: (pdfId: string) => void;
+    onDelete: (pdf: PdfFile) => void;
     onEdit: (pdf: PdfFile) => void;
 }
 
@@ -119,7 +119,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
 
     const handleDelete = () => {
         if (selectedPdf) {
-            onDelete(selectedPdf.id);
+            onDelete(selectedPdf);
         }
         handleCloseMenu();
     };

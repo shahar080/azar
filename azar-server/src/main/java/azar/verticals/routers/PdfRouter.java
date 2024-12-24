@@ -6,6 +6,7 @@ import azar.entities.db.PdfFile;
 import azar.entities.requests.BaseRequest;
 import azar.entities.requests.pdf.PdfUpdateRequest;
 import azar.utils.CacheManager;
+import azar.utils.Constants;
 import azar.utils.JsonManager;
 import azar.utils.Utilities;
 import com.google.inject.Inject;
@@ -31,7 +32,7 @@ public class PdfRouter extends BaseRouter {
     private final PdfFileService pdfFileService;
     private final UserService userService;
     private final JsonManager jsonManager;
-    private final CacheManager redisAPI;
+    private final CacheManager cacheManager;
     private final Vertx vertx;
 
     @Inject
@@ -39,7 +40,7 @@ public class PdfRouter extends BaseRouter {
         this.pdfFileService = pdfFileService;
         this.userService = userService;
         this.jsonManager = jsonManager;
-        this.redisAPI = cacheManager;
+        this.cacheManager = cacheManager;
         this.vertx = vertx;
     }
 
@@ -89,6 +90,7 @@ public class PdfRouter extends BaseRouter {
                                                 savedPdfFile.setData(new byte[0]);
                                                 sendCreatedResponse(routingContext, jsonManager.toJson(savedPdfFile),
                                                         "File %s uploaded successfully by %s".formatted(savedPdfFile.getFileName(), userName));
+                                                cacheManager.put(Constants.THUMBNAIL + savedPdfFile.getId(), thumbnail);
                                             })
                                             .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error saving " + fileUpload.fileName()));
                                 })
@@ -192,7 +194,7 @@ public class PdfRouter extends BaseRouter {
         if (isInvalidUsername(routingContext, currentUser)) return;
 
         String pdfId = routingContext.pathParam("id");
-        byte[] cachedThumbnail = redisAPI.get("thumbnail:" + pdfId);
+        byte[] cachedThumbnail = cacheManager.get(Constants.THUMBNAIL + pdfId);
 
         if (cachedThumbnail != null) {
             logger.info("Sending cached thumbnail for {}", pdfId);
@@ -201,7 +203,7 @@ public class PdfRouter extends BaseRouter {
             logger.info("Calculating thumbnail for {}", pdfId);
             pdfFileService.getThumbnailById(Integer.valueOf(pdfId))
                     .onSuccess(dbThumbnail -> {
-                        redisAPI.put("thumbnail:" + pdfId, dbThumbnail);
+                        cacheManager.put(Constants.THUMBNAIL + pdfId, dbThumbnail);
                         logger.info("Sending thumbnail for {}", pdfId);
                         sendThumbnailResponse(routingContext, dbThumbnail);
                     })

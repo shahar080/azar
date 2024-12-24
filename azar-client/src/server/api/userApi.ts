@@ -1,9 +1,10 @@
 import apiClient from "./apiClient.ts";
-import {LoginResponse, User, UserNameAndPassword} from "../../models/models.ts"
+import {LoginResponse, User} from "../../models/models.ts"
+import {BaseRequest, UserAddRequest, UserLoginRequest, UserUpdateRequest} from "./requests.ts";
 
-export async function login(userNameAndPassword: UserNameAndPassword): Promise<LoginResponse | undefined> {
+export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {
     try {
-        const response = await apiClient.post('/user/login', userNameAndPassword);
+        const response = await apiClient.post('/user/login', userLoginRequest);
         const loginResponse: LoginResponse = response.data;
         if (loginResponse && loginResponse.success) {
             // Securely store the token
@@ -19,13 +20,10 @@ export async function login(userNameAndPassword: UserNameAndPassword): Promise<L
     }
 }
 
-export async function add(userName: string, userToAdd: User): Promise<boolean> {
-    const req = {
-        "currentUser": userName,
-        "userToAdd": userToAdd
-    }
+export async function add(userAddRequest: UserAddRequest): Promise<boolean> {
+
     try {
-        const response = await apiClient.post('/user/ops/add', req);
+        const response = await apiClient.post('/user/ops/add', userAddRequest);
         return response.status === 201;
     } catch (error) {
         console.error('Create user failed:', error);
@@ -33,9 +31,9 @@ export async function add(userName: string, userToAdd: User): Promise<boolean> {
     }
 }
 
-export async function getAllUsers(page: number = 1, limit: number = 20): Promise<User[]> {
+export async function getAllUsers(baseRequest: BaseRequest, page: number = 1, limit: number = 20): Promise<User[]> {
     try {
-        const response = await apiClient.get<User[]>(`/user/getAll?page=${page}&limit=${limit}`);
+        const response = await apiClient.post<User[]>(`/user/getAll?page=${page}&limit=${limit}`, baseRequest);
         const users: User[] = response.data;
         return users || []; // Return empty array if no data
     } catch (error) {
@@ -44,9 +42,9 @@ export async function getAllUsers(page: number = 1, limit: number = 20): Promise
     }
 }
 
-export async function deleteUser(userId: string, userName: string): Promise<boolean> {
+export async function deleteUser(userId: string, baseRequest: BaseRequest): Promise<boolean> {
     try {
-        const response = await apiClient.post(`/user/ops/delete/${userId}`, userName);
+        const response = await apiClient.post(`/user/ops/delete/${userId}`, baseRequest);
         if (response.status === 200) {
             return true;
         }
@@ -56,14 +54,14 @@ export async function deleteUser(userId: string, userName: string): Promise<bool
     return false;
 }
 
-export async function updateUser(updatedUser: User): Promise<User | undefined> {
+export async function updateUser(userUpdateRequest: UserUpdateRequest): Promise<User | undefined> {
     try {
-        const response = await apiClient.post('/user/ops/update', updatedUser);
+        const response = await apiClient.post('/user/ops/update', userUpdateRequest);
         if (response.status === 200) {
             return response.data;
         }
     } catch (error) {
-        console.error('Update user ' + updatedUser.id + ' failed', error);
+        console.error('Update user ' + userUpdateRequest.user.id + ' failed', error);
     }
     return undefined;
 }

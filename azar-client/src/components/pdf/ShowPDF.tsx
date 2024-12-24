@@ -3,11 +3,12 @@ import {fetchPDF} from "../../server/api/pdfFileApi.ts";
 
 const ShowPDF: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText}) => {
     const [showPDFUrl, setShowPDFUrl] = useState<string | null>(null);
+    const userName = localStorage.getItem('userName') || '';
 
     useEffect(() => {
         const loadShowPDF = async () => {
             try {
-                const blob = await fetchPDF(pdfId);
+                const blob = await fetchPDF({currentUser: userName}, pdfId);
                 const url = URL.createObjectURL(blob);
                 setShowPDFUrl(url);
             } catch (error) {

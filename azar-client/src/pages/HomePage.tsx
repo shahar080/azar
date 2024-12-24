@@ -39,7 +39,7 @@ const HomePage: React.FC = () => {
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userType = getUserType(localStorage.getItem('userType'));
-    const userName = localStorage.getItem('userName');
+    const userName = localStorage.getItem('userName') || '';
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -64,7 +64,7 @@ const HomePage: React.FC = () => {
         setLoadingAnimation(true)
         const currentPage = forceLoad ? 1 : page;
 
-        getAllPdfs(currentPage, 20)
+        getAllPdfs({currentUser: userName}, currentPage, 20)
             .then((newPdfs) => {
                 if (newPdfs.length < 20) {
                     setHasMore(false);
@@ -136,7 +136,7 @@ const HomePage: React.FC = () => {
             showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
             return;
         }
-        deletePdf(pdf.id, userName)
+        deletePdf(pdf.id, {currentUser: userName})
             .then((res) => {
                 console.log(res)
                 if (res === 200) {
@@ -198,7 +198,7 @@ const HomePage: React.FC = () => {
             prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
         );
         updateLabels(tempPdfs)
-        updatePdf(updatedPdf).then((res) => {
+        updatePdf({currentUser: userName, pdfFile: updatedPdf}).then((res) => {
             if (res && res.id === updatedPdf.id) {
                 setSelectedPdf(res);
                 showToast("PDF \"" + res.fileName + "\" updated successfully.", "success");

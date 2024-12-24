@@ -9,7 +9,7 @@ interface PdfContextMenuProps {
     pdfFile: PdfFile | null;
     onClose: () => void;
     onViewMore: (pdfFile: PdfFile) => void;
-    onDownloadPdf: (pdfFile: PdfFile) => void;
+    onDownloadPdf: (userName: string, pdfFile: PdfFile) => void;
     onEdit: (pdf: PdfFile) => void;
     onDelete: (pdfId: string) => void;
     onShowPDF?: (pdf: PdfFile) => void;
@@ -28,6 +28,7 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
     const menuRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
+    const userName = localStorage.getItem('userName') || '';
 
     // Close menu when mouse leaves the menu area
     const handleMouseLeave = () => {
@@ -58,7 +59,7 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
         >
             {isDesktop &&
                 <MenuItem onClick={() => pdfFile && onViewMore(pdfFile)}>View more</MenuItem>}
-            <MenuItem onClick={() => pdfFile && onDownloadPdf(pdfFile)}>Download</MenuItem>
+            <MenuItem onClick={() => pdfFile && onDownloadPdf(userName, pdfFile)}>Download</MenuItem>
             <MenuItem onClick={() => pdfFile && onEdit(pdfFile)}>Edit</MenuItem>
             <MenuItem onClick={() => pdfFile && onDelete(pdfFile.id.toString())}>Delete</MenuItem>
             {onShowPDF &&

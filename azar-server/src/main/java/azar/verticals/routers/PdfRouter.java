@@ -3,6 +3,8 @@ package azar.verticals.routers;
 import azar.dal.service.PdfFileService;
 import azar.dal.service.UserService;
 import azar.entities.db.PdfFile;
+import azar.entities.requests.BaseRequest;
+import azar.entities.requests.pdf.PdfUpdateRequest;
 import azar.utils.CacheManager;
 import azar.utils.JsonManager;
 import azar.utils.Utilities;
@@ -46,7 +48,7 @@ public class PdfRouter extends BaseRouter {
 
         pdfRouter.route("/upload").handler(this::handlePdfUpload);
         pdfRouter.route("/getAll").handler(this::handleGetAllPdfs);
-        pdfRouter.route("/delete/:id").handler(this::handleDeletePdf);
+        pdfRouter.route("/delete/:id").handler(this::handleDeletePdfById);
         pdfRouter.route("/update").handler(this::handleUpdatePdf);
         pdfRouter.route("/thumbnail/:id").handler(this::handleThumbnailRequest);
         pdfRouter.route("/get/:id").handler(this::handlePDFGet);
@@ -56,15 +58,14 @@ public class PdfRouter extends BaseRouter {
 
 
     private void handlePdfUpload(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        String userName = routingContext.request().getFormAttribute("userName");
+        if (isInvalidUsername(routingContext, userName)) return;
 
         List<FileUpload> fileUploads = routingContext.fileUploads();
         if (fileUploads.isEmpty()) {
-            routingContext.response()
-                    .setStatusCode(400).end("No file uploaded");
+            sendBadRequestResponse(routingContext, "No file uploaded");
             return;
         }
-        String userName = routingContext.request().getFormAttribute("userName");
 
         FileUpload fileUpload = fileUploads.getFirst();
         String uploadedFilePath = fileUpload.uploadedFileName();
@@ -86,65 +87,55 @@ public class PdfRouter extends BaseRouter {
                                     pdfFileService.add(pdfFile)
                                             .onSuccess(savedPdfFile -> {
                                                 savedPdfFile.setData(new byte[0]);
-                                                routingContext.response()
-                                                        .setStatusCode(201).end(jsonManager.toJson(savedPdfFile));
-                                                logger.info("File {} uploaded successfully", savedPdfFile.getFileName());
+                                                sendCreatedResponse(routingContext, jsonManager.toJson(savedPdfFile),
+                                                        "File %s uploaded successfully by %s".formatted(savedPdfFile.getFileName(), userName));
                                             })
-                                            .onFailure(err -> sendErrorResponse(routingContext, "Error saving " + fileUpload.fileName(), err.getMessage()));
+                                            .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error saving " + fileUpload.fileName()));
                                 })
-                                .onFailure(err -> sendErrorResponse(routingContext, "Error generating thumbnail for " + fileUpload.fileName(), err.getMessage()));
+                                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error generating thumbnail for " + fileUpload.fileName()));
                     } catch (Exception err) {
-                        sendErrorResponse(routingContext, "Unexpected error while processing " + fileUpload.fileName(), err.getMessage());
+                        sendInternalErrorResponse(routingContext, "Unexpected error while processing " + fileUpload.fileName());
                     }
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to read uploaded file " + fileUpload.fileName(), err.getMessage()))
-                .eventually(() -> {
-                    // Cleanup temporary file
-                    return routingContext.vertx().fileSystem().delete(uploadedFilePath)
-                            .onSuccess(ignored -> logger.info("Temporary file deleted: {}", uploadedFilePath))
-                            .onFailure(err -> logger.warn("Failed to delete temporary file: {}", uploadedFilePath, err));
-                });
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to read uploaded file " + fileUpload.fileName()))
+                .eventually(() -> routingContext.vertx().fileSystem().delete(uploadedFilePath)
+                        .onSuccess(_ -> logger.info("Temporary file deleted: {}", uploadedFilePath))
+                        .onFailure(err -> logger.warn("Failed to delete temporary file: {}", uploadedFilePath, err)));
     }
 
     private void handleGetAllPdfs(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
 
         // Default values for pagination
         int page = Integer.parseInt(routingContext.queryParams().get("page"));
         int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
 
         if (page < 1 || limit < 1) {
-            routingContext.response()
-                    .setStatusCode(400)
-                    .end("Page and limit must be greater than 0.");
+            sendBadRequestResponse(routingContext, "Page and limit must be greater than 0.");
             return;
         }
 
         int offset = (page - 1) * limit;
 
         pdfFileService.getAllClientPaginated(offset, limit) // Fetch paginated results
-                .onSuccess(pdfFiles -> {
-                    routingContext.response()
-                            .setStatusCode(200)
-                            .putHeader("Content-Type", "application/json")
-                            .end(jsonManager.toJson(pdfFiles));
-                    logger.info("Returned {} PDFs to client (page: {}, limit: {})", pdfFiles.size(), page, limit);
-                })
-                .onFailure(err -> sendErrorResponse(routingContext, "Error getting PDFs from DB", err.getMessage()));
+                .onSuccess(pdfFiles -> sendOKResponse(routingContext, jsonManager.toJson(pdfFiles),
+                        "Returned %s PDFs to client (page: %s, limit: %s)".formatted(pdfFiles.size(), page, limit)))
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error getting PDFs from DB"));
     }
 
-    private void handleDeletePdf(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+    private void handleDeletePdfById(RoutingContext routingContext) {
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
 
         // Extract the PDF ID from the request path
         String pdfId = routingContext.pathParam("id");
         if (pdfId == null || pdfId.isEmpty()) {
-            routingContext.response()
-                    .setStatusCode(400)
-                    .end("PDF ID is required");
+            sendBadRequestResponse(routingContext, "PDF ID is required");
             return;
         }
-        String currentUser = jsonManager.fromJson(routingContext.body().asString(), String.class);
 
         pdfFileService.getOwnerByPdfId(Integer.valueOf(pdfId))
                 .onSuccess(dbPdfOwner -> {
@@ -152,52 +143,54 @@ public class PdfRouter extends BaseRouter {
                         userService.isAdmin(currentUser)
                                 .onSuccess(isAdmin -> {
                                     if (isAdmin) {
-                                        handleRemovePdfById(routingContext, pdfId);
+                                        removePdfById(routingContext, pdfId);
                                     } else {
-                                        sendErrorResponse(routingContext, 401, "Unauthorized", "Deleting other people PDFs isn't allowed unless you're admin");
+                                        sendUnauthorizedErrorResponse(routingContext, "Deleting other people PDFs isn't allowed unless you're admin");
                                     }
                                 })
-                                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+                                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId));
                     } else {
-                        handleRemovePdfById(routingContext, pdfId);
+                        removePdfById(routingContext, pdfId);
                     }
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId));
     }
 
-    private void handleRemovePdfById(RoutingContext routingContext, String pdfId) {
+    private void removePdfById(RoutingContext routingContext, String pdfId) {
         pdfFileService.removeById(Integer.valueOf(pdfId))
                 .onSuccess(success -> {
                     if (success) {
-                        logger.info("Successfully deleted PDF with ID: {}", pdfId);
-                        routingContext.response()
-                                .setStatusCode(200)
-                                .end("PDF deleted successfully");
+                        sendOKResponse(routingContext, "PDF deleted successfully", "Successfully deleted PDF with ID: %s".formatted(pdfId));
                     } else {
-                        sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, "Failed to delete PDF with ID: " + pdfId);
+                        sendInternalErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId);
                     }
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId, err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to delete PDF with ID: " + pdfId));
     }
 
     private void handleUpdatePdf(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
-        PdfFile pdfFile = jsonManager.fromJson(routingContext.body().asString(), PdfFile.class);
+        PdfUpdateRequest pdfUpdateRequest = jsonManager.fromJson(routingContext.body().asString(), PdfUpdateRequest.class);
+        String currentUser = pdfUpdateRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
+        PdfFile pdfFile = pdfUpdateRequest.getPdfFile();
         pdfFileService.updatePartial(pdfFile)
                 .onSuccess(isSuccess -> {
                     if (isSuccess) {
-                        logger.info("Sending updated PDF {} back", pdfFile.getId());
-                        routingContext.response()
-                                .setStatusCode(200)
-                                .end(jsonManager.toJson(pdfFile));
+                        sendOKResponse(routingContext, jsonManager.toJson(pdfFile),
+                                "Sending updated PDF %s back".formatted(pdfFile.getId()));
                     } else {
-                        sendErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId(), "Failed to update PDF with ID: " + pdfFile.getId());
+                        sendInternalErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId());
                     }
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId(), err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to update PDF with ID: " + pdfFile.getId()));
     }
 
     public void handleThumbnailRequest(RoutingContext routingContext) {
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
         String pdfId = routingContext.pathParam("id");
         byte[] cachedThumbnail = redisAPI.get("thumbnail:" + pdfId);
 
@@ -212,7 +205,7 @@ public class PdfRouter extends BaseRouter {
                         logger.info("Sending thumbnail for {}", pdfId);
                         sendThumbnailResponse(routingContext, dbThumbnail);
                     })
-                    .onFailure(err -> sendErrorResponse(routingContext, "Database error", err.getMessage()));
+                    .onFailure(_ -> sendInternalErrorResponse(routingContext, "Database error"));
         }
     }
 
@@ -224,13 +217,17 @@ public class PdfRouter extends BaseRouter {
     }
 
     private void handlePDFGet(RoutingContext routingContext) {
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
         String pdfId = routingContext.pathParam("id");
 
         // Fetch the PDF file from your database/service
         pdfFileService.getById(Integer.valueOf(pdfId))
                 .onSuccess(pdfFile -> {
                     if (pdfFile == null) {
-                        routingContext.response().setStatusCode(404).end("PDF not found");
+                        sendNotFoundResponse(routingContext, "PDF not found");
                         return;
                     }
 
@@ -240,7 +237,7 @@ public class PdfRouter extends BaseRouter {
                             .putHeader("Content-Disposition", "inline; filename=" + pdfFile.getFileName())
                             .end(Buffer.buffer(pdfFile.getData()));
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to retrieve PDF: " + pdfId, err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to retrieve PDF: " + pdfId));
     }
 
 }

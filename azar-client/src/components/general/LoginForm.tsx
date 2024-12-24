@@ -21,6 +21,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     const [errorMessage, setErrorMessage] = useState("");
     const {setLoadingAnimation} = useLoading();
 
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -28,7 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         try {
             setErrorMessage(""); // Clear previous error
 
-            const response = await login(formData);
+            const response = await login({currentUser: formData.userName, userNameAndPassword: formData});
 
             console.log(response)
             if (response?.success) {

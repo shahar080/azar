@@ -34,7 +34,7 @@ const UserManagement: React.FC = () => {
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userName = localStorage.getItem('userName');
+    const userName = localStorage.getItem('userName') || '';
     const userType = getUserType(localStorage.getItem('userType'));
     const navigate = useNavigate();
 
@@ -56,7 +56,7 @@ const UserManagement: React.FC = () => {
 
         const currentPage = forceLoad ? 1 : page;
         setLoadingAnimation(true);
-        getAllUsers(currentPage, 20)
+        getAllUsers({currentUser: userName}, currentPage, 20)
             .then((newUsers) => {
                 if (newUsers.length < 20) {
                     setHasMore(false);
@@ -97,7 +97,7 @@ const UserManagement: React.FC = () => {
             setLoadingAnimation(false);
             return false;
         }
-        deleteUser(user.id, userName)
+        deleteUser(user.id, {currentUser: userName})
             .then((res) => {
                 resetPaginationAndReload();
                 if (res) {
@@ -129,7 +129,7 @@ const UserManagement: React.FC = () => {
         setFilteredUsers((prev) =>
             prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
         );
-        updateUser(updatedUser)
+        updateUser({user: updatedUser, currentUser: userName})
             .then((res) => {
                 if (res) {
                     showToast("User \"" + res.userName + "\" updated successfully.", "success")
@@ -174,7 +174,7 @@ const UserManagement: React.FC = () => {
             showToast("Error adding user \"" + user.userName + "\"", "error");
             return;
         }
-        add(userName, user).then((success) => {
+        add({currentUser: userName, userToAdd:user}).then((success) => {
                 resetPaginationAndReload();
                 if (success) {
                     showToast("user \"" + user.userName + "\" added successfully.", "success");

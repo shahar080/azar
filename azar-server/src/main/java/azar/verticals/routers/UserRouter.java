@@ -4,7 +4,10 @@ import azar.dal.service.UserService;
 import azar.entities.LoginResponse;
 import azar.entities.db.User;
 import azar.entities.db.UserNameAndPassword;
-import azar.entities.requests.AddUserRequest;
+import azar.entities.requests.BaseRequest;
+import azar.entities.requests.user.UserAddRequest;
+import azar.entities.requests.user.UserLoginRequest;
+import azar.entities.requests.user.UserUpdateRequest;
 import azar.utils.AuthService;
 import azar.utils.JsonManager;
 import azar.utils.PasswordManager;
@@ -16,16 +19,12 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Author: Shahar Azar
  * Date:   20/12/2024
  **/
 public class UserRouter extends BaseRouter {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     private final UserService userService;
     private final JsonManager jsonManager;
     private final PasswordManager passwordManager;
@@ -54,13 +53,15 @@ public class UserRouter extends BaseRouter {
     }
 
     private void handleUserLogin(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        UserLoginRequest userLoginRequest = jsonManager.fromJson(routingContext.body().asString(), UserLoginRequest.class);
+        String currentUser = userLoginRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
 
         // Parse JSON body to UserNameAndPassword
-        UserNameAndPassword userNameAndPassword = jsonManager.fromJson(routingContext.body().asString(), UserNameAndPassword.class);
+        UserNameAndPassword userNameAndPassword = userLoginRequest.getUserNameAndPassword();
 
         if (userNameAndPassword == null) {
-            sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
+            sendBadRequestResponse(routingContext, "Missing username and password");
             return;
         }
 
@@ -73,38 +74,34 @@ public class UserRouter extends BaseRouter {
                         );
 
                         LoginResponse response = new LoginResponse(true, token, user.getUserName(), user.getUserType());
-                        routingContext.response()
-                                .setStatusCode(200)
-                                .putHeader("Content-Type", "application/json")
-                                .end(jsonManager.toJson(response));
-                        logger.info("User '{}' has logged in successfully.", user.getUserName());
+                        sendOKResponse(routingContext, jsonManager.toJson(response),
+                                "User '%s' has logged in successfully.".formatted(user.getUserName()));
                     } else {
-                        sendErrorResponse(routingContext, 401, "Unauthorized", "Wrong username or password.");
+                        sendBadRequestResponse(routingContext, "Wrong username or password.");
                     }
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while retrieving user by username: {}", err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error while retrieving user by username: {}"));
     }
 
     private void handleAddUser(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        UserAddRequest userAddRequest = jsonManager.fromJson(routingContext.body().asString(), UserAddRequest.class);
+        String currentUser = userAddRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
 
-        // Parse JSON body to User
-        AddUserRequest addUserRequest = jsonManager.fromJson(routingContext.body().asString(), AddUserRequest.class);
-
-        userService.getUserByUserName(addUserRequest.currentUser())
+        userService.getUserByUserName(userAddRequest.getCurrentUser())
                 .onSuccess(dbUser -> {
                     if (dbUser == null) {
-                        sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
+                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(userAddRequest.getCurrentUser()));
                         return;
                     }
                     if (!dbUser.isAdmin()) {
-                        sendErrorResponse(routingContext, 401, "UNAUTHORIZED", "User %s is not authorized to add users!".formatted(dbUser.getUserName()));
+                        sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(userAddRequest.getCurrentUser()));
                         return;
                     }
-                    User user = addUserRequest.userToAdd();
+                    User user = userAddRequest.getUserToAdd();
                     // Validate user data
                     if (userService.isInvalidUser(user)) {
-                        sendErrorResponse(routingContext, 400, "BAD_REQUEST", "Received bad data from client!");
+                        sendBadRequestResponse(routingContext, "User to add is missing values");
                         return;
                     }
 
@@ -112,109 +109,95 @@ public class UserRouter extends BaseRouter {
                     userService.getUserByUserName(user.getUserName())
                             .onSuccess(existingUser -> {
                                 if (existingUser != null) {
-                                    sendErrorResponse(routingContext, 400, "Username already exists!", "Username '{}' already exists!", user.getUserName());
+                                    sendBadRequestResponse(routingContext, "Username '%s' already exists!".formatted(user.getUserName()));
                                 } else {
                                     // Add user to the system
                                     addUser(routingContext, user);
                                 }
                             })
-                            .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while handling add user: {}", err.getMessage()));
+                            .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error while handling add user: %s".formatted(user.getUserName())));
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while handling add user: {}", err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error while handling add user: %s".formatted(userAddRequest.getUserToAdd().getUserName())));
     }
 
     private void addUser(RoutingContext routingContext, User user) {
         user.setPassword(passwordManager.hashPassword(user.getPassword()));
         userService.add(user)
-                .onSuccess(addedUser -> {
-                    routingContext.response()
-                            .setStatusCode(201)
-                            .putHeader("Content-Type", "application/json")
-                            .end(jsonManager.toJson(addedUser.getId(), Integer.class));
-                    logger.info("User '{}' has registered successfully.", user.getUserName());
-                })
-                .onFailure(err -> sendErrorResponse(routingContext, 500, "Internal server error!", "Error while adding user: {}", err.getMessage()));
+                .onSuccess(addedUser -> sendCreatedResponse(routingContext, jsonManager.toJson(addedUser.getId(), Integer.class),
+                        "User '%s' has registered successfully.".formatted(user.getUserName())))
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error while adding user: %s".formatted(user.getUserName())));
     }
 
     private void getAllUsers(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
 
         // Default values for pagination
         int page = Integer.parseInt(routingContext.queryParams().get("page"));
         int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
 
         if (page < 1 || limit < 1) {
-            routingContext.response()
-                    .setStatusCode(400)
-                    .end("Page and limit must be greater than 0.");
+            sendBadRequestResponse(routingContext, "Page and limit must be greater than 0.");
             return;
         }
 
         int offset = (page - 1) * limit;
 
         userService.getAllClientPaginated(offset, limit) // Fetch paginated results
-                .onSuccess(users -> {
-                    routingContext.response()
-                            .setStatusCode(200)
-                            .putHeader("Content-Type", "application/json")
-                            .end(jsonManager.toJson(users));
-                    logger.info("Returned {} users to client (page: {}, limit: {})", users.size(), page, limit);
-                })
-                .onFailure(err -> sendErrorResponse(routingContext, "Error getting users from DB", err.getMessage()));
+                .onSuccess(users -> sendOKResponse(routingContext, jsonManager.toJson(users),
+                        "Returned %s users to client (page: %s, limit: %s)".formatted(users.size(), page, limit)))
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Error getting users from DB"));
     }
 
     private void handleDeleteUser(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
 
         String userId = routingContext.pathParam("id");
         if (userId == null || userId.isEmpty()) {
-            routingContext.response()
-                    .setStatusCode(400)
-                    .end("user ID is required");
+            sendBadRequestResponse(routingContext, "user ID is required");
             return;
         }
 
         userService.getById(Integer.valueOf(userId))
                 .onSuccess(dbUser -> {
-                    String initiatorUsername = jsonManager.fromJson(routingContext.body().asString(), String.class);
 
-                    if (dbUser.getUserName().equalsIgnoreCase(initiatorUsername)) {
-                        sendErrorResponse(routingContext, 400, "Current user can't delete itself", "Current user can't delete itself");
+                    if (dbUser.getUserName().equalsIgnoreCase(currentUser)) {
+                        sendBadRequestResponse(routingContext, "Current user can't delete itself");
                         return;
                     }
 
                     if (dbUser.getUserName().equalsIgnoreCase("admin")) {
-                        sendErrorResponse(routingContext, 401, "User admin can't be deleted", "User admin can't be deleted");
+                        sendUnauthorizedErrorResponse(routingContext, "User admin can't be deleted");
                         return;
                     }
 
                     userService.removeById(Integer.valueOf(userId))
                             .onSuccess(success -> {
                                 if (success) {
-                                    logger.info("Successfully deleted user with ID: {}", userId);
-                                    routingContext.response()
-                                            .setStatusCode(200)
-                                            .end("user deleted successfully");
+                                    sendOKResponse(routingContext, "user deleted successfully",
+                                            "Successfully deleted user with ID: %s".formatted(userId));
                                 } else {
-                                    sendErrorResponse(routingContext, "Failed to delete user with ID: " + userId, "Failed to delete user with ID: " + userId);
+                                    sendInternalErrorResponse(routingContext, "Failed to delete user with ID: " + userId);
                                 }
                             })
-                            .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete user with ID: " + userId, err.getMessage()));
+                            .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to delete user with ID: " + userId));
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to delete user with ID: " + userId, err.getMessage()));
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to delete user with ID: " + userId));
     }
 
     private void handleUpdateUser(RoutingContext routingContext) {
-        logger.info("Client made a request for path: {}", routingContext.currentRoute().getPath());
-        User user = jsonManager.fromJson(routingContext.body().asString(), User.class);
+        UserUpdateRequest userUpdateRequest = jsonManager.fromJson(routingContext.body().asString(), UserUpdateRequest.class);
+        String currentUser = userUpdateRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
+        User user = userUpdateRequest.getUser();
         userService.update(user)
-                .onSuccess(dbUser -> {
-                    logger.info("Sending updated user {} back", user.getId());
-                    routingContext.response()
-                            .setStatusCode(200)
-                            .end(jsonManager.toJson(dbUser));
-                })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to update user with ID: " + user.getId(), err.getMessage()));
+                .onSuccess(dbUser -> sendOKResponse(routingContext, jsonManager.toJson(dbUser),
+                        "Sending updated user %s back".formatted(user.getId())))
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to update user with ID: " + user.getId()));
     }
 
 }

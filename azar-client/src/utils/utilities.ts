@@ -44,9 +44,9 @@ export function parseSize(size: string): number {
     }
 }
 
-export async function downloadPdf(pdfFile: PdfFile) {
+export async function downloadPdf(userName: string, pdfFile: PdfFile) {
     try {
-        const blob = await fetchPDF(pdfFile.id); // Fetch the PDF from the database
+        const blob = await fetchPDF({currentUser: userName}, pdfFile.id); // Fetch the PDF from the database
         const url = URL.createObjectURL(blob);
 
         const anchor = document.createElement("a");

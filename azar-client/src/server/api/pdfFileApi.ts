@@ -1,5 +1,6 @@
 import apiClient from "./apiClient.ts";
 import {PdfFile} from "../../models/models.ts";
+import {BaseRequest, PdfUpdateRequest} from "./requests.ts";
 
 export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFile | undefined> {
     try {
@@ -18,9 +19,9 @@ export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFil
     return undefined;
 }
 
-export async function deletePdf(pdfId: string, userName: string): Promise<number> {
+export async function deletePdf(pdfId: string, baseRequest: BaseRequest): Promise<number> {
     try {
-        const response = await apiClient.post(`/pdf/delete/${pdfId}`, userName);
+        const response = await apiClient.post(`/pdf/delete/${pdfId}`, baseRequest);
         return response.status;
     } catch (error: any) {
         console.error('Delete pdf ' + pdfId + ' failed', error);
@@ -31,21 +32,21 @@ export async function deletePdf(pdfId: string, userName: string): Promise<number
     return 400;
 }
 
-export async function updatePdf(updatedPdf: PdfFile): Promise<PdfFile | undefined> {
+export async function updatePdf(pdfUpdateRequest: PdfUpdateRequest): Promise<PdfFile | undefined> {
     try {
-        const response = await apiClient.post('/pdf/update', updatedPdf);
+        const response = await apiClient.post('/pdf/update', pdfUpdateRequest);
         if (response.status === 200) {
             return response.data;
         }
     } catch (error) {
-        console.error('Update pdf ' + updatedPdf.id + ' failed', error);
+        console.error('Update pdf ' + pdfUpdateRequest.pdfFile.id + ' failed', error);
     }
     return undefined;
 }
 
-export async function getAllPdfs(page: number = 1, limit: number = 20): Promise<PdfFile[]> {
+export async function getAllPdfs(baseRequest: BaseRequest, page: number = 1, limit: number = 20): Promise<PdfFile[]> {
     try {
-        const response = await apiClient.get<PdfFile[]>(`/pdf/getAll?page=${page}&limit=${limit}`);
+        const response = await apiClient.post<PdfFile[]>(`/pdf/getAll?page=${page}&limit=${limit}`, baseRequest);
         const pdfFiles: PdfFile[] = response.data;
         return pdfFiles || []; // Return empty array if no data
     } catch (error) {
@@ -54,9 +55,9 @@ export async function getAllPdfs(page: number = 1, limit: number = 20): Promise<
     }
 }
 
-export const fetchPdfThumbnail = async (pdfId: string): Promise<Blob> => {
+export const fetchPdfThumbnail = async (baseRequest: BaseRequest, pdfId: string): Promise<Blob> => {
     try {
-        const response = await apiClient.get(`/pdf/thumbnail/${pdfId}`, {
+        const response = await apiClient.post(`/pdf/thumbnail/${pdfId}`, baseRequest, {
             responseType: "blob", // Fetch the response as a binary blob
         });
 
@@ -67,10 +68,9 @@ export const fetchPdfThumbnail = async (pdfId: string): Promise<Blob> => {
     }
 };
 
-
-export const fetchPDF = async (pdfId: string): Promise<Blob> => {
+export const fetchPDF = async (baseRequest: BaseRequest, pdfId: string): Promise<Blob> => {
     try {
-        const response = await apiClient.get(`/pdf/get/${pdfId}`, {
+        const response = await apiClient.post(`/pdf/get/${pdfId}`, baseRequest, {
             responseType: "blob", // Fetch the response as a binary blob
         });
 
@@ -80,4 +80,3 @@ export const fetchPDF = async (pdfId: string): Promise<Blob> => {
         throw error;
     }
 };
-

@@ -69,14 +69,12 @@ public class ServerVertical extends AbstractVerticle {
 
             mainRouter.route("/api/*").subRouter(apiRouter);
 
-            mainRouter.route().method(HttpMethod.OPTIONS).handler(routingContext -> {
-                routingContext.response()
-                        .putHeader("Access-Control-Allow-Origin", "*")
-                        .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-                        .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-                        .setStatusCode(200)
-                        .end();
-            });
+            mainRouter.route().method(HttpMethod.OPTIONS).handler(routingContext -> routingContext.response()
+                    .putHeader("Access-Control-Allow-Origin", "*")
+                    .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                    .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+                    .setStatusCode(200)
+                    .end());
 
             int serverPort = appProperties.getIntProperty("server.port", 8080);
             String serverHost = appProperties.getProperty("server.host");
@@ -87,7 +85,7 @@ public class ServerVertical extends AbstractVerticle {
                     .listen(
                             serverPort,
                             "0.0.0.0"
-                    ).onSuccess(ignored -> {
+                    ).onSuccess(_ -> {
                         logger.info("Server is up and listening on {}", String.format("%s:%s", serverHost, serverPort));
                         startPromise.complete();
                     })

@@ -3,11 +3,12 @@ import {fetchPdfThumbnail} from "../../server/api/pdfFileApi.ts";
 
 const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText}) => {
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+    const userName = localStorage.getItem('userName') || '';
 
     useEffect(() => {
         const loadThumbnail = async () => {
             try {
-                const blob = await fetchPdfThumbnail(pdfId);
+                const blob = await fetchPdfThumbnail({currentUser: userName}, pdfId);
                 const url = URL.createObjectURL(blob);
                 setThumbnailUrl(url);
             } catch (error) {

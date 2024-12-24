@@ -1,8 +1,10 @@
 package azar.verticals.routers;
 
 import azar.dal.service.UserService;
+import azar.entities.requests.BaseRequest;
 import azar.properties.AppProperties;
 import azar.utils.AuthService;
+import azar.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -10,8 +12,6 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
 
@@ -20,16 +20,16 @@ import java.util.Base64;
  * Date:   20/12/2024
  **/
 public class TokenRouter extends BaseRouter {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     private final UserService userService;
     private final AppProperties appProperties;
+    private final JsonManager jsonManager;
     private JWTAuth jwtAuth;
 
     @Inject
-    public TokenRouter(UserService userService, AppProperties appProperties) {
+    public TokenRouter(UserService userService, AppProperties appProperties, JsonManager jsonManager) {
         this.userService = userService;
         this.appProperties = appProperties;
+        this.jsonManager = jsonManager;
     }
 
     public Router create(Vertx vertx) {
@@ -42,12 +42,14 @@ public class TokenRouter extends BaseRouter {
         return tokenRouter;
     }
 
-    private void handleRefreshToken(RoutingContext ctx) {
-        String authHeader = ctx.request().getHeader("Authorization");
+    private void handleRefreshToken(RoutingContext routingContext) {
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
+        String authHeader = routingContext.request().getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            ctx.response()
-                    .setStatusCode(401)
-                    .end(new JsonObject().put("error", "Unauthorized: Missing or invalid token").encode());
+            sendUnauthorizedErrorResponse(routingContext, "Missing or invalid token");
             return;
         }
 
@@ -60,16 +62,12 @@ public class TokenRouter extends BaseRouter {
             // Extract user information (e.g., username) from the decoded token
             String username = decodedToken.getString("userName");
             if (username == null) {
-                ctx.response()
-                        .setStatusCode(401)
-                        .end(new JsonObject().put("error", "Unauthorized: Missing or invalid token").encode());
+                sendUnauthorizedErrorResponse(routingContext, "Missing or invalid token");
                 return;
             }
 
             if (userService.getUserByUserName(username) == null) {
-                ctx.response()
-                        .setStatusCode(401)
-                        .end(new JsonObject().put("error", "Unauthorized: Missing or invalid token").encode());
+                sendUnauthorizedErrorResponse(routingContext, "Missing or invalid token");
                 return;
             }
 
@@ -79,16 +77,10 @@ public class TokenRouter extends BaseRouter {
                     new JWTOptions().setExpiresInSeconds(3600) // New token valid for 1 hour
             );
 
-            ctx.response()
-                    .setStatusCode(200)
-                    .putHeader("Content-Type", "application/json")
-                    .end(new JsonObject().put("token", newToken).encode());
-
+            sendOKResponse(routingContext, new JsonObject().put("token", newToken).encode(), "Successfully refreshed token");
         } catch (Exception e) {
             // Handle decoding errors or invalid tokens
-            ctx.response()
-                    .setStatusCode(401)
-                    .end(new JsonObject().put("error", "Invalid or expired token").encode());
+            sendUnauthorizedErrorResponse(routingContext, "Invalid or expired token");
         }
     }
 

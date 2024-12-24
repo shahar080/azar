@@ -90,16 +90,20 @@ public class PdfRouter extends BaseRouter {
                                                         .setStatusCode(201).end(jsonManager.toJson(savedPdfFile));
                                                 logger.info("File {} uploaded successfully", savedPdfFile.getFileName());
                                             })
-                                            .onFailure(err -> sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage()));
+                                            .onFailure(err -> sendErrorResponse(routingContext, "Error saving " + fileUpload.fileName(), err.getMessage()));
                                 })
-                                .onFailure(err -> {
-                                    sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage());
-                                });
+                                .onFailure(err -> sendErrorResponse(routingContext, "Error generating thumbnail for " + fileUpload.fileName(), err.getMessage()));
                     } catch (Exception err) {
-                        sendErrorResponse(routingContext, "Error saving" + fileUpload.fileName(), err.getMessage());
+                        sendErrorResponse(routingContext, "Unexpected error while processing " + fileUpload.fileName(), err.getMessage());
                     }
                 })
-                .onFailure(err -> sendErrorResponse(routingContext, "Failed to read uploaded file" + fileUpload.fileName(), err.getMessage()));
+                .onFailure(err -> sendErrorResponse(routingContext, "Failed to read uploaded file " + fileUpload.fileName(), err.getMessage()))
+                .eventually(() -> {
+                    // Cleanup temporary file
+                    return routingContext.vertx().fileSystem().delete(uploadedFilePath)
+                            .onSuccess(ignored -> logger.info("Temporary file deleted: {}", uploadedFilePath))
+                            .onFailure(err -> logger.warn("Failed to delete temporary file: {}", uploadedFilePath, err));
+                });
     }
 
     private void handleGetAllPdfs(RoutingContext routingContext) {

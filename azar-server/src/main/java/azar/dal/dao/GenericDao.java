@@ -2,14 +2,10 @@ package azar.dal.dao;
 
 import azar.factory.SessionFactoryProvider;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -41,13 +37,17 @@ public abstract class GenericDao<T> {
 
     public Future<Set<T>> getAll() {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                Class<T> type = this.getType();
-                List<T> items = session.createQuery("from " + type.getName() + " s", type).getResultList();
-                promise.complete(new HashSet<>(items));
-            } catch (Exception e) {
-                promise.fail(e);
-            }
+            vertx.executeBlocking(() ->
+            {
+                try (Session session = openSession()) {
+                    Class<T> type = this.getType();
+                    List<T> items = session.createQuery("from " + type.getName() + " s", type).getResultList();
+                    promise.complete(new HashSet<>(items));
+                } catch (Exception e) {
+                    promise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
@@ -63,7 +63,7 @@ public abstract class GenericDao<T> {
                     promise.fail(e);
                 }
                 return null;
-            });
+            }, false);
         });
     }
 
@@ -81,47 +81,56 @@ public abstract class GenericDao<T> {
                     promise.fail(e);
                 }
                 return null;
-            });
+            }, false);
         });
     }
 
 
     public Future<T> getById(Integer id) {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                session.beginTransaction();
-                T res = session.get(this.getType(), id);
-                session.getTransaction().commit();
-                promise.complete(res);
-            } catch (Exception e) {
-                promise.fail(e);
-            }
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    session.beginTransaction();
+                    T res = session.get(this.getType(), id);
+                    session.getTransaction().commit();
+                    promise.complete(res);
+                } catch (Exception e) {
+                    promise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
     public Future<Boolean> remove(T t) {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                session.beginTransaction();
-                session.remove(t);
-                session.getTransaction().commit();
-                promise.complete(true);
-            } catch (Exception e) {
-                promise.fail(e);
-            }
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    session.beginTransaction();
+                    session.remove(t);
+                    session.getTransaction().commit();
+                    promise.complete(true);
+                } catch (Exception e) {
+                    promise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
     public Future<Boolean> removeById(Integer id) {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                session.beginTransaction();
-                session.remove(session.get(this.getType(), id));
-                session.getTransaction().commit();
-                promise.complete(true);
-            } catch (Exception e) {
-                promise.fail(e);
-            }
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    session.beginTransaction();
+                    session.remove(session.get(this.getType(), id));
+                    session.getTransaction().commit();
+                    promise.complete(true);
+                } catch (Exception e) {
+                    promise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 

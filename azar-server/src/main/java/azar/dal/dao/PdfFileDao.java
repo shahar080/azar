@@ -30,35 +30,41 @@ public class PdfFileDao extends GenericDao<PdfFile> {
 
     public Future<List<azar.entities.client.PdfFile>> getAllClientPaginated(int offset, int limit) {
         return Future.future(listPromise -> {
-            try (Session session = openSession()) {
-                List<azar.entities.client.PdfFile> paginatedResults = session
-                        .createQuery(
-                                "SELECT new azar.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
-                                        " FROM PdfFile p",
-                                azar.entities.client.PdfFile.class)
-                        .setFirstResult(offset) // Offset
-                        .setMaxResults(limit)   // Limit
-                        .getResultList();
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    List<azar.entities.client.PdfFile> paginatedResults = session
+                            .createQuery(
+                                    "SELECT new azar.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
+                                            " FROM PdfFile p",
+                                    azar.entities.client.PdfFile.class)
+                            .setFirstResult(offset) // Offset
+                            .setMaxResults(limit)   // Limit
+                            .getResultList();
 
-                listPromise.complete(paginatedResults);
-            } catch (Exception e) {
-                listPromise.fail(e);
-            }
+                    listPromise.complete(paginatedResults);
+                } catch (Exception e) {
+                    listPromise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
     public Future<byte[]> getThumbnailById(Integer id) {
         return Future.future(thumbnailPromise -> {
             try (Session session = openSession()) {
-                byte[] thumbnail = session
-                        .createNativeQuery(
-                                "SELECT lo_get(p.thumbnail) FROM pdf_files p WHERE p.id = :id",
-                                byte[].class
-                        )
-                        .setParameter("id", id)
-                        .getSingleResult();
+                vertx.executeBlocking(() -> {
+                    byte[] thumbnail = session
+                            .createNativeQuery(
+                                    "SELECT lo_get(p.thumbnail) FROM pdf_files p WHERE p.id = :id",
+                                    byte[].class
+                            )
+                            .setParameter("id", id)
+                            .getSingleResult();
 
-                thumbnailPromise.complete(thumbnail);
+                    thumbnailPromise.complete(thumbnail);
+                    return null;
+                }, false);
             } catch (Exception e) {
                 thumbnailPromise.fail(e);
             }
@@ -67,19 +73,22 @@ public class PdfFileDao extends GenericDao<PdfFile> {
 
     public Future<String> getOwnerByPdfId(Integer id) {
         return Future.future(pdfOwnerPromise -> {
-            try (Session session = openSession()) {
-                String pdfOwner = session
-                        .createNativeQuery(
-                                "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
-                                String.class
-                        )
-                        .setParameter("id", id)
-                        .getSingleResult();
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    String pdfOwner = session
+                            .createNativeQuery(
+                                    "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
+                                    String.class
+                            )
+                            .setParameter("id", id)
+                            .getSingleResult();
 
-                pdfOwnerPromise.complete(pdfOwner);
-            } catch (Exception e) {
-                pdfOwnerPromise.fail(e);
-            }
+                    pdfOwnerPromise.complete(pdfOwner);
+                } catch (Exception e) {
+                    pdfOwnerPromise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
@@ -108,7 +117,7 @@ public class PdfFileDao extends GenericDao<PdfFile> {
                     promise.fail(e);
                 }
                 return null;
-            });
+            }, false);
         });
     }
 

@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Author: Shahar Azar
@@ -34,48 +33,6 @@ public class UserDao extends GenericDao<User> {
     }
 
     /**
-     * A function to get all the users as a Map
-     *
-     * @return - the users map
-     */
-    @Override
-    public Future<Set<User>> getAll() {
-        return super.getAll();
-    }
-
-    /**
-     * A function to add a new user to the DB
-     *
-     * @param user - the new user
-     */
-    @Override
-    public Future<User> add(User user) {
-        return super.add(user);
-    }
-
-    /**
-     * A function to update an existing user
-     *
-     * @param newUser - the new user
-     * @return - the updated user if succeeded, else, null
-     */
-    @Override
-    public Future<User> update(User newUser) {
-        return super.update(newUser);
-    }
-
-    /**
-     * A function to get a user by id from the DB
-     *
-     * @param id - the users' id
-     * @return the user if found, else, null
-     */
-    @Override
-    public Future<User> getById(Integer id) {
-        return super.getById(id);
-    }
-
-    /**
      * A wrapper function to get a user by userName from the db
      *
      * @param userName - the users' name
@@ -83,78 +40,65 @@ public class UserDao extends GenericDao<User> {
      */
     public Future<User> getUserByUserName(String userName) {
         return Future.future(promise -> {
-            try (Session session = openSession()) {
-                String hql = "FROM User U WHERE lower(U.userName) = lower(:userName)";
-                Query<User> query = session.createQuery(hql, User.class);
-                query.setParameter("userName", userName);
-                List<User> results = query.list();
-                if (!results.isEmpty()) {
-                    promise.complete(results.getFirst());
-                } else {
-                    logger.warn("User {} not found in DB!", userName);
-                    promise.complete(null);
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    String hql = "FROM User U WHERE lower(U.userName) = lower(:userName)";
+                    Query<User> query = session.createQuery(hql, User.class);
+                    query.setParameter("userName", userName);
+                    List<User> results = query.list();
+                    if (!results.isEmpty()) {
+                        promise.complete(results.getFirst());
+                    } else {
+                        logger.warn("User {} not found in DB!", userName);
+                        promise.complete(null);
+                    }
+                } catch (Exception e) {
+                    promise.fail(e.getMessage());
                 }
-            } catch (Exception e) {
-                promise.fail(e.getMessage());
-            }
+                return null;
+            }, false);
         });
-    }
-
-    /**
-     * A function to remove a user from the DB
-     *
-     * @param user - the user to remove
-     * @return - true if succeeded, else, false
-     */
-    @Override
-    public Future<Boolean> remove(User user) {
-        return super.remove(user);
-    }
-
-    /**
-     * A function to remove a given user from the DB using its id
-     *
-     * @param id - the users' id
-     * @return - true if succeeded, else, false
-     */
-    @Override
-    public Future<Boolean> removeById(Integer id) {
-        return super.removeById(id);
     }
 
     public Future<List<User>> getAllClientPaginated(int offset, int limit) {
         return Future.future(listPromise -> {
-            try (Session session = openSession()) {
-                List<User> paginatedResults = session
-                        .createQuery(
-                                "FROM User",
-                                User.class)
-                        .setFirstResult(offset) // Offset
-                        .setMaxResults(limit)   // Limit
-                        .getResultList();
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    List<User> paginatedResults = session
+                            .createQuery(
+                                    "FROM User",
+                                    User.class)
+                            .setFirstResult(offset) // Offset
+                            .setMaxResults(limit)   // Limit
+                            .getResultList();
 
-                listPromise.complete(paginatedResults);
-            } catch (Exception e) {
-                listPromise.fail(e);
-            }
+                    listPromise.complete(paginatedResults);
+                } catch (Exception e) {
+                    listPromise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
     public Future<Boolean> isAdmin(String userName) {
         return Future.future(pdfOwnerPromise -> {
-            try (Session session = openSession()) {
-                String userType = session
-                        .createNativeQuery(
-                                "SELECT u.user_type FROM users u WHERE u.user_name = :userName",
-                                String.class
-                        )
-                        .setParameter("userName", userName)
-                        .getSingleResult();
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    String userType = session
+                            .createNativeQuery(
+                                    "SELECT u.user_type FROM users u WHERE u.user_name = :userName",
+                                    String.class
+                            )
+                            .setParameter("userName", userName)
+                            .getSingleResult();
 
-                pdfOwnerPromise.complete(Objects.equals(userType, UserType.ADMIN.getType()));
-            } catch (Exception e) {
-                pdfOwnerPromise.fail(e);
-            }
+                    pdfOwnerPromise.complete(Objects.equals(userType, UserType.ADMIN.getType()));
+                } catch (Exception e) {
+                    pdfOwnerPromise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 

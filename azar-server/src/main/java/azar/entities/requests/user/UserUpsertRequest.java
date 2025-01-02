@@ -11,6 +11,6 @@ import lombok.Getter;
  **/
 @Getter
 @AllArgsConstructor
-public class UserAddRequest extends BaseRequest {
-    private User userToAdd;
+public class UserUpsertRequest extends BaseRequest {
+    private User user;
 }

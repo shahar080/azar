@@ -1,5 +1,7 @@
-export interface User {
+export interface BaseModel {
     id?: string;
+}
+export interface User extends BaseModel {
     firstName: string;
     lastName: string;
     userName: string;
@@ -34,9 +36,10 @@ export interface LoginResponse {
     token: string;
     userName: string;
     userType: UserType;
+    userId: number;
 }
 
-export interface PdfFile {
+export interface PdfFile extends BaseModel {
     id: string;
     uploadedBy: string;
     fileName: string;
@@ -46,4 +49,10 @@ export interface PdfFile {
     size: string;
     uploadedAt: string;
     description: string;
+}
+
+export interface Preference extends BaseModel {
+    key: string;
+    value: string;
+    userId: number;
 }

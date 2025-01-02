@@ -1,6 +1,6 @@
 import apiClient from "./apiClient.ts";
 import {LoginResponse, User} from "../../models/models.ts"
-import {BaseRequest, UserAddRequest, UserLoginRequest, UserUpdateRequest} from "./requests.ts";
+import {BaseRequest, UserLoginRequest, UserUpsertRequest} from "./requests.ts";
 
 export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {
     try {
@@ -11,6 +11,7 @@ export async function login(userLoginRequest: UserLoginRequest): Promise<LoginRe
             localStorage.setItem('authToken', loginResponse.token);
             localStorage.setItem('userName', loginResponse.userName); // TODO: AZAR-68
             localStorage.setItem('userType', loginResponse.userType);
+            localStorage.setItem('userId', String(loginResponse.userId));
             return loginResponse;
         }
         return undefined;
@@ -20,7 +21,7 @@ export async function login(userLoginRequest: UserLoginRequest): Promise<LoginRe
     }
 }
 
-export async function add(userAddRequest: UserAddRequest): Promise<boolean> {
+export async function add(userAddRequest: UserUpsertRequest): Promise<boolean> {
 
     try {
         const response = await apiClient.post('/user/ops/add', userAddRequest);
@@ -54,7 +55,7 @@ export async function deleteUser(userId: string, baseRequest: BaseRequest): Prom
     return false;
 }
 
-export async function updateUser(userUpdateRequest: UserUpdateRequest): Promise<User | undefined> {
+export async function updateUser(userUpdateRequest: UserUpsertRequest): Promise<User | undefined> {
     try {
         const response = await apiClient.post('/user/ops/update', userUpdateRequest);
         if (response.status === 200) {

@@ -3,10 +3,10 @@ import {Box, Button, TextField} from '@mui/material';
 
 interface SearchBarProps {
     onSearch: (query: string) => void;
-    onAddUser: () => void;
+    onAddOperation: () => void;
 }
 
-const UserSearchBar: React.FC<SearchBarProps> = ({onSearch, onAddUser}) => {
+const SearchBarWithAdd: React.FC<SearchBarProps> = ({onSearch, onAddOperation}) => {
     const [searchQuery, setSearchQuery] = useState('');
 
     /** Handle search bar text input */
@@ -37,8 +37,8 @@ const UserSearchBar: React.FC<SearchBarProps> = ({onSearch, onAddUser}) => {
 
             {/* Button Under Search Bar */}
             <Box sx={{display: 'flex', justifyContent: 'flex-start'}}>
-                <Button variant="outlined" color="secondary" onClick={onAddUser}>
-                    Add user
+                <Button variant="outlined" color="secondary" onClick={onAddOperation}>
+                    Add
                 </Button>
             </Box>
         </Box>
@@ -46,4 +46,4 @@ const UserSearchBar: React.FC<SearchBarProps> = ({onSearch, onAddUser}) => {
     );
 };
 
-export default UserSearchBar;
+export default SearchBarWithAdd;

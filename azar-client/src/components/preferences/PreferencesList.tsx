@@ -11,37 +11,37 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {User} from "../../models/models.ts";
-import RegisterUserModal from "./RegisterUserModal.tsx";
+import {Preference} from "../../models/models.ts";
 import BaseContextMenu from "../general/BaseContextMenu.tsx";
+import AddPreferenceModal from "./AddPreferenceModal.tsx";
 
-interface UserListProps {
-    users: User[];
+interface PreferencesListProps {
+    preferences: Preference[];
     onLoadMore: () => void;
-    onDelete: (user: User) => void;
-    onEdit: (user: User) => void;
-    onShowUser: (user: User) => void;
-    isAddUser: boolean;
-    setIsAddUser: () => void;
-    handleUserRegistration: (user: User) => void;
+    onDelete: (preference: Preference) => void;
+    onEdit: (preference: Preference) => void;
+    onShowPreference: (preference: Preference) => void;
+    isAddPreference: boolean;
+    setIsAddPreference: () => void;
+    handleAddPreference: (preference: Preference) => void;
 }
 
-const UserList: React.FC<UserListProps> = ({
-                                               users,
+const PreferencesList: React.FC<PreferencesListProps> = ({
+                                               preferences,
                                                onLoadMore,
                                                onDelete,
                                                onEdit,
-                                               onShowUser,
-                                               isAddUser,
-                                               setIsAddUser,
-                                               handleUserRegistration
+                                               onShowPreference,
+                                               isAddPreference,
+                                               setIsAddPreference,
+                                               handleAddPreference
                                            }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const longPressTimer = useRef<NodeJS.Timeout | null>(null);
     const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedPreference, setSelectedPreference] = useState<Preference | null>(null);
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-    const [orderBy, setOrderBy] = useState<string>('firstName');
+    const [orderBy, setOrderBy] = useState<string>('key');
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -84,25 +84,25 @@ const UserList: React.FC<UserListProps> = ({
         });
     };
 
-    const sortedUsers = sortData([...users]);
+    const sortedPreferences = sortData([...preferences]);
 
     // Context Menu Logic
-    const handleRightClick = (event: MouseEvent<HTMLTableRowElement>, user: User) => {
+    const handleRightClick = (event: MouseEvent<HTMLTableRowElement>, preference: Preference) => {
         if (!isMobile) {
             event.preventDefault();
             setAnchorPosition({top: event.clientY - 4, left: event.clientX - 2});
-            setSelectedUser(user);
+            setSelectedPreference(preference);
         }
     };
 
-    const handleTouchStart = (event: TouchEvent<HTMLTableRowElement>, user: User) => {
+    const handleTouchStart = (event: TouchEvent<HTMLTableRowElement>, preference: Preference) => {
         if (isMobile) {
             longPressTimer.current = setTimeout(() => {
                 setAnchorPosition({
                     top: event.touches[0].clientY,
                     left: event.touches[0].clientX,
                 });
-                setSelectedUser(user);
+                setSelectedPreference(preference);
             }, 600); // Long-press duration
         }
     };
@@ -118,22 +118,22 @@ const UserList: React.FC<UserListProps> = ({
     };
 
     const handleDelete = () => {
-        if (selectedUser && selectedUser.id) {
-            onDelete(selectedUser);
+        if (selectedPreference && selectedPreference.id) {
+            onDelete(selectedPreference);
         }
         handleCloseMenu();
     };
 
     const handleEdit = () => {
-        if (selectedUser) {
-            onEdit(selectedUser);
+        if (selectedPreference) {
+            onEdit(selectedPreference);
         }
         handleCloseMenu();
     };
 
-    const handleShowUser = () => {
-        if (selectedUser) {
-            onShowUser(selectedUser);
+    const handleShowPreference = () => {
+        if (selectedPreference) {
+            onShowPreference(selectedPreference);
         }
         handleCloseMenu();
     }
@@ -154,7 +154,7 @@ const UserList: React.FC<UserListProps> = ({
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            {['firstName', 'lastName', 'userName', 'userType'].map((field) => (
+                            {['key', 'value'].map((field) => (
                                 <TableCell key={field} sortDirection={orderBy === field ? order : false}>
                                     <TableSortLabel
                                         active={orderBy === field}
@@ -168,12 +168,12 @@ const UserList: React.FC<UserListProps> = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {sortedUsers.map((user: User) => (
+                        {sortedPreferences.map((preference: Preference) => (
                             <TableRow
-                                key={user.id}
+                                key={preference.id}
                                 hover
-                                onContextMenu={(e) => handleRightClick(e, user)}
-                                onTouchStart={(e) => handleTouchStart(e, user)}
+                                onContextMenu={(e) => handleRightClick(e, preference)}
+                                onTouchStart={(e) => handleTouchStart(e, preference)}
                                 onTouchEnd={handleTouchEnd}
                                 sx={{
                                     cursor: "pointer",
@@ -184,10 +184,8 @@ const UserList: React.FC<UserListProps> = ({
                                     msUserSelect: "none",           // Prevents IE/Edge text selection
                                 }}
                             >
-                                <TableCell>{user.firstName}</TableCell>
-                                <TableCell>{user.lastName}</TableCell>
-                                <TableCell>{user.userName}</TableCell>
-                                <TableCell>{user.userType}</TableCell>
+                                <TableCell>{preference.key}</TableCell>
+                                <TableCell>{preference.value}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -196,20 +194,20 @@ const UserList: React.FC<UserListProps> = ({
 
             <BaseContextMenu
                 anchorPosition={anchorPosition}
-                item={selectedUser}
+                item={selectedPreference}
                 onClose={handleCloseMenu}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onShow={handleShowUser}
+                onShow={handleShowPreference}
             />
 
-            <RegisterUserModal
-                open={isAddUser}
-                onClose={setIsAddUser}
-                onSubmit={handleUserRegistration}
+            <AddPreferenceModal
+                open={isAddPreference}
+                onClose={setIsAddPreference}
+                onSubmit={handleAddPreference}
             />
         </>
     );
 };
 
-export default UserList;
+export default PreferencesList;

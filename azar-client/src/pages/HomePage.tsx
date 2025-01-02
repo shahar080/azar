@@ -59,7 +59,7 @@ const HomePage: React.FC = () => {
     }, [pdfs]);
 
     const loadPdfs = (forceLoad: boolean = false) => {
-        if (!forceLoad && (loading || !hasMore)) return; // Stop if already loading or no more PDFs
+        if (!forceLoad && (loading || !hasMore)) return;
         setLoading(true);
         setLoadingAnimation(true)
         const currentPage = forceLoad ? 1 : page;
@@ -170,6 +170,10 @@ const HomePage: React.FC = () => {
         navigate("/manage-users")
     };
 
+    const handleMangePreferences = () => {
+        navigate("/manage-preferences")
+    }
+
     const toggleDrawer = () => {
         if (!drawerPinned) {
             setDrawerOpen(!drawerOpen);
@@ -192,15 +196,15 @@ const HomePage: React.FC = () => {
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
         setLoadingAnimation(true);
-        const tempPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
-        setPdfs(tempPdfs);
-        setFilteredPdfs((prev) =>
-            prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
-        );
-        updateLabels(tempPdfs)
         updatePdf({currentUser: userName, pdfFile: updatedPdf}).then((res) => {
             if (res && res.id === updatedPdf.id) {
                 setSelectedPdf(res);
+                const tempPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
+                setPdfs(tempPdfs);
+                setFilteredPdfs((prev) =>
+                    prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
+                );
+                updateLabels(tempPdfs)
                 showToast("PDF \"" + res.fileName + "\" updated successfully.", "success");
             } else {
                 showToast("Error updating PDF \"" + updatedPdf.fileName + "\"", "error");
@@ -236,6 +240,7 @@ const HomePage: React.FC = () => {
                 onNavigate={() => {
                 }}
                 onManageUser={handleRegisterUser}
+                onManagePreferences={handleMangePreferences}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
             />

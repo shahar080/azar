@@ -1,23 +1,23 @@
 import React, {useEffect, useRef} from "react";
 import {Menu, MenuItem} from "@mui/material";
-import {User} from "../../models/models.ts";
+import {BaseModel} from "../../models/models.ts";
 
-interface PdfContextMenuProps {
+interface BaseContextMenuProps<T> {
     anchorPosition: { top: number; left: number } | null;
-    user: User | null;
+    item: T | null;
     onClose: () => void;
-    onEdit: (user: User) => void;
-    onDelete: (userId: string | undefined) => void;
-    onShowUser: (user: User) => void;
+    onEdit: (item: T) => void;
+    onDelete: (itemId: string | undefined) => void;
+    onShow: (item: T) => void;
 }
 
-const UserContextMenu: React.FC<PdfContextMenuProps> = ({
+const BaseContextMenu: React.FC<BaseContextMenuProps<BaseModel>> = ({
                                                             anchorPosition,
-                                                            user,
+                                                            item,
                                                             onClose,
                                                             onEdit,
                                                             onDelete,
-                                                            onShowUser,
+                                                            onShow,
                                                         }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -48,11 +48,11 @@ const UserContextMenu: React.FC<PdfContextMenuProps> = ({
             }}
             ref={menuRef}
         >
-            <MenuItem onClick={() => user && onShowUser(user)}>View</MenuItem>
-            <MenuItem onClick={() => user && onEdit(user)}>Edit</MenuItem>
-            <MenuItem onClick={() => user && onDelete(user?.id?.toString())}>Delete</MenuItem>
+            <MenuItem onClick={() => item && onShow(item)}>View</MenuItem>
+            <MenuItem onClick={() => item && onEdit(item)}>Edit</MenuItem>
+            <MenuItem onClick={() => item && onDelete(item?.id?.toString())}>Delete</MenuItem>
         </Menu>
     );
 };
 
-export default UserContextMenu;
+export default BaseContextMenu;

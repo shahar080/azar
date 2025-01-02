@@ -5,72 +5,73 @@ import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
-import {add, deleteUser, getAllUsers, updateUser} from "../server/api/userApi";
-import {getUserType, User} from "../models/models";
+import {getUserType, Preference} from "../models/models";
 import {useTheme} from "@mui/material/styles";
 import SearchBarWithAdd from "../components/general/SearchBarWithAdd.tsx";
-import UserList from "../components/user/UserList.tsx";
-import UserModal from "../components/user/UserModal.tsx";
 import {useLoading} from "../utils/LoadingContext.tsx";
 import {useToast} from "../utils/ToastContext.tsx";
+import {add, deletePreference, getAllPreferences, updatePreference} from "../server/api/preferencesApi.ts";
+import PreferencesList from "../components/preferences/PreferencesList.tsx";
+import PreferenceModal from "../components/preferences/PreferenceModal.tsx";
 
 const drawerWidth = 240;
 
-const UserManagement: React.FC = () => {
+const PreferenceManagement: React.FC = () => {
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerPinned, setDrawerPinned] = useState(isDesktop);
-    const [users, setUsers] = useState<User[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+    const [preferences, setPreferences] = useState<Preference[]>([]);
+    const [filteredPreferences, setFilteredPreferences] = useState<Preference[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [isViewModalOpen, setViewModalOpen] = useState(false);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
-    const [selectedUserForOp, setSelectedUserForOp] = useState<User | null>(null);
-    const [isAddUser, setAddUser] = useState<boolean>(false);
+    const [selectedPreferenceForOp, setSelectedPreferenceForOp] = useState<Preference | null>(null);
+    const [isAddPreference, setAddPreference] = useState<boolean>(false);
     const {setLoadingAnimation} = useLoading();
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const userName = localStorage.getItem('userName') || '';
+    const userId = localStorage.getItem('userId') || '';
     const userType = getUserType(localStorage.getItem('userType'));
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!isLoggedIn) {
-            setUsers([]);
-            setFilteredUsers([]);
+            setPreferences([]);
+            setFilteredPreferences([]);
             navigate("/login");
         }
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
-        loadUsers();
+        loadPreferences();
     }, []);
 
-    const loadUsers = (forceLoad: boolean = false) => {
+    const loadPreferences = (forceLoad: boolean = false) => {
         if (!forceLoad && (loading || !hasMore)) return;
         setLoading(true);
 
         const currentPage = forceLoad ? 1 : page;
         setLoadingAnimation(true);
-        getAllUsers({currentUser: userName}, currentPage, 20)
-            .then((newUsers) => {
-                if (newUsers.length < 20) {
+        getAllPreferences({currentUser: userName, userId: userId}, currentPage, 20)
+            .then((newPreferences) => {
+                if (newPreferences.length < 20) {
                     setHasMore(false);
                 }
 
                 // If forceLoad is true, replace PDFs; otherwise, append
-                setUsers((prevUsers) => (forceLoad ? newUsers : [...prevUsers, ...newUsers]));
-                setFilteredUsers((prevUsers) => (forceLoad ? newUsers : [...prevUsers, ...newUsers]));
+                setPreferences((prevPreferences) => (forceLoad ? newPreferences : [...prevPreferences, ...newPreferences]));
+                setFilteredPreferences((prevPreferences) => (forceLoad ? newPreferences : [...prevPreferences, ...newPreferences]));
 
                 if (!forceLoad) {
                     setPage((prev) => prev + 1); // Increment page only if not forcing reload
                 }
             })
-            .catch((err) => console.error("Failed to load users:", err))
+            .catch((err) => console.error("Failed to load preferences:", err))
             .finally(() => {
                 setLoading(false);
                 setLoadingAnimation(false);
@@ -82,59 +83,58 @@ const UserManagement: React.FC = () => {
         setPage(1);
         setHasMore(true);
 
-        const filteredResults = users.filter((user) => {
-            return user.firstName.toLowerCase().includes(query.toLowerCase()) ||
-                user.lastName.toLowerCase().includes(query.toLowerCase()) ||
-                user.userName.toLowerCase().includes(query.toLowerCase());
+        const filteredResults = preferences.filter((preference) => {
+            return preference.key.toLowerCase().includes(query.toLowerCase()) ||
+                preference.value.toLowerCase().includes(query.toLowerCase());
         });
 
-        setFilteredUsers(filteredResults);
+        setFilteredPreferences(filteredResults);
     };
 
-    const handleDeleteUser = (user: User) => {
+    const handleDeletePreference = (preference: Preference) => {
         setLoadingAnimation(true);
-        if (user.id === undefined || userName === null) {
+        if (preference.id === undefined || userName === null) {
             setLoadingAnimation(false);
             return false;
         }
-        deleteUser(user.id, {currentUser: userName})
+        deletePreference(preference.id, {currentUser: userName})
             .then((res) => {
                 resetPaginationAndReload();
                 if (res) {
-                    showToast("User \"" + user.userName + "\" deleted successfully.", "success")
+                    showToast("Preference \"" + preference.key + "\" deleted successfully.", "success")
                 } else {
-                    showToast("Error deleting user: \"" + user.userName + "\"", "error")
+                    showToast("Error deleting preference: \"" + preference.key + "\"", "error")
                 }
             })
             .catch((error) => {
-                console.error("Failed to delete user:", error);
+                console.error("Failed to delete preference:", error);
             })
             .finally(() => setLoadingAnimation(false));
     };
 
-    const handleEditUser = (user: User) => {
-        setSelectedUserForOp(user);
+    const handleEditPreference = (preference: Preference) => {
+        setSelectedPreferenceForOp(preference);
         setEditModalOpen(true);
     };
 
-    const handleShowUser = (user: User) => {
-        setSelectedUserForOp(user);
+    const handleShowPreference = (preference: Preference) => {
+        setSelectedPreferenceForOp(preference);
         setViewModalOpen(true);
     }
 
-    const handleSaveEdit = (updatedUser: User) => {
+    const handleSaveEdit = (updatedPreference: Preference) => {
         setLoadingAnimation(true);
-        updateUser({user: updatedUser, currentUser: userName})
+        updatePreference({preference: updatedPreference, currentUser: userName})
             .then((res) => {
                 if (res) {
-                    const tempUsers = users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
-                    setUsers(tempUsers);
-                    setFilteredUsers((prev) =>
-                        prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+                    showToast("Preference \"" + updatedPreference.key + "\" updated successfully.", "success")
+                    const tempPreferences = preferences.map((preferences) => (preferences.id === updatedPreference.id ? updatedPreference : preferences));
+                    setPreferences(tempPreferences);
+                    setFilteredPreferences((prev) =>
+                        prev.map((preference) => (preference.id === updatedPreference.id ? updatedPreference : preference))
                     );
-                    showToast("User \"" + res.userName + "\" updated successfully.", "success")
                 } else {
-                    showToast("Error updating user \"" + updatedUser.userName + "\"", "error")
+                    showToast("Error updating preference \"" + updatedPreference.key + " | " + updatedPreference.value + "\"", "error")
                 }
             })
             .finally(() => {
@@ -145,8 +145,8 @@ const UserManagement: React.FC = () => {
     const resetPaginationAndReload = () => {
         setPage(1);
         setHasMore(true);
-        setUsers([]); // Clear the list of PDFs
-        loadUsers(true); // Force reload starting from page 1
+        setPreferences([]); // Clear the list of PDFs
+        loadPreferences(true); // Force reload starting from page 1
     };
 
     const toggleDrawer = () => {
@@ -164,33 +164,33 @@ const UserManagement: React.FC = () => {
         });
     };
 
-    const handleAddUser = () => {
-        setAddUser(true);
+    const handleOnAddPreference = () => {
+        setAddPreference(true);
     }
 
-    const handleUserRegistration = (user: User) => {
+    const handleAddPreference = (preference: Preference) => {
         setLoadingAnimation(true);
         if (userName === null) {
-            showToast("Error adding user \"" + user.userName + "\"", "error");
+            showToast("Error adding preference \"" + preference.key + "\"", "error");
             return;
         }
-        add({currentUser: userName, user: user}).then((success) => {
+        add({currentUser: userName, preference: preference}).then((success) => {
                 resetPaginationAndReload();
                 if (success) {
-                    showToast("user \"" + user.userName + "\" added successfully.", "success");
+                    showToast("preference \"" + preference.key + "\" added successfully.", "success");
                 } else {
-                    showToast("Error adding user \"" + user.userName + "\"", "error");
+                    showToast("Error adding preference \"" + preference.key + "\"", "error");
                 }
             }
         ).finally(() => setLoadingAnimation(false))
     }
 
     const handleManageUser = () => {
-        resetPaginationAndReload();
+        navigate("/manage-users");
     }
 
-    const handleMangePreferences = () => {
-        navigate("/manage-preferences");
+    const handleManagePreferences = () => {
+        resetPaginationAndReload();
     }
 
     return (
@@ -208,7 +208,7 @@ const UserManagement: React.FC = () => {
                 onNavigate={() => {
                 }}
                 onManageUser={handleManageUser}
-                onManagePreferences={handleMangePreferences}
+                onManagePreferences={handleManagePreferences}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
             />
@@ -235,34 +235,34 @@ const UserManagement: React.FC = () => {
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <SearchBarWithAdd
                             onSearch={handleSearch}
-                            onAddOperation={handleAddUser}
+                            onAddOperation={handleOnAddPreference}
                         />
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
-                            <UserList
-                                users={filteredUsers}
-                                onLoadMore={loadUsers}
-                                onDelete={handleDeleteUser}
-                                onEdit={handleEditUser}
-                                onShowUser={handleShowUser}
-                                isAddUser={isAddUser}
-                                setIsAddUser={() => setAddUser(false)}
-                                handleUserRegistration={handleUserRegistration}
+                            <PreferencesList
+                                preferences={filteredPreferences}
+                                onLoadMore={loadPreferences}
+                                onDelete={handleDeletePreference}
+                                onEdit={handleEditPreference}
+                                onShowPreference={handleShowPreference}
+                                isAddPreference={isAddPreference}
+                                setIsAddPreference={() => setAddPreference(false)}
+                                handleAddPreference={handleAddPreference}
                             />
                         </Box>
                     </Grid>
                 </Grid>
             </Box>
 
-            <UserModal
+            <PreferenceModal
                 open={isViewModalOpen}
-                user={selectedUserForOp}
+                preference={selectedPreferenceForOp}
                 onClose={() => setViewModalOpen(false)}
                 mode="view"
             />
 
-            <UserModal
+            <PreferenceModal
                 open={isEditModalOpen}
-                user={selectedUserForOp}
+                preference={selectedPreferenceForOp}
                 onClose={() => setEditModalOpen(false)}
                 onSave={handleSaveEdit}
                 mode="edit"
@@ -271,4 +271,4 @@ const UserManagement: React.FC = () => {
     );
 };
 
-export default UserManagement;
+export default PreferenceManagement;

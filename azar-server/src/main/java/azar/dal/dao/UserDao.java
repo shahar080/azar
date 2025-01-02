@@ -60,27 +60,6 @@ public class UserDao extends GenericDao<User> {
         });
     }
 
-    public Future<List<User>> getAllClientPaginated(int offset, int limit) {
-        return Future.future(listPromise -> {
-            vertx.executeBlocking(() -> {
-                try (Session session = openSession()) {
-                    List<User> paginatedResults = session
-                            .createQuery(
-                                    "FROM User",
-                                    User.class)
-                            .setFirstResult(offset) // Offset
-                            .setMaxResults(limit)   // Limit
-                            .getResultList();
-
-                    listPromise.complete(paginatedResults);
-                } catch (Exception e) {
-                    listPromise.fail(e);
-                }
-                return null;
-            }, false);
-        });
-    }
-
     public Future<Boolean> isAdmin(String userName) {
         return Future.future(pdfOwnerPromise -> {
             vertx.executeBlocking(() -> {

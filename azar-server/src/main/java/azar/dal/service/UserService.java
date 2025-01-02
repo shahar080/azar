@@ -108,8 +108,8 @@ public class UserService extends GenericService<User> {
                 user.getPassword() == null;
     }
 
-    public Future<List<User>> getAllClientPaginated(int offset, int limit) {
-        return userDao.getAllClientPaginated(offset, limit);
+    public Future<List<User>> getAllClientPaginated(int offset, int limit, String whereClause) {
+        return userDao.getAllPaginated(offset, limit, whereClause);
     }
 
     public Future<Boolean> isAdmin(String userName) {

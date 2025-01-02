@@ -5,6 +5,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import PeopleIcon from '@mui/icons-material/People';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {logout} from "../../store/authSlice.ts";
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from "../../store/store.ts";
@@ -18,7 +19,8 @@ interface DrawerMenuProps {
     onPinToggle: () => void;
     onNavigate: (path: string) => void;
     onClose: () => void;
-    onManageUser?: () => void;
+    onManageUser: () => void;
+    onManagePreferences: () => void;
     userType: UserType;
 }
 
@@ -36,6 +38,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                                                    onNavigate,
                                                    onClose,
                                                    onManageUser,
+                                                   onManagePreferences,
                                                    userType = UserType.STANDARD,
                                                }) => {
     const theme = useTheme();
@@ -71,12 +74,20 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                     </ListItemIcon>
                     <ListItemText primary="Home"/>
                 </ListItem>
-                {userType === UserType.ADMIN && onManageUser &&
+                {userType === UserType.ADMIN &&
                     <ListItem component={ButtonBase} onClick={onManageUser} sx={hoverStyles}>
                         <ListItemIcon>
                             <PeopleIcon/>
                         </ListItemIcon>
-                        <ListItemText primary="Manage Users"/>
+                        <ListItemText primary="Users"/>
+                    </ListItem>
+                }
+                {userType === UserType.ADMIN  &&
+                    <ListItem component={ButtonBase} onClick={onManagePreferences} sx={hoverStyles}>
+                        <ListItemIcon>
+                            <SettingsIcon/>
+                        </ListItemIcon>
+                        <ListItemText primary="Preferences"/>
                     </ListItem>
                 }
                 <ListItem component={ButtonBase} onClick={() => handleLogOut({onNavigate, dispatch})} sx={hoverStyles}>
@@ -103,6 +114,7 @@ function handleLogOut({onNavigate, dispatch}: OnLogoutProps): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userName');
     localStorage.removeItem('userType');
+    localStorage.removeItem('userId');
     onNavigate('/login');
 }
 

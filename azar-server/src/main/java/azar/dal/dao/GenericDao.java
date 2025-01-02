@@ -51,6 +51,25 @@ public abstract class GenericDao<T> {
         });
     }
 
+    public Future<List<T>> getAllPaginated(int offset, int limit, String whereClause) {
+        return Future.future(listPromise -> {
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
+                    List<T> paginatedResults = session
+                            .createQuery("from " + getType().getName() + " s " + whereClause, getType())
+                            .setFirstResult(offset)
+                            .setMaxResults(limit)
+                            .getResultList();
+
+                    listPromise.complete(paginatedResults);
+                } catch (Exception e) {
+                    listPromise.fail(e);
+                }
+                return null;
+            }, false);
+        });
+    }
+
     public Future<T> add(T t) {
         return Future.future(promise -> {
             vertx.executeBlocking(() -> {

@@ -188,7 +188,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
 
                 <Box mt={2} display="flex" justifyContent="flex-end" gap={2}>
                     <Button variant="outlined" color="primary" onClick={handleSubmit}>
-                        Register New User
+                        Register
                     </Button>
                     <Button variant="outlined" color="secondary" onClick={handleCancel}>
                         Cancel

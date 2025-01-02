@@ -2,6 +2,7 @@ package azar.verticals;
 
 import azar.properties.AppProperties;
 import azar.verticals.routers.PdfRouter;
+import azar.verticals.routers.PreferencesRouter;
 import azar.verticals.routers.TokenRouter;
 import azar.verticals.routers.UserRouter;
 import com.google.inject.Inject;
@@ -26,14 +27,16 @@ public class ServerVertical extends AbstractVerticle {
     private final AppProperties appProperties;
     private final PdfRouter pdfRouter;
     private final UserRouter userRouter;
+    private final PreferencesRouter preferencesRouter;
     private final TokenRouter tokenRouter;
 
     @Inject
     public ServerVertical(AppProperties appProperties, PdfRouter pdfRouter, UserRouter userRouter,
-                          TokenRouter tokenRouter) {
+                          PreferencesRouter preferencesRouter, TokenRouter tokenRouter) {
         this.appProperties = appProperties;
         this.pdfRouter = pdfRouter;
         this.userRouter = userRouter;
+        this.preferencesRouter = preferencesRouter;
         this.tokenRouter = tokenRouter;
     }
 
@@ -64,6 +67,7 @@ public class ServerVertical extends AbstractVerticle {
             apiRouter.route("/pdf/*").subRouter(pdfRouter.create(vertx));
             apiRouter.route("/user/*").subRouter(userRouter.create(vertx));
             apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx));
+            apiRouter.route("/preference/*").subRouter(preferencesRouter.create(vertx));
 
             apiRouter.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
 

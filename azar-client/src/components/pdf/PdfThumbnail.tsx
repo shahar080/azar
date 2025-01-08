@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {fetchPdfThumbnail} from "../../server/api/pdfFileApi.ts";
+import {getUserName} from "../../utils/AppState.ts";
 
 const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText}) => {
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-    const userName = localStorage.getItem('userName') || '';
+    const userName = getUserName();
 
     useEffect(() => {
         const loadThumbnail = async () => {

@@ -4,6 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import {Preference} from "../../models/models.ts";
+import {getUserId} from "../../utils/AppState.ts";
 
 interface AddPreferenceModalProps {
     open: boolean;
@@ -12,7 +13,7 @@ interface AddPreferenceModalProps {
 }
 
 const AddPreferenceModal: React.FC<AddPreferenceModalProps> = ({open, onClose, onSubmit}) => {
-    const userId = Number(localStorage.getItem('userId')) || -1;
+    const userId = Number(getUserId());
     const [formData, setFormData] = useState({
         key: '',
         value: '',

@@ -1,6 +1,7 @@
 import apiClient from "./apiClient.ts";
 import {LoginResponse, User} from "../../models/models.ts"
 import {BaseRequest, UserLoginRequest, UserUpsertRequest} from "./requests.ts";
+import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
 
 export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {
     try {
@@ -8,10 +9,10 @@ export async function login(userLoginRequest: UserLoginRequest): Promise<LoginRe
         const loginResponse: LoginResponse = response.data;
         if (loginResponse && loginResponse.success) {
             // Securely store the token
-            localStorage.setItem('authToken', loginResponse.token);
-            localStorage.setItem('userName', loginResponse.userName); // TODO: AZAR-68
-            localStorage.setItem('userType', loginResponse.userType);
-            localStorage.setItem('userId', String(loginResponse.userId));
+            setAuthToken(loginResponse.token);
+            setUserName(loginResponse.userName);
+            setUserType(loginResponse.userType);
+            setUserId(String(loginResponse.userId));
             return loginResponse;
         }
         return undefined;

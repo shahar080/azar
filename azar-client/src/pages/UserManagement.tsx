@@ -6,13 +6,14 @@ import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
 import {add, deleteUser, getAllUsers, updateUser} from "../server/api/userApi";
-import {getUserType, User} from "../models/models";
+import {getUserTypeFromStr, User} from "../models/models";
 import {useTheme} from "@mui/material/styles";
 import SearchBarWithAdd from "../components/general/SearchBarWithAdd.tsx";
 import UserList from "../components/user/UserList.tsx";
 import UserModal from "../components/user/UserModal.tsx";
 import {useLoading} from "../utils/LoadingContext.tsx";
 import {useToast} from "../utils/ToastContext.tsx";
+import {getUserName, getUserType} from "../utils/AppState.ts";
 
 const drawerWidth = 240;
 
@@ -34,8 +35,8 @@ const UserManagement: React.FC = () => {
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userName = localStorage.getItem('userName') || '';
-    const userType = getUserType(localStorage.getItem('userType'));
+    const userName = getUserName();
+    const userType = getUserTypeFromStr(getUserType());
     const navigate = useNavigate();
 
     useEffect(() => {

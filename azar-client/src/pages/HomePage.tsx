@@ -8,7 +8,7 @@ import {RootState} from "../store/store";
 import PDFSearchBar from "../components/pdf/PDFSearchBar.tsx";
 import PdfList from "../components/pdf/PdfList.tsx";
 import ExtendedPdfInfo from "../components/pdf/ExtendedPdfInfo.tsx";
-import {getUserType, PdfFile} from "../models/models";
+import {getUserTypeFromStr, PdfFile} from "../models/models";
 import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFileApi.ts";
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
@@ -16,6 +16,7 @@ import {useTheme} from "@mui/material/styles";
 import {formatDate} from "../utils/utilities.ts";
 import {useLoading} from "../utils/LoadingContext.tsx";
 import {useToast} from "../utils/ToastContext.tsx";
+import {getUserName, getUserType} from "../utils/AppState.ts";
 
 const drawerWidth = 240;
 
@@ -38,8 +39,8 @@ const HomePage: React.FC = () => {
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userType = getUserType(localStorage.getItem('userType'));
-    const userName = localStorage.getItem('userName') || '';
+    const userType = getUserTypeFromStr(getUserType());
+    const userName = getUserName();
     const navigate = useNavigate();
 
     useEffect(() => {

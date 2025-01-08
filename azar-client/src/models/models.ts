@@ -19,7 +19,7 @@ export enum UserType {
     STANDARD = "STANDARD",
 }
 
-export function getUserType(value: string | null): UserType {
+export function getUserTypeFromStr(value: string | null): UserType {
     if (value === null || value === undefined) {
         return UserType.STANDARD;
     }

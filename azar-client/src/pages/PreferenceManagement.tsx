@@ -5,7 +5,7 @@ import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
-import {getUserType, Preference} from "../models/models";
+import {getUserTypeFromStr, Preference} from "../models/models";
 import {useTheme} from "@mui/material/styles";
 import SearchBarWithAdd from "../components/general/SearchBarWithAdd.tsx";
 import {useLoading} from "../utils/LoadingContext.tsx";
@@ -13,6 +13,7 @@ import {useToast} from "../utils/ToastContext.tsx";
 import {add, deletePreference, getAllPreferences, updatePreference} from "../server/api/preferencesApi.ts";
 import PreferencesList from "../components/preferences/PreferencesList.tsx";
 import PreferenceModal from "../components/preferences/PreferenceModal.tsx";
+import {getUserId, getUserName, getUserType} from "../utils/AppState.ts";
 
 const drawerWidth = 240;
 
@@ -34,9 +35,9 @@ const PreferenceManagement: React.FC = () => {
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const userName = localStorage.getItem('userName') || '';
-    const userId = localStorage.getItem('userId') || '';
-    const userType = getUserType(localStorage.getItem('userType'));
+    const userName = getUserName();
+    const userId = getUserId();
+    const userType = getUserTypeFromStr(getUserType());
     const navigate = useNavigate();
 
     useEffect(() => {

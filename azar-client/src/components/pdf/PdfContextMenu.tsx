@@ -2,6 +2,7 @@ import React, {useEffect, useRef} from "react";
 import {Menu, MenuItem, useMediaQuery} from "@mui/material";
 import {PdfFile} from "../../models/models.ts";
 import {useTheme} from "@mui/material/styles";
+import {getUserName} from "../../utils/AppState.ts";
 
 
 interface PdfContextMenuProps {
@@ -28,7 +29,7 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
     const menuRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
-    const userName = localStorage.getItem('userName') || '';
+    const userName = getUserName();
 
     // Close menu when mouse leaves the menu area
     const handleMouseLeave = () => {

@@ -12,6 +12,7 @@ import {AppDispatch} from "../../store/store.ts";
 import {UserType} from "../../models/models.ts";
 import {useTheme} from "@mui/material/styles";
 import {useNavigate} from "react-router-dom";
+import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
 
 interface DrawerMenuProps {
     open: boolean;
@@ -111,10 +112,10 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
 
 function handleLogOut({onNavigate, dispatch}: OnLogoutProps): void {
     dispatch(logout());
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('userId');
+    setAuthToken('');
+    setUserName('');
+    setUserType('');
+    setUserId('');
     onNavigate('/login');
 }
 

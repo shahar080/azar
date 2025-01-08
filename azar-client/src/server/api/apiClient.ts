@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {logout} from "../../store/authSlice.ts";
+import {getAuthToken, setAuthToken} from "../../utils/AppState.ts";
 
 // Create an Axios instance
 const apiClient = axios.create({
@@ -11,8 +12,7 @@ const apiClient = axios.create({
     },
 });
 
-// Load token from localStorage on initialization
-const token = localStorage.getItem('authToken');
+const token = getAuthToken();
 if (token) {
     apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
@@ -21,14 +21,14 @@ export async function refreshToken(): Promise<string | null> {
     try {
         const response = await apiClient.post('/token/refresh', {}, {
             headers: {
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Use old token
+                Authorization: `Bearer ${getAuthToken()}`, // Use old token
             },
         });
 
         const {token} = response.data;
 
         if (token) {
-            localStorage.setItem('authToken', token); // Save new token
+            setAuthToken(token); // Save new token
             apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             return token;
         }
@@ -43,7 +43,7 @@ export async function refreshToken(): Promise<string | null> {
 
 
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

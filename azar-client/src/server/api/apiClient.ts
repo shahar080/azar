@@ -1,11 +1,11 @@
 import axios from 'axios';
 import {logout} from "../../store/authSlice.ts";
 import {getAuthToken, setAuthToken} from "../../utils/AppState.ts";
+import {BASE_URL_API, TOKEN_REFRESH_API} from "../../utils/constants.ts";
 
 // Create an Axios instance
 const apiClient = axios.create({
-    baseURL: "https://shahar-azar.com/api",
-    // baseURL: "http://127.0.0.1:8080/api",
+    baseURL: BASE_URL_API,
     timeout: 30000,
     headers: {
         'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ if (token) {
 
 export async function refreshToken(): Promise<string | null> {
     try {
-        const response = await apiClient.post('/token/refresh', {}, {
+        const response = await apiClient.post(TOKEN_REFRESH_API, {}, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`, // Use old token
             },

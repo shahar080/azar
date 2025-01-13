@@ -13,18 +13,20 @@ import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFile
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
-import {formatDate} from "../utils/utilities.ts";
+import {formatDate, loadPreferences} from "../utils/utilities.ts";
 import {useLoading} from "../utils/LoadingContext.tsx";
 import {useToast} from "../utils/ToastContext.tsx";
-import {getUserName, getUserType} from "../utils/AppState.ts";
+import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
+import {DRAWER_PIN_STR, LOGIN_ROUTE, MANAGE_PREFERENCES_ROUTE, MANAGE_USERS_ROUTE} from "../utils/constants.ts";
+import {updatePreference} from "../server/api/preferencesApi.ts";
 
 const drawerWidth = 240;
 
 const HomePage: React.FC = () => {
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const [drawerPinned, setDrawerPinned] = useState(isDesktop);
+    const [drawerPinned, setDrawerPinned] = useState(isDesktop && getDrawerPinnedState());
+    const [drawerOpen, setDrawerOpen] = useState(drawerPinned);
     const [pdfs, setPdfs] = useState<PdfFile[]>([]);
     const [filteredPdfs, setFilteredPdfs] = useState<PdfFile[]>([]);
     const [selectedPdf, setSelectedPdf] = useState<PdfFile | null>(null);
@@ -47,12 +49,16 @@ const HomePage: React.FC = () => {
         if (!isLoggedIn) {
             setPdfs([]);
             setFilteredPdfs([]);
-            navigate("/login");
+            navigate(LOGIN_ROUTE);
         }
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
         loadPdfs();
+    }, []);
+
+    useEffect(() => {
+        loadPreferences(getUserName(), getUserId());
     }, []);
 
     useEffect(() => {
@@ -139,7 +145,6 @@ const HomePage: React.FC = () => {
         }
         deletePdf(pdf.id, {currentUser: userName})
             .then((res) => {
-                console.log(res)
                 if (res === 200) {
                     showToast("PDF \"" + pdf.fileName + "\" deleted successfully.", "success");
                 } else if (res === 401) {
@@ -168,11 +173,11 @@ const HomePage: React.FC = () => {
     };
 
     const handleRegisterUser = () => {
-        navigate("/manage-users")
+        navigate(MANAGE_USERS_ROUTE)
     };
 
     const handleMangePreferences = () => {
-        navigate("/manage-preferences")
+        navigate(MANAGE_PREFERENCES_ROUTE)
     }
 
     const toggleDrawer = () => {
@@ -183,9 +188,22 @@ const HomePage: React.FC = () => {
 
     const pinDrawer = () => {
         setDrawerPinned((prevPinned) => {
-            if (prevPinned) {
-                setDrawerOpen(false); // Close the drawer when unpinning
+            setDrawerOpen(!prevPinned); // Close the drawer when unpinning
+            const updatedPreference = {
+                userId: Number(getUserId()),
+                key: DRAWER_PIN_STR,
+                value: (!prevPinned).toString()
             }
+            updatePreference({preference: updatedPreference, currentUser: userName})
+                .then(updatedPreference => {
+                    if (updatedPreference) {
+                        setDrawerPinnedState(JSON.parse(updatedPreference.value));
+                        setDrawerPinned(JSON.parse(updatedPreference.value));
+                        setDrawerOpen(JSON.parse(updatedPreference.value));
+                    } else {
+                        showToast("Error updating preference drawer pinned", "error")
+                    }
+                })
             return !prevPinned;
         });
     };

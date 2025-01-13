@@ -57,7 +57,8 @@ public class PreferencesRouter extends BaseRouter {
                                 sendCreatedResponse(routingContext, "Successfully added preference", "Preference %s was added with value %s".formatted(preferenceToAdd.getKey(), preferenceToAdd.getValue()));
                             })
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error adding preference, error: %s".formatted(err.getMessage())));
-                });
+                })
+                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error adding preference, error: %s".formatted(err.getMessage())));
     }
 
     private void handleUpdatePreference(RoutingContext routingContext) {
@@ -66,19 +67,16 @@ public class PreferencesRouter extends BaseRouter {
         if (isInvalidUsername(routingContext, currentUser)) return;
 
         Preference preferenceToUpdate = preferenceUpsertRequest.getPreference();
-        userService.getUserByUserName(currentUser)
-                .onSuccess(dbUser -> {
-                    if (!dbUser.isAdmin()) {
-                        sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add preferences!".formatted(currentUser));
-                        return;
-                    }
-
-                    preferencesService.update(preferenceToUpdate)
-                            .onSuccess(_ -> {
-                                sendOKResponse(routingContext, "Successfully updated preference", "Preference %s was updated with value %s".formatted(preferenceToUpdate.getKey(), preferenceToUpdate.getValue()));
+        preferencesService.getByKey(preferenceToUpdate.getKey(), preferenceToUpdate.getUserId())
+                .onSuccess(dbPreference -> {
+                    dbPreference.setValue(preferenceToUpdate.getValue());
+                    preferencesService.update(dbPreference)
+                            .onSuccess(preference -> {
+                                sendOKResponse(routingContext, jsonManager.toJson(preference), "Preference %s was updated with value %s".formatted(preferenceToUpdate.getKey(), preferenceToUpdate.getValue()));
                             })
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
-                });
+                })
+                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
     }
 
     private void handleDeletePreference(RoutingContext routingContext) {
@@ -104,7 +102,8 @@ public class PreferencesRouter extends BaseRouter {
                                 sendOKResponse(routingContext, "Successfully deleted preference", "Preference with id %s was deleted".formatted(preferenceId));
                             })
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error deleting preference, error: %s".formatted(err.getMessage())));
-                });
+                })
+                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error deleting preference, error: %s".formatted(err.getMessage())));
     }
 
     private void handleGetAllPreferences(RoutingContext routingContext) {
@@ -112,20 +111,9 @@ public class PreferencesRouter extends BaseRouter {
         String currentUser = preferencesGetAllRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        // Default values for pagination
-        int page = Integer.parseInt(routingContext.queryParams().get("page"));
-        int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
-
-        if (page < 1 || limit < 1) {
-            sendBadRequestResponse(routingContext, "Page and limit must be greater than 0.");
-            return;
-        }
-
-        int offset = (page - 1) * limit;
-
-        preferencesService.getAllClientPaginated(offset, limit, "where s.userId = \"%s\"".formatted(preferencesGetAllRequest.getUserId())) // Fetch paginated results
+        preferencesService.getAllUsers(preferencesGetAllRequest.getUserId()) // Fetch paginated results
                 .onSuccess(preferences -> sendOKResponse(routingContext, jsonManager.toJson(preferences),
-                        "Returned %s preferences to client (page: %s, limit: %s)".formatted(preferences.size(), page, limit)))
+                        "Returned %s preferences to client".formatted(preferences.size())))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting preferences from DB, error: %s".formatted(err.getMessage())));
     }
 

@@ -1,5 +1,6 @@
 package azar.dal.dao;
 
+import azar.entities.db.Preference;
 import azar.entities.db.User;
 import azar.entities.db.UserType;
 import azar.factory.SessionFactoryProvider;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
+import static azar.utils.Constants.DRAWER_PINNED;
+
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
@@ -28,8 +31,51 @@ public class UserDao extends GenericDao<User> {
     private JsonManager jsonManager;
 
     @Inject
+    private PreferencesDao preferencesDao;
+
+    @Inject
     public UserDao(Vertx vertx, SessionFactoryProvider sessionFactoryProvider) {
         super(vertx, sessionFactoryProvider);
+    }
+
+    @Override
+    public Future<User> add(User user) {
+        return Future.future(promise -> {
+            vertx.executeBlocking(() -> {
+                super.add(user)
+                        .onSuccess(dbUser -> {
+                            Preference drawerPinned = new Preference();
+                            drawerPinned.setKey(DRAWER_PINNED);
+                            drawerPinned.setValue(String.valueOf(true));
+                            drawerPinned.setUserId(String.valueOf(dbUser.getId()));
+                            preferencesDao.add(drawerPinned)
+                                    .onSuccess(_ -> {
+                                        promise.complete(dbUser);
+                                    })
+                                    .onFailure(promise::fail);
+                        })
+                        .onFailure(promise::fail);
+                return null;
+            }, false);
+        });
+    }
+
+    @Override
+    public Future<Boolean> removeById(Integer id) {
+        return Future.future(promise -> {
+            vertx.executeBlocking(() -> {
+                super.removeById(id)
+                        .onSuccess(isDeleted -> {
+                            if (isDeleted) {
+                                preferencesDao.removeAllByUserId(String.valueOf(id))
+                                        .onSuccess(promise::complete)
+                                        .onFailure(promise::fail);
+                            }
+                        })
+                        .onFailure(promise::fail);
+                return null;
+            }, false);
+        });
     }
 
     /**

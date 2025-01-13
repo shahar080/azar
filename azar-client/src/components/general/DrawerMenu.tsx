@@ -13,6 +13,7 @@ import {UserType} from "../../models/models.ts";
 import {useTheme} from "@mui/material/styles";
 import {useNavigate} from "react-router-dom";
 import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
+import {LANDING_ROUTE, LOGIN_ROUTE} from '../../utils/constants.ts';
 
 interface DrawerMenuProps {
     open: boolean;
@@ -69,7 +70,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
         >
             <Toolbar/>
             <List>
-                <ListItem component={ButtonBase} onClick={() => navigate("/")} sx={hoverStyles}>
+                <ListItem component={ButtonBase} onClick={() => navigate(LANDING_ROUTE)} sx={hoverStyles}>
                     <ListItemIcon>
                         <HomeIcon/>
                     </ListItemIcon>
@@ -83,14 +84,12 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
                         <ListItemText primary="Users"/>
                     </ListItem>
                 }
-                {userType === UserType.ADMIN  &&
-                    <ListItem component={ButtonBase} onClick={onManagePreferences} sx={hoverStyles}>
-                        <ListItemIcon>
-                            <SettingsIcon/>
-                        </ListItemIcon>
-                        <ListItemText primary="Preferences"/>
-                    </ListItem>
-                }
+                <ListItem component={ButtonBase} onClick={onManagePreferences} sx={hoverStyles}>
+                    <ListItemIcon>
+                        <SettingsIcon/>
+                    </ListItemIcon>
+                    <ListItemText primary="Preferences"/>
+                </ListItem>
                 <ListItem component={ButtonBase} onClick={() => handleLogOut({onNavigate, dispatch})} sx={hoverStyles}>
                     <ListItemIcon>
                         <LogoutIcon/>
@@ -116,7 +115,7 @@ function handleLogOut({onNavigate, dispatch}: OnLogoutProps): void {
     setUserName('');
     setUserType('');
     setUserId('');
-    onNavigate('/login');
+    onNavigate(LOGIN_ROUTE);
 }
 
 export default DrawerMenu;

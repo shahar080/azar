@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, CssBaseline, Grid, Toolbar, useMediaQuery} from "@mui/material";
+import {Box, CssBaseline, FormControlLabel, Grid, Switch, Toolbar, useMediaQuery} from "@mui/material";
 import AppBarHeader from "../components/general/AppBarHeader.tsx";
 import DrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
@@ -7,31 +7,27 @@ import {useNavigate} from "react-router-dom";
 import {RootState} from "../store/store";
 import {getUserTypeFromStr, Preference} from "../models/models";
 import {useTheme} from "@mui/material/styles";
-import SearchBarWithAdd from "../components/general/SearchBarWithAdd.tsx";
+import SearchBar from "../components/general/SearchBar.tsx";
 import {useLoading} from "../utils/LoadingContext.tsx";
+import {getAllPreferences, updatePreference} from "../server/api/preferencesApi.ts";
+import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
+import {DRAWER_PIN_STR, LOGIN_ROUTE, MANAGE_USERS_ROUTE} from "../utils/constants.ts";
 import {useToast} from "../utils/ToastContext.tsx";
-import {add, deletePreference, getAllPreferences, updatePreference} from "../server/api/preferencesApi.ts";
-import PreferencesList from "../components/preferences/PreferencesList.tsx";
-import PreferenceModal from "../components/preferences/PreferenceModal.tsx";
-import {getUserId, getUserName, getUserType} from "../utils/AppState.ts";
 
 const drawerWidth = 240;
 
 const PreferenceManagement: React.FC = () => {
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const [drawerPinned, setDrawerPinned] = useState(isDesktop);
+    const [drawerPinned, setDrawerPinned] = useState(isDesktop && getDrawerPinnedState());
+    const [drawerOpen, setDrawerOpen] = useState(drawerPinned);
     const [preferences, setPreferences] = useState<Preference[]>([]);
     const [filteredPreferences, setFilteredPreferences] = useState<Preference[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-    const [isViewModalOpen, setViewModalOpen] = useState(false);
-    const [isEditModalOpen, setEditModalOpen] = useState(false);
-    const [selectedPreferenceForOp, setSelectedPreferenceForOp] = useState<Preference | null>(null);
-    const [isAddPreference, setAddPreference] = useState<boolean>(false);
     const {setLoadingAnimation} = useLoading();
+
     const {showToast} = useToast();
 
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -44,13 +40,22 @@ const PreferenceManagement: React.FC = () => {
         if (!isLoggedIn) {
             setPreferences([]);
             setFilteredPreferences([]);
-            navigate("/login");
+            navigate(LOGIN_ROUTE);
         }
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
         loadPreferences();
     }, []);
+
+    useEffect(() => {
+        if (filteredPreferences.length > 0) {
+            const drawerPinned = filteredPreferences.filter(pref => pref.key === DRAWER_PIN_STR) || []
+            if (drawerPinned.length > 0) {
+                setDrawerPinned(JSON.parse(drawerPinned[0].value))
+            }
+        }
+    }, [filteredPreferences])
 
     const loadPreferences = (forceLoad: boolean = false) => {
         if (!forceLoad && (loading || !hasMore)) return;
@@ -92,57 +97,6 @@ const PreferenceManagement: React.FC = () => {
         setFilteredPreferences(filteredResults);
     };
 
-    const handleDeletePreference = (preference: Preference) => {
-        setLoadingAnimation(true);
-        if (preference.id === undefined || userName === null) {
-            setLoadingAnimation(false);
-            return false;
-        }
-        deletePreference(preference.id, {currentUser: userName})
-            .then((res) => {
-                resetPaginationAndReload();
-                if (res) {
-                    showToast("Preference \"" + preference.key + "\" deleted successfully.", "success")
-                } else {
-                    showToast("Error deleting preference: \"" + preference.key + "\"", "error")
-                }
-            })
-            .catch((error) => {
-                console.error("Failed to delete preference:", error);
-            })
-            .finally(() => setLoadingAnimation(false));
-    };
-
-    const handleEditPreference = (preference: Preference) => {
-        setSelectedPreferenceForOp(preference);
-        setEditModalOpen(true);
-    };
-
-    const handleShowPreference = (preference: Preference) => {
-        setSelectedPreferenceForOp(preference);
-        setViewModalOpen(true);
-    }
-
-    const handleSaveEdit = (updatedPreference: Preference) => {
-        setLoadingAnimation(true);
-        updatePreference({preference: updatedPreference, currentUser: userName})
-            .then((res) => {
-                if (res) {
-                    showToast("Preference \"" + updatedPreference.key + "\" updated successfully.", "success")
-                    const tempPreferences = preferences.map((preferences) => (preferences.id === updatedPreference.id ? updatedPreference : preferences));
-                    setPreferences(tempPreferences);
-                    setFilteredPreferences((prev) =>
-                        prev.map((preference) => (preference.id === updatedPreference.id ? updatedPreference : preference))
-                    );
-                } else {
-                    showToast("Error updating preference \"" + updatedPreference.key + " | " + updatedPreference.value + "\"", "error")
-                }
-            })
-            .finally(() => {
-                setLoadingAnimation(false);
-            })
-    };
-
     const resetPaginationAndReload = () => {
         setPage(1);
         setHasMore(true);
@@ -158,41 +112,57 @@ const PreferenceManagement: React.FC = () => {
 
     const pinDrawer = () => {
         setDrawerPinned((prevPinned) => {
-            if (prevPinned) {
-                setDrawerOpen(false); // Close the drawer when unpinning
+            setDrawerOpen(!prevPinned); // Close the drawer when unpinning
+            const updatedPreference = {
+                userId: Number(getUserId()),
+                key: DRAWER_PIN_STR,
+                value: (!prevPinned).toString()
             }
+            updatePreference({preference: updatedPreference, currentUser: userName})
+                .then(updatedPreference => {
+                    if (updatedPreference) {
+                        setDrawerPinnedState(JSON.parse(updatedPreference.value));
+                        setDrawerPinned(JSON.parse(updatedPreference.value));
+                        setDrawerOpen(JSON.parse(updatedPreference.value));
+                    } else {
+                        showToast("Error updating preference drawer pinned", "error")
+                    }
+                })
             return !prevPinned;
         });
     };
 
-    const handleOnAddPreference = () => {
-        setAddPreference(true);
-    }
-
-    const handleAddPreference = (preference: Preference) => {
-        setLoadingAnimation(true);
-        if (userName === null) {
-            showToast("Error adding preference \"" + preference.key + "\"", "error");
-            return;
-        }
-        add({currentUser: userName, preference: preference}).then((success) => {
-                resetPaginationAndReload();
-                if (success) {
-                    showToast("preference \"" + preference.key + "\" added successfully.", "success");
-                } else {
-                    showToast("Error adding preference \"" + preference.key + "\"", "error");
-                }
-            }
-        ).finally(() => setLoadingAnimation(false))
-    }
-
     const handleManageUser = () => {
-        navigate("/manage-users");
+        navigate(MANAGE_USERS_ROUTE);
     }
 
     const handleManagePreferences = () => {
         resetPaginationAndReload();
     }
+
+    const handleDrawerPinnedPreference = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = event.target.checked
+        const updatedPreference = {
+            userId: Number(getUserId()),
+            key: DRAWER_PIN_STR,
+            value: isChecked.toString(),
+        }
+        updatePreference({preference: updatedPreference, currentUser: userName})
+            .then(updatedResult => {
+                if (updatedResult) {
+                    const tempPreferences = preferences.map((preference) => (preference.id === updatedResult.id ? updatedResult : preference));
+                    setPreferences(tempPreferences);
+                    setFilteredPreferences((prev) =>
+                        prev.map((preference) => (preference.id === updatedResult.id ? updatedResult : preference))
+                    );
+                    setDrawerPinnedState(isChecked);
+                    setDrawerPinned(isChecked);
+                    setDrawerOpen(isChecked);
+                } else {
+                    showToast("Error updating preference drawer pinned", "error")
+                }
+            })
+    };
 
     return (
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
@@ -234,40 +204,40 @@ const PreferenceManagement: React.FC = () => {
                 <Grid container spacing={2} sx={{height: "100%"}}>
                     {/* Left Section: Search and PDF Table */}
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
-                        <SearchBarWithAdd
+                        <SearchBar
                             onSearch={handleSearch}
-                            onAddOperation={handleOnAddPreference}
                         />
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
-                            <PreferencesList
-                                preferences={filteredPreferences}
-                                onLoadMore={loadPreferences}
-                                onDelete={handleDeletePreference}
-                                onEdit={handleEditPreference}
-                                onShowPreference={handleShowPreference}
-                                isAddPreference={isAddPreference}
-                                setIsAddPreference={() => setAddPreference(false)}
-                                handleAddPreference={handleAddPreference}
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={drawerPinned}
+                                        onChange={handleDrawerPinnedPreference}
+                                        color="primary"
+                                    />
+                                }
+                                label={`Pin Drawer`}
+                                labelPlacement={"start"}
                             />
                         </Box>
                     </Grid>
                 </Grid>
             </Box>
 
-            <PreferenceModal
-                open={isViewModalOpen}
-                preference={selectedPreferenceForOp}
-                onClose={() => setViewModalOpen(false)}
-                mode="view"
-            />
+            {/*<PreferenceModal*/}
+            {/*    open={isViewModalOpen}*/}
+            {/*    preference={selectedPreferenceForOp}*/}
+            {/*    onClose={() => setViewModalOpen(false)}*/}
+            {/*    mode="view"*/}
+            {/*/>*/}
 
-            <PreferenceModal
-                open={isEditModalOpen}
-                preference={selectedPreferenceForOp}
-                onClose={() => setEditModalOpen(false)}
-                onSave={handleSaveEdit}
-                mode="edit"
-            />
+            {/*<PreferenceModal*/}
+            {/*    open={isEditModalOpen}*/}
+            {/*    preference={selectedPreferenceForOp}*/}
+            {/*    onClose={() => setEditModalOpen(false)}*/}
+            {/*    onSave={handleSaveEdit}*/}
+            {/*    mode="edit"*/}
+            {/*/>*/}
         </Box>
     );
 };

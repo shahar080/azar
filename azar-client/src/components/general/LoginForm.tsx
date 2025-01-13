@@ -31,7 +31,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
             const response = await login({currentUser: formData.userName, userNameAndPassword: formData});
 
-            console.log(response)
             if (response?.success) {
                 onLoginSuccess(response);
             } else {

@@ -2,6 +2,7 @@ let authToken: string;
 let userName: string;
 let userType: string;
 let userId: string;
+let drawerPinned: boolean;
 
 export function setAuthToken(token: string) {
     authToken = token;
@@ -33,4 +34,12 @@ export function setUserId(id: string) {
 
 export function getUserId(): string {
     return userId || '';
+}
+
+export function setDrawerPinnedState(pinned: boolean) {
+    drawerPinned = pinned;
+}
+
+export function getDrawerPinnedState(): boolean {
+    return drawerPinned === undefined ? true : drawerPinned;
 }

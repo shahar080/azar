@@ -8,20 +8,22 @@ import {RootState} from "../store/store";
 import {add, deleteUser, getAllUsers, updateUser} from "../server/api/userApi";
 import {getUserTypeFromStr, User} from "../models/models";
 import {useTheme} from "@mui/material/styles";
-import SearchBarWithAdd from "../components/general/SearchBarWithAdd.tsx";
+import SearchBar from "../components/general/SearchBar.tsx";
 import UserList from "../components/user/UserList.tsx";
 import UserModal from "../components/user/UserModal.tsx";
 import {useLoading} from "../utils/LoadingContext.tsx";
 import {useToast} from "../utils/ToastContext.tsx";
-import {getUserName, getUserType} from "../utils/AppState.ts";
+import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
+import {DRAWER_PIN_STR, LOGIN_ROUTE, MANAGE_PREFERENCES_ROUTE} from "../utils/constants.ts";
+import {updatePreference} from "../server/api/preferencesApi.ts";
 
 const drawerWidth = 240;
 
 const UserManagement: React.FC = () => {
     const theme = useTheme();
     const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const [drawerPinned, setDrawerPinned] = useState(isDesktop);
+    const [drawerPinned, setDrawerPinned] = useState(isDesktop && getDrawerPinnedState());
+    const [drawerOpen, setDrawerOpen] = useState(drawerPinned);
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const [page, setPage] = useState(1);
@@ -43,7 +45,7 @@ const UserManagement: React.FC = () => {
         if (!isLoggedIn) {
             setUsers([]);
             setFilteredUsers([]);
-            navigate("/login");
+            navigate(LOGIN_ROUTE);
         }
     }, [isLoggedIn, navigate]);
 
@@ -158,9 +160,22 @@ const UserManagement: React.FC = () => {
 
     const pinDrawer = () => {
         setDrawerPinned((prevPinned) => {
-            if (prevPinned) {
-                setDrawerOpen(false); // Close the drawer when unpinning
+            setDrawerOpen(!prevPinned); // Close the drawer when unpinning
+            const updatedPreference = {
+                userId: Number(getUserId()),
+                key: DRAWER_PIN_STR,
+                value: (!prevPinned).toString()
             }
+            updatePreference({preference: updatedPreference, currentUser: userName})
+                .then(updatedPreference => {
+                    if (updatedPreference) {
+                        setDrawerPinnedState(JSON.parse(updatedPreference.value));
+                        setDrawerPinned(JSON.parse(updatedPreference.value));
+                        setDrawerOpen(JSON.parse(updatedPreference.value));
+                    } else {
+                        showToast("Error updating preference drawer pinned", "error")
+                    }
+                })
             return !prevPinned;
         });
     };
@@ -191,7 +206,7 @@ const UserManagement: React.FC = () => {
     }
 
     const handleMangePreferences = () => {
-        navigate("/manage-preferences");
+        navigate(MANAGE_PREFERENCES_ROUTE);
     }
 
     return (
@@ -234,7 +249,7 @@ const UserManagement: React.FC = () => {
                 <Grid container spacing={2} sx={{height: "100%"}}>
                     {/* Left Section: Search and PDF Table */}
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
-                        <SearchBarWithAdd
+                        <SearchBar
                             onSearch={handleSearch}
                             onAddOperation={handleAddUser}
                         />

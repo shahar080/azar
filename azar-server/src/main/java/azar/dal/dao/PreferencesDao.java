@@ -8,7 +8,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import org.hibernate.Session;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Author: Shahar Azar
@@ -22,16 +24,37 @@ public class PreferencesDao extends GenericDao<Preference> {
         super(vertx, sessionFactoryProvider);
     }
 
-    public Future<String> getValue(String key) {
+    public Future<Set<Preference>> getAllUsers(String userId) {
+        return Future.future(getValuePromise ->
+                vertx.executeBlocking(() -> {
+                    try (Session session = openSession()) {
+                        List<Preference> value = session
+                                .createQuery(
+                                        "FROM Preference p WHERE p.userId = :userId",
+                                        Preference.class
+                                )
+                                .setParameter("userId", userId)
+                                .getResultList();
+
+                        getValuePromise.complete(new HashSet<>(value));
+                    } catch (Exception e) {
+                        getValuePromise.fail(e);
+                    }
+                    return null;
+                }, false));
+    }
+
+    public Future<String> getValue(String key, String userId) {
         return Future.future(getValuePromise ->
                 vertx.executeBlocking(() -> {
                     try (Session session = openSession()) {
                         String value = session
-                                .createNativeQuery(
-                                        "SELECT s.value FROM settings s WHERE s.key = :key",
+                                .createQuery(
+                                        "SELECT p.value FROM Preference p WHERE p.key = :key AND p.userId = :userId",
                                         String.class
                                 )
                                 .setParameter("key", key)
+                                .setParameter("userId", userId)
                                 .getSingleResult();
 
                         getValuePromise.complete(value);
@@ -42,23 +65,24 @@ public class PreferencesDao extends GenericDao<Preference> {
                 }, false));
     }
 
-    public Future<Boolean> getBooleanValue(String key) {
+    public Future<Boolean> getBooleanValue(String key, String userId) {
         return Future.future(booleanRes ->
-                getValue(key)
+                getValue(key, userId)
                         .onSuccess(value -> booleanRes.complete(Boolean.getBoolean(value)))
                         .onFailure(booleanRes::fail));
     }
 
-    public Future<Preference> getByKey(String key) {
+    public Future<Preference> getByKey(String key, String userId) {
         return Future.future(getByKeyPromise ->
                 vertx.executeBlocking(() -> {
                     try (Session session = openSession()) {
                         Preference preference = session
-                                .createNativeQuery(
-                                        "SELECT s FROM settings s WHERE s.key = :key",
+                                .createQuery(
+                                        "SELECT p FROM Preference p WHERE p.key = :key AND p.userId = :userId",
                                         Preference.class
                                 )
                                 .setParameter("key", key)
+                                .setParameter("userId", userId)
                                 .getSingleResult();
 
                         getByKeyPromise.complete(preference);
@@ -67,7 +91,33 @@ public class PreferencesDao extends GenericDao<Preference> {
                     }
                     return null;
                 }, false));
+    }
 
+    public Future<Boolean> removeAllByUserId(String userId) {
+        return Future.future(getByKeyPromise ->
+                vertx.executeBlocking(() -> {
+                    try (Session session = openSession()) {
+                        try {
+                            session.getTransaction().begin();
+                            int deleted = session
+                                    .createMutationQuery(
+                                            "DELETE FROM Preference p WHERE p.userId = :userId"
+                                    )
+                                    .setParameter("userId", userId)
+                                    .executeUpdate();
+                            session.getTransaction().commit();
+                            getByKeyPromise.complete(deleted > 0);
+                        } catch (Exception e) {
+                            if (session.getTransaction().isActive()) {
+                                session.getTransaction().rollback();
+                            }
+                            getByKeyPromise.fail(e);
+                        }
+                    } catch (Exception e) {
+                        getByKeyPromise.fail(e);
+                    }
+                    return null;
+                }, false));
     }
 
     @Override

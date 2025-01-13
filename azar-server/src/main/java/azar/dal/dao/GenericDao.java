@@ -18,21 +18,16 @@ import java.util.Set;
  **/
 public abstract class GenericDao<T> {
     protected SessionFactory sessionFactory;
-    private Session currentSession;
     protected final Vertx vertx;
 
     @Inject
     public GenericDao(Vertx vertx, SessionFactoryProvider sessionFactoryProvider) {
         sessionFactory = sessionFactoryProvider.getSessionFactory();
-        currentSession = null;
         this.vertx = vertx;
     }
 
     protected Session openSession() {
-        if (currentSession == null || !currentSession.isOpen()) {
-            currentSession = sessionFactory.openSession();
-        }
-        return currentSession;
+        return sessionFactory.openSession();
     }
 
     public Future<Set<T>> getAll() {

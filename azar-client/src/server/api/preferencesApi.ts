@@ -1,11 +1,12 @@
 import {BaseRequest, PreferenceGetAllRequest, PreferenceUpsertRequest} from "./requests.ts";
 import apiClient from "./apiClient.ts";
 import {Preference} from "../../models/models.ts";
+import {PREFERENCE_ADD_API, PREFERENCE_DELETE_API, PREFERENCE_UPDATE_API} from "../../utils/constants.ts";
 
 export async function add(preferenceAddRequest: PreferenceUpsertRequest): Promise<boolean> {
 
     try {
-        const response = await apiClient.post('/preference/add', preferenceAddRequest);
+        const response = await apiClient.post(PREFERENCE_ADD_API, preferenceAddRequest);
         return response.status === 201;
     } catch (error) {
         console.error('Create preference failed:', error);
@@ -17,7 +18,6 @@ export async function getAllPreferences(preferenceGetAllRequest: PreferenceGetAl
     try {
         const response = await apiClient.post<Preference[]>(`/preference/getAll?page=${page}&limit=${limit}`, preferenceGetAllRequest);
         const preferences: Preference[] = response.data;
-        console.log(preferences);
         return preferences || []; // Return empty array if no data
     } catch (error) {
         console.error(`Error getting preferences from server (page: ${page})!`, error);
@@ -27,7 +27,7 @@ export async function getAllPreferences(preferenceGetAllRequest: PreferenceGetAl
 
 export async function deletePreference(preferenceId: string, baseRequest: BaseRequest): Promise<boolean> {
     try {
-        const response = await apiClient.post(`/preference/delete/${preferenceId}`, baseRequest);
+        const response = await apiClient.post(PREFERENCE_DELETE_API + preferenceId, baseRequest);
         if (response.status === 200) {
             return true;
         }
@@ -37,12 +37,12 @@ export async function deletePreference(preferenceId: string, baseRequest: BaseRe
     return false;
 }
 
-export async function updatePreference(preferenceUpdateRequest: PreferenceUpsertRequest): Promise<boolean> {
+export async function updatePreference(preferenceUpdateRequest: PreferenceUpsertRequest): Promise<Preference | undefined> {
     try {
-        const response = await apiClient.post('/preference/update', preferenceUpdateRequest);
-        return response.status === 200;
+        const response = await apiClient.post(PREFERENCE_UPDATE_API, preferenceUpdateRequest);
+        return response.data;
     } catch (error) {
         console.error('Update preference ' + preferenceUpdateRequest.preference.id + ' failed', error);
     }
-    return false;
+    return undefined;
 }

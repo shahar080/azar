@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Modal, Stack, TextField, Typography} from "@mui/material";
-import {User} from "../../models/models.ts";
+import {Box, Button, MenuItem, Modal, Stack, TextField, Typography} from "@mui/material";
+import {getUserTypeFromStr, User, UserType} from "../../models/models.ts";
 import {AccountCircle, Person} from "@mui/icons-material";
 import InputAdornment from "@mui/material/InputAdornment";
 
@@ -16,12 +16,14 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [userName, setUserName] = useState("");
+    const [userType, setUserType] = useState(UserType.STANDARD);
 
     useEffect(() => {
         if (user) {
             setFirstName(user.firstName || "");
             setLastName(user.lastName || "");
             setUserName(user.userName || "");
+            setUserType(getUserTypeFromStr(user.userType) || UserType.STANDARD);
         }
     }, [user]);
 
@@ -32,6 +34,7 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
                 firstName,
                 lastName,
                 userName,
+                userType,
             });
             onClose();
         }
@@ -105,6 +108,23 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
                         ),
                     }}
                 />
+
+                <TextField
+                    label="User Type"
+                    name="userType"
+                    value={userType}
+                    select
+                    fullWidth
+                    margin="normal"
+                    onChange={(e) => setUserType(getUserTypeFromStr(e.target.value))}
+                    disabled={mode === "view"}
+                >
+                    {Object.values(UserType).map((option) => (
+                        <MenuItem key={option} value={option}>
+                            {option}
+                        </MenuItem>
+                    ))}
+                </TextField>
 
                 {/* Actions */}
                 <Stack direction="row" spacing={2} mt={2}>

@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/general/ProtectedRoute.tsx";
 import UserManagement from "./pages/UserManagement.tsx";
 import LoadingOverlay from "./components/general/LoadingOverlay.tsx";
 import PreferenceManagement from "./pages/PreferenceManagement.tsx";
+import {LANDING_ROUTE, LOGIN_ROUTE, MANAGE_PREFERENCES_ROUTE, MANAGE_USERS_ROUTE} from "./utils/constants.ts";
 
 function App() {
 
@@ -12,10 +13,10 @@ function App() {
         <>
             <LoadingOverlay/>
             <Routes>
-                <Route path="/" element={<ProtectedRoute><HomePage/></ProtectedRoute>}/>
-                <Route path="/manage-users" element={<ProtectedRoute><UserManagement/></ProtectedRoute>}/>
-                <Route path="/manage-preferences" element={<ProtectedRoute><PreferenceManagement/></ProtectedRoute>}/>
-                <Route path="/login" element={<LandingPage/>}/>
+                <Route path={LANDING_ROUTE} element={<ProtectedRoute><HomePage/></ProtectedRoute>}/>
+                <Route path={MANAGE_USERS_ROUTE} element={<ProtectedRoute><UserManagement/></ProtectedRoute>}/>
+                <Route path={MANAGE_PREFERENCES_ROUTE} element={<ProtectedRoute><PreferenceManagement/></ProtectedRoute>}/>
+                <Route path={LOGIN_ROUTE} element={<LandingPage/>}/>
             </Routes>
         </>
     )

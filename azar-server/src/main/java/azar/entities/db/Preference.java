@@ -8,7 +8,10 @@ import lombok.*;
  * Date:   29/12/2024
  **/
 @Entity
-@Table(name = "Preferences")
+@Table(
+        name = "Preferences",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"key", "user_id"})
+)
 @Getter
 @Builder
 @NoArgsConstructor
@@ -20,14 +23,16 @@ public class Preference {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "key", nullable = false, unique = true)
+    @Setter
+    @Column(name = "key", nullable = false)
     private String key;
 
     @Setter
     @Column(name = "value", nullable = false)
     private String value;
 
-    @Column(name = "userId", nullable = false)
+    @Setter
+    @Column(name = "user_id", nullable = false)
     private String userId;
 }
 

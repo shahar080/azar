@@ -1,5 +1,8 @@
 import {fetchPDF} from "../server/api/pdfFileApi.ts";
 import {PdfFile} from "../models/models.ts";
+import {getAllPreferences} from "../server/api/preferencesApi.ts";
+import {DRAWER_PIN_STR} from "./constants.ts";
+import {setDrawerPinnedState} from "./AppState.ts";
 
 export function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -62,4 +65,15 @@ export async function downloadPdf(userName: string, pdfFile: PdfFile) {
     } catch (error) {
         console.error("Failed to download the PDF:", error);
     }
+}
+
+export function loadPreferences(userName: string, userId: string) {
+    getAllPreferences({currentUser: userName, userId: userId}, 1, 20)
+        .then((preferences) => {
+            const drawerPinned = preferences.filter(pref => pref.key === DRAWER_PIN_STR) || []
+            if (drawerPinned.length > 0) {
+                setDrawerPinnedState(JSON.parse(drawerPinned[0].value))
+            }
+        })
+        .catch((err) => console.error("Failed to load preferences:", err))
 }

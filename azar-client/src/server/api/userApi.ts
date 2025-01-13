@@ -2,10 +2,11 @@ import apiClient from "./apiClient.ts";
 import {LoginResponse, User} from "../../models/models.ts"
 import {BaseRequest, UserLoginRequest, UserUpsertRequest} from "./requests.ts";
 import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
+import {USER_ADD_API, USER_DELETE_API, USER_LOGIN_API, USER_UPDATE_API} from "../../utils/constants.ts";
 
 export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {
     try {
-        const response = await apiClient.post('/user/login', userLoginRequest);
+        const response = await apiClient.post(USER_LOGIN_API, userLoginRequest);
         const loginResponse: LoginResponse = response.data;
         if (loginResponse && loginResponse.success) {
             // Securely store the token
@@ -25,7 +26,7 @@ export async function login(userLoginRequest: UserLoginRequest): Promise<LoginRe
 export async function add(userAddRequest: UserUpsertRequest): Promise<boolean> {
 
     try {
-        const response = await apiClient.post('/user/ops/add', userAddRequest);
+        const response = await apiClient.post(USER_ADD_API, userAddRequest);
         return response.status === 201;
     } catch (error) {
         console.error('Create user failed:', error);
@@ -46,7 +47,7 @@ export async function getAllUsers(baseRequest: BaseRequest, page: number = 1, li
 
 export async function deleteUser(userId: string, baseRequest: BaseRequest): Promise<boolean> {
     try {
-        const response = await apiClient.post(`/user/ops/delete/${userId}`, baseRequest);
+        const response = await apiClient.post(USER_DELETE_API + userId, baseRequest);
         if (response.status === 200) {
             return true;
         }
@@ -58,7 +59,7 @@ export async function deleteUser(userId: string, baseRequest: BaseRequest): Prom
 
 export async function updateUser(userUpdateRequest: UserUpsertRequest): Promise<User | undefined> {
     try {
-        const response = await apiClient.post('/user/ops/update', userUpdateRequest);
+        const response = await apiClient.post(USER_UPDATE_API, userUpdateRequest);
         if (response.status === 200) {
             return response.data;
         }

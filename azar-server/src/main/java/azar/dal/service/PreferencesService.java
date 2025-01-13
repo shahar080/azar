@@ -25,6 +25,10 @@ public class PreferencesService extends GenericService<Preference> {
         return preferencesDao.getAll();
     }
 
+    public Future<Set<Preference>> getAllUsers(String userId) {
+        return preferencesDao.getAllUsers(userId);
+    }
+
     @Override
     public Future<Preference> add(Preference preference) {
         return preferencesDao.add(preference);
@@ -50,16 +54,16 @@ public class PreferencesService extends GenericService<Preference> {
         return preferencesDao.removeById(id);
     }
 
-    public Future<String> getValue(String key) {
-        return preferencesDao.getValue(key);
+    public Future<String> getValue(String key, String userId) {
+        return preferencesDao.getValue(key, userId);
     }
 
-    public Future<Boolean> getBooleanValue(String key) {
-        return preferencesDao.getBooleanValue(key);
+    public Future<Boolean> getBooleanValue(String key, String userId) {
+        return preferencesDao.getBooleanValue(key, userId);
     }
 
-    public Future<Preference> getByKey(String key) {
-        return preferencesDao.getByKey(key);
+    public Future<Preference> getByKey(String key, String userId) {
+        return preferencesDao.getByKey(key, userId);
     }
 
     public Future<List<Preference>> getAllClientPaginated(int offset, int limit, String whereClause) {

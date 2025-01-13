@@ -6,4 +6,7 @@ package azar.utils;
  **/
 public class Constants {
     public static final String THUMBNAIL = "thumbnail:";
+
+    /* Preferences  */
+    public static final String DRAWER_PINNED = "DRAWER_PINNED";
 }

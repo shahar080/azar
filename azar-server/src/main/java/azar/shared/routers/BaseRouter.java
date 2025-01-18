@@ -1,4 +1,4 @@
-package azar.cloud.routers;
+package azar.shared.routers;
 
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;

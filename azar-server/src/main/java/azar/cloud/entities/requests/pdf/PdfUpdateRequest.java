@@ -1,7 +1,7 @@
 package azar.cloud.entities.requests.pdf;
 
 import azar.cloud.entities.db.PdfFile;
-import azar.cloud.entities.requests.BaseRequest;
+import azar.shared.entities.requests.BaseRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

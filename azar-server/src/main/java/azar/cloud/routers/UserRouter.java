@@ -1,15 +1,16 @@
 package azar.cloud.routers;
 
-import azar.cloud.dal.service.UserService;
-import azar.cloud.entities.LoginResponse;
-import azar.cloud.entities.db.User;
+import azar.shared.dal.service.UserService;
+import azar.cloud.entities.responses.LoginResponse;
+import azar.shared.entities.db.User;
 import azar.cloud.entities.db.UserNameAndPassword;
-import azar.cloud.entities.requests.BaseRequest;
+import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.user.UserLoginRequest;
 import azar.cloud.entities.requests.user.UserUpsertRequest;
 import azar.cloud.utils.AuthService;
-import azar.cloud.utils.JsonManager;
+import azar.shared.utils.JsonManager;
 import azar.cloud.utils.PasswordManager;
+import azar.shared.routers.BaseRouter;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -110,21 +111,17 @@ public class UserRouter extends BaseRouter {
                                 if (existingUser != null) {
                                     sendBadRequestResponse(routingContext, "Username '%s' already exists!".formatted(user.getUserName()));
                                 } else {
-                                    // Add user to the system
-                                    addUser(routingContext, user);
+                                    user.setPassword(passwordManager.hashPassword(user.getPassword()));
+                                    userService.add(user)
+                                            .onSuccess(addedUser -> sendCreatedResponse(routingContext, jsonManager.toJson(addedUser.getId(), Integer.class),
+                                                    "User '%s' has registered successfully.".formatted(user.getUserName())))
+                                            .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while adding user: %s, error: %s".formatted(user.getUserName(), err.getMessage())));
+
                                 }
                             })
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while handling add user: %s, error: %s".formatted(user.getUserName(), err.getMessage())));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while handling add user: %s, error: %s".formatted(userUpsertRequest.getUser().getUserName(), err.getMessage())));
-    }
-
-    private void addUser(RoutingContext routingContext, User user) {
-        user.setPassword(passwordManager.hashPassword(user.getPassword()));
-        userService.add(user)
-                .onSuccess(addedUser -> sendCreatedResponse(routingContext, jsonManager.toJson(addedUser.getId(), Integer.class),
-                        "User '%s' has registered successfully.".formatted(user.getUserName())))
-                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while adding user: %s, error: %s".formatted(user.getUserName(), err.getMessage())));
     }
 
     private void getAllUsers(RoutingContext routingContext) {

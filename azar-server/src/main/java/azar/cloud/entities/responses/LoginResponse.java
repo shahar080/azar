@@ -1,6 +1,6 @@
-package azar.cloud.entities;
+package azar.cloud.entities.responses;
 
-import azar.cloud.entities.db.UserType;
+import azar.shared.entities.db.UserType;
 
 /**
  * Author: Shahar Azar

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Box, Button, MenuItem, Modal, TextField, Typography} from '@mui/material';
 import {User, UserType} from "../../models/models.ts";
-import PasswordField from "../general/PasswordField.tsx";
+import PasswordField from "../../../shared/components/PasswordField.tsx";
 import InputAdornment from "@mui/material/InputAdornment";
 import {AccountCircle, Person} from "@mui/icons-material";
 

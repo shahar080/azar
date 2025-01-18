@@ -14,7 +14,7 @@ import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
 import {formatDate, loadPreferences} from "../utils/utilities.ts";
-import {useLoading} from "../utils/LoadingContext.tsx";
+import {useLoading} from "../../shared/utils/LoadingContext.tsx";
 import {useToast} from "../utils/ToastContext.tsx";
 import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
 import {updatePreference} from "../server/api/preferencesApi.ts";

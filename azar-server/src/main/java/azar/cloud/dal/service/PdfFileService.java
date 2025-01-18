@@ -2,6 +2,7 @@ package azar.cloud.dal.service;
 
 import azar.cloud.entities.client.PdfFile;
 import azar.cloud.dal.dao.PdfFileDao;
+import azar.shared.dal.service.GenericService;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 
@@ -14,8 +15,12 @@ import java.util.Set;
  **/
 public class PdfFileService extends GenericService<azar.cloud.entities.db.PdfFile> {
 
+    private final PdfFileDao pdfFileDao;
+
     @Inject
-    private PdfFileDao pdfFileDao;
+    public PdfFileService(PdfFileDao pdfFileDao) {
+        this.pdfFileDao = pdfFileDao;
+    }
 
     @Override
     public Future<Set<azar.cloud.entities.db.PdfFile>> getAll() {

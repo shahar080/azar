@@ -1,12 +1,13 @@
 package azar.cloud.routers;
 
 import azar.cloud.dal.service.PreferencesService;
-import azar.cloud.dal.service.UserService;
+import azar.shared.dal.service.UserService;
 import azar.cloud.entities.db.Preference;
-import azar.cloud.entities.requests.BaseRequest;
+import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.preferences.PreferenceUpsertRequest;
 import azar.cloud.entities.requests.preferences.PreferencesGetAllRequest;
-import azar.cloud.utils.JsonManager;
+import azar.shared.utils.JsonManager;
+import azar.shared.routers.BaseRouter;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;

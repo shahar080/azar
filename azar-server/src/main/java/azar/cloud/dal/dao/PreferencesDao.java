@@ -1,6 +1,7 @@
 package azar.cloud.dal.dao;
 
 import azar.cloud.entities.db.Preference;
+import azar.shared.dal.dao.GenericDao;
 import azar.shared.factory.SessionFactoryProvider;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

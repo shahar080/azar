@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import {Provider} from 'react-redux';
 import store from './cloud/store/store';
-import {LoadingProvider} from './cloud/utils/LoadingContext.tsx';
+import {LoadingProvider} from './shared/utils/LoadingContext.tsx';
 import {ToastProvider} from "./cloud/utils/ToastContext.tsx";
 import {ThemeProvider} from "@mui/material";
 import theme from "./theme.ts";

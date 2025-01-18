@@ -1,4 +1,4 @@
-package azar.cloud.utils.email;
+package azar.shared.utils.email;
 
 import azar.shared.properties.AppProperties;
 import com.google.inject.Inject;

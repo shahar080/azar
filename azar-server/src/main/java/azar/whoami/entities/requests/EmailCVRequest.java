@@ -1,5 +1,6 @@
 package azar.whoami.entities.requests;
 
+import azar.shared.entities.requests.EmptyBaseRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailCVRequest {
+public class EmailCVRequest extends EmptyBaseRequest {
     private String email;
 }

@@ -1,12 +1,12 @@
 import React, {useState} from "react";
 import {Box, Button, TextField, Typography} from "@mui/material";
-import {login} from "../../server/api/userApi.ts";
-import PasswordField from "./PasswordField.tsx";
-import {LoginResponse} from "../../models/models.ts";
+import {login} from "../../../shared/server/api/userApi.ts";
+import PasswordField from "../../../shared/components/PasswordField.tsx";
 import {AxiosError} from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 import {AccountCircle} from "@mui/icons-material";
-import {useLoading} from "../../utils/LoadingContext.tsx";
+import {useLoading} from "../../../shared/utils/LoadingContext.tsx";
+import {LoginResponse} from "../../server/api/responses.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;

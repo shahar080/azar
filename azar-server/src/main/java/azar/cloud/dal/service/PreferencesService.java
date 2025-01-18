@@ -2,10 +2,9 @@ package azar.cloud.dal.service;
 
 import azar.cloud.dal.dao.PreferencesDao;
 import azar.cloud.entities.db.Preference;
+import azar.shared.dal.service.GenericService;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -15,10 +14,13 @@ import java.util.Set;
  * Date:   29/12/2024
  **/
 public class PreferencesService extends GenericService<Preference> {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private final PreferencesDao preferencesDao;
 
     @Inject
-    private PreferencesDao preferencesDao;
+    public PreferencesService(PreferencesDao preferencesDao) {
+        this.preferencesDao = preferencesDao;
+    }
 
     @Override
     public Future<Set<Preference>> getAll() {

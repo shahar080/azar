@@ -12,8 +12,8 @@ import {AppDispatch} from "../../store/store.ts";
 import {UserType} from "../../models/models.ts";
 import {useTheme} from "@mui/material/styles";
 import {useNavigate} from "react-router-dom";
-import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
 import {LANDING_ROUTE, LOGIN_ROUTE} from '../../../shared/utils/reactRoutes.ts';
+import {clearCredentials} from "../../../shared/utils/utilities.ts";
 
 interface DrawerMenuProps {
     open: boolean;
@@ -111,10 +111,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({
 
 function handleLogOut({onNavigate, dispatch}: OnLogoutProps): void {
     dispatch(logout());
-    setAuthToken('');
-    setUserName('');
-    setUserType('');
-    setUserId('');
+    clearCredentials();
     onNavigate(LOGIN_ROUTE);
 }
 

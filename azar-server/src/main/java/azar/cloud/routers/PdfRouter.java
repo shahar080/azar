@@ -1,13 +1,14 @@
 package azar.cloud.routers;
 
 import azar.cloud.dal.service.PdfFileService;
-import azar.cloud.dal.service.UserService;
+import azar.shared.dal.service.UserService;
 import azar.cloud.entities.db.PdfFile;
-import azar.cloud.entities.requests.BaseRequest;
+import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.pdf.PdfUpdateRequest;
 import azar.cloud.utils.CacheManager;
 import azar.cloud.utils.Constants;
-import azar.cloud.utils.JsonManager;
+import azar.shared.utils.JsonManager;
+import azar.shared.routers.BaseRouter;
 import azar.shared.utils.Utilities;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;

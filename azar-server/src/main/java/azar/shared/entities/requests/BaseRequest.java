@@ -1,4 +1,4 @@
-package azar.cloud.entities.requests;
+package azar.shared.entities.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

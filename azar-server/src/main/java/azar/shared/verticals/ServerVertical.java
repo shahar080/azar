@@ -6,6 +6,7 @@ import azar.cloud.routers.TokenRouter;
 import azar.cloud.routers.UserRouter;
 import azar.shared.properties.AppProperties;
 import azar.whoami.routers.CVRouter;
+import azar.whoami.routers.WhoAmIRouter;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -32,17 +33,19 @@ public class ServerVertical extends AbstractVerticle {
     private final PreferencesRouter preferencesRouter;
     private final TokenRouter tokenRouter;
     private final CVRouter cvRouter;
+    private final WhoAmIRouter whoAmIRouter;
 
     @Inject
     public ServerVertical(AppProperties appProperties, PdfRouter pdfRouter, UserRouter userRouter,
                           PreferencesRouter preferencesRouter, TokenRouter tokenRouter,
-                          CVRouter cvRouter) {
+                          CVRouter cvRouter, WhoAmIRouter whoAmIRouter) {
         this.appProperties = appProperties;
         this.pdfRouter = pdfRouter;
         this.userRouter = userRouter;
         this.preferencesRouter = preferencesRouter;
         this.tokenRouter = tokenRouter;
         this.cvRouter = cvRouter;
+        this.whoAmIRouter = whoAmIRouter;
     }
 
     @Override
@@ -76,6 +79,7 @@ public class ServerVertical extends AbstractVerticle {
             apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx));
             apiRouter.route("/preference/*").subRouter(preferencesRouter.create(vertx));
             apiRouter.route("/cv/*").subRouter(cvRouter.create(vertx));
+            apiRouter.route("/whoami/*").subRouter(whoAmIRouter.create(vertx));
 
             apiRouter.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
 

@@ -1,8 +1,5 @@
+import { BaseRequest } from "../../../shared/server/api/requests.ts";
 import {PdfFile, Preference, User, UserNameAndPassword} from "../../models/models.ts";
-
-export interface BaseRequest {
-    currentUser: string;
-}
 
 export interface UserLoginRequest extends BaseRequest {
     userNameAndPassword: UserNameAndPassword;

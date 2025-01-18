@@ -8,7 +8,7 @@ import {RootState} from "../store/store.ts";
 import {getUserTypeFromStr, Preference} from "../models/models.ts";
 import {useTheme} from "@mui/material/styles";
 import SearchBar from "../components/general/SearchBar.tsx";
-import {useLoading} from "../utils/LoadingContext.tsx";
+import {useLoading} from "../../shared/utils/LoadingContext.tsx";
 import {getAllPreferences, updatePreference} from "../server/api/preferencesApi.ts";
 import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
 import {DRAWER_PIN_STR} from "../utils/constants.ts";

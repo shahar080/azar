@@ -1,6 +1,5 @@
-export interface BaseModel {
-    id?: string;
-}
+import { BaseModel } from "../../shared/models/models";
+
 export interface User extends BaseModel {
     firstName: string;
     lastName: string;
@@ -29,14 +28,6 @@ export function getUserTypeFromStr(value: string | null): UserType {
     }
     // Return the default value if not found
     return UserType.STANDARD;
-}
-
-export interface LoginResponse {
-    success: boolean;
-    token: string;
-    userName: string;
-    userType: UserType;
-    userId: number;
 }
 
 export interface PdfFile extends BaseModel {

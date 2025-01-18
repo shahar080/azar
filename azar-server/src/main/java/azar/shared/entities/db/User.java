@@ -1,4 +1,4 @@
-package azar.cloud.entities.db;
+package azar.shared.entities.db;
 
 import jakarta.persistence.*;
 import lombok.*;

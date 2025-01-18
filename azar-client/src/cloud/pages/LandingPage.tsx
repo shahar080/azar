@@ -6,8 +6,8 @@ import {login} from "../store/authSlice.ts";
 import {LoginForm} from "../components/general/LoginForm.tsx";
 import {CLOUD_ROUTE} from "../../shared/utils/reactRoutes.ts";
 import {GeneralMenu} from "../../shared/GeneralMenu.tsx";
-import {LoginResponse} from "../models/models.ts";
 import bgImage from '../../img/whoami/bg.jpg';
+import {LoginResponse} from "../server/api/responses.ts";
 
 const CloudLandingPage: React.FC = () => {
     const [showLoginForm, setShowLoginForm] = useState(false);

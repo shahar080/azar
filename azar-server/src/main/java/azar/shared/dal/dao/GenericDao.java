@@ -1,4 +1,4 @@
-package azar.cloud.dal.dao;
+package azar.shared.dal.dao;
 
 import azar.shared.factory.SessionFactoryProvider;
 import com.google.inject.Inject;

@@ -1,10 +1,11 @@
-package azar.cloud.dal.dao;
+package azar.shared.dal.dao;
 
+import azar.cloud.dal.dao.PreferencesDao;
 import azar.cloud.entities.db.Preference;
-import azar.cloud.entities.db.User;
-import azar.cloud.entities.db.UserType;
+import azar.shared.entities.db.User;
+import azar.shared.entities.db.UserType;
 import azar.shared.factory.SessionFactoryProvider;
-import azar.cloud.utils.JsonManager;
+import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.vertx.core.Future;

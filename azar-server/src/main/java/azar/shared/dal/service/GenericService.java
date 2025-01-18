@@ -1,4 +1,4 @@
-package azar.cloud.dal.service;
+package azar.shared.dal.service;
 
 import io.vertx.core.Future;
 

@@ -1,7 +1,7 @@
 package azar.cloud.entities.requests.preferences;
 
 import azar.cloud.entities.db.Preference;
-import azar.cloud.entities.requests.BaseRequest;
+import azar.shared.entities.requests.BaseRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -17,9 +17,11 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
 
-        <mapping class="azar.cloud.entities.db.User"/>
+        <mapping class="azar.shared.entities.db.User"/>
         <mapping class="azar.cloud.entities.db.PdfFile"/>
         <mapping class="azar.cloud.entities.db.Preference"/>
+        <mapping class="azar.whoami.entities.db.WhoAmIData"/>
+        <mapping class="azar.whoami.entities.db.CV"/>
 
     </session-factory>
 </hibernate-configuration>

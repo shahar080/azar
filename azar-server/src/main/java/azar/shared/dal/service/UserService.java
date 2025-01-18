@@ -1,8 +1,8 @@
-package azar.cloud.dal.service;
+package azar.shared.dal.service;
 
-import azar.cloud.dal.dao.UserDao;
-import azar.cloud.entities.db.User;
-import azar.cloud.utils.JsonManager;
+import azar.shared.dal.dao.UserDao;
+import azar.shared.entities.db.User;
+import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import org.slf4j.Logger;
@@ -18,11 +18,14 @@ import java.util.Set;
 public class UserService extends GenericService<User> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Inject
-    private UserDao userDao;
+    private final UserDao userDao;
+    private final JsonManager jsonManager;
 
     @Inject
-    private JsonManager jsonManager;
+    public UserService(UserDao userDao, JsonManager jsonManager) {
+        this.userDao = userDao;
+        this.jsonManager = jsonManager;
+    }
 
     /**
      * A wrapper function to add a new user to the db

@@ -12,16 +12,17 @@ interface PdfModalProps {
 }
 
 const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState<string | null>(null);
-    const [scale, setScale] = useState(1.0);
+    const [scale, setScale] = useState(isMobile ? 0.7 : 1.0);
     const [containerWidth, setContainerWidth] = useState<number>(0);
+    const [containerHeight, setContainerHeight] = useState<number>(0);
     const [status, setStatus] = useState<"loading" | "success" | "error" | "">("");
     const [emailButtonText, setEmailButtonText] = useState("Email me");
-
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     useEffect(() => {
         if (open) {
@@ -47,37 +48,39 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                 setEmailButtonText("Email me");
                 break;
             case "loading":
-                setEmailButtonText("Sending..");
+                setEmailButtonText("Sending...");
                 break;
             case "success":
-                setEmailButtonText("Send again")
+                setEmailButtonText("Send again");
                 break;
             case "error":
                 setEmailButtonText("Try again");
         }
     }, [status]);
 
-    // Dynamically adjust container width and scale
+    // Dynamically adjust container dimensions and scale
     useEffect(() => {
-        const updateContainerWidth = () => {
+        const updateContainerDimensions = () => {
             const container = document.getElementById("pdf-container");
             if (container) {
                 const width = container.offsetWidth;
+                const height = container.offsetHeight;
                 setContainerWidth(width);
+                setContainerHeight(height);
 
-                // Adjust scale based on screen size
-                if (isMobile) {
-                    setScale(width / 500); // For mobile, fit to smaller width
-                } else {
-                    setScale(width / 800); // Default scaling for larger screens
-                }
+                // Adjust scale based on container dimensions
+                const pdfDefaultWidth = 800;
+                const pdfDefaultHeight = 1131;
+                const scaleWidth = width / pdfDefaultWidth;
+                const scaleHeight = height / pdfDefaultHeight;
+                setScale(Math.min(scaleWidth, scaleHeight));
             }
         };
 
-        updateContainerWidth();
-        window.addEventListener("resize", updateContainerWidth);
+        updateContainerDimensions();
+        window.addEventListener("resize", updateContainerDimensions);
         return () => {
-            window.removeEventListener("resize", updateContainerWidth);
+            window.removeEventListener("resize", updateContainerDimensions);
         };
     }, [isMobile]);
 
@@ -149,12 +152,26 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                     id="pdf-container"
                     sx={{
                         flex: 1,
-                        overflow: "hidden",
+                        overflowY: "auto",
                         display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
+                        justifyContent: isMobile ? "start" : "center",
+                        alignItems: "flex-start",
                         backgroundColor: "#f5f5f5",
                         position: "relative",
+                        "&::-webkit-scrollbar": {
+                            width: "8px", // Scrollbar width
+                        },
+                        "&::-webkit-scrollbar-track": {
+                            backgroundColor: "#f0f0f0", // Track color
+                            borderRadius: "4px", // Rounded corners for track
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                            backgroundColor: "#90caf9", // Thumb color (MUI primary light)
+                            borderRadius: "4px", // Rounded corners for thumb
+                        },
+                        "&::-webkit-scrollbar-thumb:hover": {
+                            backgroundColor: "#42a5f5", // Thumb hover color (MUI primary main)
+                        },
                     }}
                 >
                     {/* Loading Overlay */}
@@ -179,25 +196,30 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
 
                     {pdfUrl ? (
                         <Document file={pdfUrl}>
-                            <Page pageNumber={1} width={containerWidth * scale}/>
+                            <Page
+                                pageNumber={1}
+                                width={containerWidth}
+                                height={containerHeight}
+                                scale={scale}
+                            />
                         </Document>
                     ) : (
                         <Typography>Loading PDF...</Typography>
                     )}
 
                     {/* Zoom Buttons */}
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "10px",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "5px",
-                            zIndex: 20,
-                        }}
-                    >
-                        {!isMobile &&
+                    {!isMobile && (
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: "10px",
+                                right: "10px",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "5px",
+                                zIndex: 20,
+                            }}
+                        >
                             <Button
                                 variant="contained"
                                 size="small"
@@ -205,8 +227,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                             >
                                 +
                             </Button>
-                        }
-                        {!isMobile &&
                             <Button
                                 variant="contained"
                                 size="small"
@@ -214,8 +234,8 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                             >
                                 -
                             </Button>
-                        }
-                    </Box>
+                        </Box>
+                    )}
                 </Box>
 
                 {/* Footer Buttons */}

@@ -3,19 +3,28 @@ import {BrowserRouter} from 'react-router-dom';
 import './index.css'
 import App from './App.tsx'
 import {Provider} from 'react-redux';
-import store from './store/store';
-import {LoadingProvider} from './utils/LoadingContext.tsx';
-import {ToastProvider} from "./utils/ToastContext.tsx";
+import store from './cloud/store/store';
+import {LoadingProvider} from './cloud/utils/LoadingContext.tsx';
+import {ToastProvider} from "./cloud/utils/ToastContext.tsx";
+import {ThemeProvider} from "@mui/material";
+import theme from "./theme.ts";
+import {pdfjs} from "react-pdf";
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
+// Set the worker source to use a CDN-hosted worker
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
 createRoot(document.getElementById('root')!).render(
-    <Provider store={store}>
-        <BrowserRouter>
-            <LoadingProvider>
-                <ToastProvider>
-                    <App/>
-                </ToastProvider>
-            </LoadingProvider>
-        </BrowserRouter>
-    </Provider>
+    <ThemeProvider theme={theme}>
+        <Provider store={store}>
+            <BrowserRouter>
+                <LoadingProvider>
+                    <ToastProvider>
+                        <App/>
+                    </ToastProvider>
+                </LoadingProvider>
+            </BrowserRouter>
+        </Provider>
+    </ThemeProvider>
 )

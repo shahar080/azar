@@ -1,2 +1,4 @@
 server.port=8080
 server.host=localhost
+email.sender.email=test@test.com
+email.sender.password=supersecretpassword

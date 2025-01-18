@@ -4,7 +4,6 @@
     font-weight: 400;
 
     color-scheme: light dark;
-    color: rgba(255, 1, 255, 0.87);
     background: linear-gradient(135deg, #89CFF0, #4A90E2); /* Sky blue to medium blue */
     background-size: 400% 400%;
     animation: gradientAnimation 8s ease infinite;
@@ -69,6 +68,11 @@ button:hover {
 button:focus,
 button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
+}
+
+html .MuiButton-root {
+    text-transform: none;
+!important;
 }
 
 @media (prefers-color-scheme: light) {

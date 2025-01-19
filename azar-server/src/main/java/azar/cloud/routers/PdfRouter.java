@@ -199,24 +199,17 @@ public class PdfRouter extends BaseRouter {
 
         if (cachedThumbnail != null) {
             logger.info("Sending cached thumbnail for {}", pdfId);
-            sendThumbnailResponse(routingContext, cachedThumbnail);
+            sendOKImageResponse(routingContext, "Send thumbnail back to client", cachedThumbnail);
         } else {
             logger.info("Calculating thumbnail for {}", pdfId);
             pdfFileService.getThumbnailById(Integer.valueOf(pdfId))
                     .onSuccess(dbThumbnail -> {
                         cacheManager.put(Constants.THUMBNAIL + pdfId, dbThumbnail);
                         logger.info("Sending thumbnail for {}", pdfId);
-                        sendThumbnailResponse(routingContext, dbThumbnail);
+                        sendOKImageResponse(routingContext, "Send thumbnail back to client", dbThumbnail);
                     })
                     .onFailure(err -> sendInternalErrorResponse(routingContext, "Database error, error: %s".formatted(err.getMessage())));
         }
-    }
-
-    private void sendThumbnailResponse(RoutingContext routingContext, byte[] thumbnail) {
-        routingContext.response()
-                .putHeader("Content-Type", "image/png")
-                .putHeader("Content-Length", String.valueOf(thumbnail.length))
-                .end(Buffer.buffer(thumbnail));
     }
 
     private void handlePDFGet(RoutingContext routingContext) {
@@ -234,11 +227,7 @@ public class PdfRouter extends BaseRouter {
                         return;
                     }
 
-                    // Send the PDF data
-                    routingContext.response()
-                            .putHeader("Content-Type", "application/pdf")
-                            .putHeader("Content-Disposition", "inline; filename=" + pdfFile.getFileName())
-                            .end(Buffer.buffer(pdfFile.getData()));
+                    sendOKPDFResponse(routingContext, "Sending PDF back to client", pdfFile.getFileName(), pdfFile.getData());
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Failed to retrieve PDF: %s, error: %s".formatted(pdfId, err.getMessage())));
     }

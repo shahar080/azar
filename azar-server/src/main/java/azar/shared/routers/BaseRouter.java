@@ -1,5 +1,6 @@
 package azar.shared.routers;
 
+import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,23 @@ public abstract class BaseRouter {
         } else {
             logger.warn(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
         }
+    }
+
+    protected void sendOKPDFResponse(RoutingContext routingContext, String logMessage, String fileName, byte[] data) {
+        routingContext.response()
+                .putHeader("Content-Type", "application/pdf")
+                .putHeader("Content-Disposition", "inline; filename=" + fileName)
+                .setStatusCode(200)
+                .end(Buffer.buffer(data));
+        logger.info(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
+    }
+
+    protected void sendOKImageResponse(RoutingContext routingContext, String logMessage, byte[] data) {
+        routingContext.response()
+                .putHeader("Content-Type", "image/png")
+                .putHeader("Content-Length", String.valueOf(data.length))
+                .end(Buffer.buffer(data));
+        logger.info(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
     }
 
     protected boolean isInvalidUsername(RoutingContext routingContext, String userName) {

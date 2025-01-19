@@ -59,10 +59,7 @@ public class CVRouter extends BaseRouter {
                         sendInternalErrorResponse(routingContext, "Could not get CV from db!");
                         return;
                     }
-                    routingContext.response()
-                            .putHeader("Content-Type", "application/pdf")
-                            .putHeader("Content-Disposition", "inline; filename=" + optionalCV.get().getFileName())
-                            .end(Buffer.buffer(optionalCV.get().getData()));
+                    sendOKPDFResponse(routingContext, "Sending CV back to client", optionalCV.get().getFileName(), optionalCV.get().getData());
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting cv data, error: %s".formatted(err.getMessage())));
     }

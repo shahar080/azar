@@ -3,11 +3,12 @@ import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 interface AppBarHeaderProps {
-    onMenuToggle: () => void;
+    onMenuToggle?: () => void;
     onLogoClick: () => void;
+    title?: string;
 }
 
-const AppBarHeader: React.FC<AppBarHeaderProps> = ({onMenuToggle, onLogoClick}) => {
+const AppBarHeader: React.FC<AppBarHeaderProps> = ({onMenuToggle, onLogoClick, title = "Azar Cloud"}) => {
     return (
         <AppBar position="fixed" sx={{zIndex: (theme) => theme.zIndex.drawer + 1}}>
             <Toolbar>
@@ -15,7 +16,7 @@ const AppBarHeader: React.FC<AppBarHeaderProps> = ({onMenuToggle, onLogoClick}) 
                     <MenuIcon/>
                 </IconButton>
                 <Typography variant="h6" sx={{flexGrow: 1}}>
-                    Azar Cloud
+                    {title}
                 </Typography>
                 <img
                     src="/logo.png"

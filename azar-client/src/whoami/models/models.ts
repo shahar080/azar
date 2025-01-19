@@ -9,9 +9,15 @@ export interface WhoAmIData extends BaseModel {
     mainContentSecondTitle: string;
     mainContentSecondData: string[];
     cvButton: string;
+    photos: string[];
 }
 
 export interface CV extends BaseModel {
     fileName: string;
     data: string
+}
+
+export interface EmailData extends BaseModel {
+    title: string;
+    body: string;
 }

@@ -1,11 +1,10 @@
 import React from 'react';
 import {Navigate} from 'react-router-dom';
-import {getAuthToken} from "../../utils/AppState.ts";
-import {LOGIN_ROUTE} from "../../../shared/utils/reactRoutes.ts";
+import {getAuthToken} from "../../../shared/utils/AppState.ts";
 
-const ProtectedRoute = ({children}: { children: React.ReactElement }) => {
+const ProtectedRoute = ({children, redirectPath}: { children: React.ReactElement, redirectPath: string }) => {
     const token = getAuthToken();
-    return token ? children : <Navigate to={LOGIN_ROUTE}/>;
+    return token ? children : <Navigate to={redirectPath}/>;
 };
 
 export default ProtectedRoute;

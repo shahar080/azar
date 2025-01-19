@@ -7,7 +7,7 @@ import {useLoading} from "../../shared/utils/LoadingContext.tsx";
 import PasswordField from "../../shared/components/PasswordField.tsx";
 import {getUserTypeFromStr, UserType} from "../../cloud/models/models.ts";
 import {login} from "../../shared/server/api/userApi.ts";
-import {getUserType} from "../../cloud/utils/AppState.ts";
+import {getUserType} from "../../shared/utils/AppState.ts";
 import {LoginResponse} from "../../cloud/server/api/responses.ts";
 
 interface LoginFormProps {

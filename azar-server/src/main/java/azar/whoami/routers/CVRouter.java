@@ -8,20 +8,23 @@ import azar.shared.utils.email.EmailManager;
 import azar.whoami.dal.service.CVService;
 import azar.whoami.entities.db.CV;
 import azar.whoami.entities.requests.EmailCVRequest;
-import azar.whoami.entities.requests.UpdateCVRequest;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+import java.util.List;
 
 /**
  * Author: Shahar Azar
  * Date:   18/01/2025
  **/
 public class CVRouter extends BaseRouter {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final JsonManager jsonManager;
     private final EmailManager emailManager;
@@ -50,17 +53,16 @@ public class CVRouter extends BaseRouter {
     }
 
     private void handleGet(RoutingContext routingContext) {
-        cvService.getAll()
-                .onSuccess(resList -> {
-                    Optional<CV> cv = resList.stream().findFirst();
-                    if (cv.isEmpty()) {
+        cvService.getCVFromDB()
+                .onSuccess(optionalCV -> {
+                    if (optionalCV.isEmpty()) {
                         sendInternalErrorResponse(routingContext, "Could not get CV from db!");
                         return;
                     }
                     routingContext.response()
                             .putHeader("Content-Type", "application/pdf")
-                            .putHeader("Content-Disposition", "inline; filename=" + cv.get().getFileName())
-                            .end(Buffer.buffer(cv.get().getData()));
+                            .putHeader("Content-Disposition", "inline; filename=" + optionalCV.get().getFileName())
+                            .end(Buffer.buffer(optionalCV.get().getData()));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting cv data, error: %s".formatted(err.getMessage())));
     }
@@ -86,26 +88,57 @@ public class CVRouter extends BaseRouter {
     }
 
     private void handleUpdate(RoutingContext routingContext) {
-        UpdateCVRequest updateCVRequest = jsonManager.fromJson(routingContext.body().asString(), UpdateCVRequest.class);
-        String currentUser = updateCVRequest.getCurrentUser();
-        if (isInvalidUsername(routingContext, currentUser)) return;
+        String userName = routingContext.request().getFormAttribute("userName");
+        if (isInvalidUsername(routingContext, userName)) return;
 
-        userService.getUserByUserName(updateCVRequest.getCurrentUser())
+        List<FileUpload> fileUploads = routingContext.fileUploads();
+        if (fileUploads.isEmpty()) {
+            sendBadRequestResponse(routingContext, "No file uploaded");
+            return;
+        }
+
+        FileUpload fileUpload = fileUploads.getFirst();
+        String uploadedFilePath = fileUpload.uploadedFileName();
+
+        userService.getUserByUserName(userName)
                 .onSuccess(dbUser -> {
                     if (dbUser == null) {
-                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(updateCVRequest.getCurrentUser()));
+                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(userName));
                         return;
                     }
                     if (!dbUser.isAdmin()) {
-                        sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(updateCVRequest.getCurrentUser()));
+                        sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(userName));
                         return;
                     }
-                    CV cv = updateCVRequest.getCv();
 
-                    cvService.update(cv)
-                            .onSuccess(updatedCV -> sendOKResponse(routingContext, jsonManager.toJson(updatedCV), "User %s updated cv".formatted(currentUser)))
-                            .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while updating cv, error: %s".formatted(err.getMessage())));
+                    routingContext.vertx().fileSystem().readFile(uploadedFilePath)
+                            .onSuccess(buffer ->
+                                    cvService.getCVFromDB().
+                                            onSuccess(optionalCV -> {
+                                                CV cv = optionalCV.orElse(new CV());
+                                                cv.setFileName(fileUpload.fileName());
+                                                cv.setData(buffer.getBytes());
+
+                                                try {
+                                                    cvService.update(cv)
+                                                            .onSuccess(savedCV -> {
+                                                                savedCV.setData(new byte[0]);
+                                                                sendCreatedResponse(routingContext, jsonManager.toJson(savedCV),
+                                                                        "CV %s uploaded successfully by %s".formatted(savedCV.getFileName(), userName));
+                                                            })
+                                                            .onFailure(err -> sendInternalErrorResponse(routingContext, "Error saving %s, error: %s".formatted(fileUpload.fileName(), err.getMessage())));
+                                                } catch (Exception err) {
+                                                    sendInternalErrorResponse(routingContext, "Unexpected error while uploading cv %s".formatted(fileUpload.fileName()));
+                                                }
+
+                                            })
+                                            .onFailure(_ -> sendInternalErrorResponse(routingContext, "Unexpected error while uploading cv %s".formatted(fileUpload.fileName()))))
+                            .onFailure(err -> sendInternalErrorResponse(routingContext, "Failed to read upload cv %s, error: %s".formatted(fileUpload.fileName(), err.getMessage())));
                 })
-                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while updating cv, error: %s".formatted(err.getMessage())));
+                .onFailure(err -> sendInternalErrorResponse(routingContext, "Failed to read upload cv %s, error: %s".formatted(fileUpload.fileName(), err.getMessage())))
+                .eventually(() -> routingContext.vertx().fileSystem().delete(uploadedFilePath)
+                        .onSuccess(_ -> logger.info("Temporary file deleted: {}", uploadedFilePath))
+                        .onFailure(err -> logger.warn("Failed to delete temporary file: {}", uploadedFilePath, err)));
     }
+
 }

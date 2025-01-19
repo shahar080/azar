@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,4 +43,7 @@ public class WhoAmIData {
 
     @Column(name = "cv_button", nullable = false)
     private String cvButton;
+
+    @Column(name = "photos", columnDefinition = "text[]")
+    private List<String> photos = new ArrayList<>();
 }

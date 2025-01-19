@@ -1,6 +1,5 @@
 import apiClient from "../../../shared/server/api/apiClient.ts";
-import {EmailCVRequest, UpdateCVRequest} from "./requests.ts";
-import {CV} from "../../models/models.ts";
+import {EmailCVRequest} from "./requests.ts";
 import {CV_GET_API, CV_SEND_TO_EMAIL_API, CV_UPDATE_API} from "../../utils/constants.ts";
 
 export async function getCV(): Promise<Blob> {
@@ -28,12 +27,19 @@ export async function sendToEmail(emailCVRequest: EmailCVRequest): Promise<boole
     return false;
 }
 
-export async function updateCV(updateCVRequest: UpdateCVRequest): Promise<CV> {
+export async function updateCV(cv: File, userName: string): Promise<boolean> {
     try {
-        const response = await apiClient.post(CV_UPDATE_API, updateCVRequest);
-        return response.data;
+        const formData = new FormData();
+        formData.append("file", cv);
+        formData.append("userName", userName);
+        const response = await apiClient.post(CV_UPDATE_API, formData, {
+            headers: {"Content-Type": "multipart/form-data"},
+        });
+        if (response.status === 201) {
+            return true;
+        }
     } catch (error) {
-        console.error("Failed to update cv", error);
-        throw error;
+        console.error('Upload cv failed', error);
     }
+    return false;
 }

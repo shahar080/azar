@@ -22,6 +22,7 @@
         <mapping class="azar.cloud.entities.db.Preference"/>
         <mapping class="azar.whoami.entities.db.WhoAmIData"/>
         <mapping class="azar.whoami.entities.db.CV"/>
+        <mapping class="azar.whoami.entities.db.EmailData"/>
 
     </session-factory>
 </hibernate-configuration>

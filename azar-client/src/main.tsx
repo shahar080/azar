@@ -3,9 +3,9 @@ import {BrowserRouter} from 'react-router-dom';
 import './index.css'
 import App from './App.tsx'
 import {Provider} from 'react-redux';
-import store from './cloud/store/store';
+import store from './shared/store/store';
 import {LoadingProvider} from './shared/utils/LoadingContext.tsx';
-import {ToastProvider} from "./cloud/utils/ToastContext.tsx";
+import {ToastProvider} from "./shared/utils/ToastContext.tsx";
 import {ThemeProvider} from "@mui/material";
 import theme from "./theme.ts";
 import {pdfjs} from "react-pdf";

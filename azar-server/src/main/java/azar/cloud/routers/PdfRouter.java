@@ -5,7 +5,7 @@ import azar.shared.dal.service.UserService;
 import azar.cloud.entities.db.PdfFile;
 import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.pdf.PdfUpdateRequest;
-import azar.cloud.utils.CacheManager;
+import azar.shared.utils.CacheManager;
 import azar.cloud.utils.Constants;
 import azar.shared.utils.JsonManager;
 import azar.shared.routers.BaseRouter;

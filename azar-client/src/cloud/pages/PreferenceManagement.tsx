@@ -1,21 +1,26 @@
 import React, {useEffect, useState} from "react";
 import {Box, CssBaseline, FormControlLabel, Grid, Switch, Toolbar, useMediaQuery} from "@mui/material";
-import AppBarHeader from "../components/general/AppBarHeader.tsx";
-import DrawerMenu from "../components/general/DrawerMenu.tsx";
+import AppBarHeader from "../../shared/components/AppBarHeader.tsx";
+import CloudDrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import {RootState} from "../store/store.ts";
+import {RootState} from "../../shared/store/store.ts";
 import {getUserTypeFromStr, Preference} from "../models/models.ts";
 import {useTheme} from "@mui/material/styles";
 import SearchBar from "../components/general/SearchBar.tsx";
 import {useLoading} from "../../shared/utils/LoadingContext.tsx";
 import {getAllPreferences, updatePreference} from "../server/api/preferencesApi.ts";
-import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
+import {
+    getDrawerPinnedState,
+    getUserId,
+    getUserName,
+    getUserType,
+    setDrawerPinnedState
+} from "../../shared/utils/AppState.ts";
 import {DRAWER_PIN_STR} from "../utils/constants.ts";
-import {useToast} from "../utils/ToastContext.tsx";
-import {LOGIN_ROUTE, MANAGE_USERS_ROUTE} from "../../shared/utils/reactRoutes.ts";
-
-const drawerWidth = 240;
+import {useToast} from "../../shared/utils/ToastContext.tsx";
+import {CLOUD_LOGIN_ROUTE, CLOUD_MANAGE_USERS_ROUTE, CLOUD_ROUTE} from "../../shared/utils/reactRoutes.ts";
+import {drawerWidth} from "../../shared/utils/constants.ts";
 
 const CloudPreferenceManagement: React.FC = () => {
     const theme = useTheme();
@@ -41,7 +46,7 @@ const CloudPreferenceManagement: React.FC = () => {
         if (!isLoggedIn) {
             setPreferences([]);
             setFilteredPreferences([]);
-            navigate(LOGIN_ROUTE);
+            navigate(CLOUD_LOGIN_ROUTE);
         }
     }, [isLoggedIn, navigate]);
 
@@ -134,7 +139,7 @@ const CloudPreferenceManagement: React.FC = () => {
     };
 
     const handleManageUser = () => {
-        navigate(MANAGE_USERS_ROUTE);
+        navigate(CLOUD_MANAGE_USERS_ROUTE);
     }
 
     const handleManagePreferences = () => {
@@ -170,15 +175,13 @@ const CloudPreferenceManagement: React.FC = () => {
             <CssBaseline/>
 
             {/* AppBar */}
-            <AppBarHeader onMenuToggle={toggleDrawer} onLogoClick={() => navigate('/')}/>
+            <AppBarHeader onMenuToggle={toggleDrawer} onLogoClick={() => navigate(CLOUD_ROUTE)}/>
 
             {/* Drawer */}
-            <DrawerMenu
+            <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
                 onPinToggle={pinDrawer}
-                onNavigate={() => {
-                }}
                 onManageUser={handleManageUser}
                 onManagePreferences={handleManagePreferences}
                 onClose={() => setDrawerOpen(false)}
@@ -224,21 +227,6 @@ const CloudPreferenceManagement: React.FC = () => {
                     </Grid>
                 </Grid>
             </Box>
-
-            {/*<PreferenceModal*/}
-            {/*    open={isViewModalOpen}*/}
-            {/*    preference={selectedPreferenceForOp}*/}
-            {/*    onClose={() => setViewModalOpen(false)}*/}
-            {/*    mode="view"*/}
-            {/*/>*/}
-
-            {/*<PreferenceModal*/}
-            {/*    open={isEditModalOpen}*/}
-            {/*    preference={selectedPreferenceForOp}*/}
-            {/*    onClose={() => setEditModalOpen(false)}*/}
-            {/*    onSave={handleSaveEdit}*/}
-            {/*    mode="edit"*/}
-            {/*/>*/}
         </Box>
     );
 };

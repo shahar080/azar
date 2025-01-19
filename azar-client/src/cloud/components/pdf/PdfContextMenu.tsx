@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from "react";
 import {Menu, MenuItem, useMediaQuery} from "@mui/material";
 import {PdfFile} from "../../models/models.ts";
 import {useTheme} from "@mui/material/styles";
-import {getUserName} from "../../utils/AppState.ts";
+import {getUserName} from "../../../shared/utils/AppState.ts";
 
 
 interface PdfContextMenuProps {

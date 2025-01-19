@@ -1,4 +1,4 @@
-import {CV, WhoAmIData} from "../../models/models.ts";
+import {EmailData, WhoAmIData} from "../../models/models.ts";
 import {BaseRequest, EmptyBaseRequest} from "../../../shared/server/api/requests.ts";
 
 
@@ -10,6 +10,6 @@ export interface UpdateWhoAmIDataRequest extends BaseRequest {
     whoAmIData: WhoAmIData;
 }
 
-export interface UpdateCVRequest extends BaseRequest{
-    cv: CV;
+export interface UpdateEmailDataRequest extends BaseRequest{
+    emailData: EmailData;
 }

@@ -1,9 +1,9 @@
 import apiClient from "./apiClient.ts";
 import {User} from "../../../cloud/models/models.ts"
 import {BaseRequest, UserLoginRequest, UserUpsertRequest} from "../../../cloud/server/api/requests.ts";
-import {setAuthToken, setUserId, setUserName, setUserType} from "../../../cloud/utils/AppState.ts";
+import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
 import {USER_ADD_API, USER_DELETE_API, USER_LOGIN_API, USER_UPDATE_API} from "../../../cloud/utils/constants.ts";
-import { LoginResponse } from "../../../cloud/server/api/responses.ts";
+import {LoginResponse} from "../../../cloud/server/api/responses.ts";
 
 export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {
     try {

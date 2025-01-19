@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {fetchPDF} from "../../server/api/pdfFileApi.ts";
-import {getUserName} from "../../utils/AppState.ts";
+import {getUserName} from "../../../shared/utils/AppState.ts";
 
 const ShowPDF: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText}) => {
     const [showPDFUrl, setShowPDFUrl] = useState<string | null>(null);

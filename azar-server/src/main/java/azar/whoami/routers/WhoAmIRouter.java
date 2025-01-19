@@ -13,9 +13,11 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Author: Shahar Azar
@@ -45,15 +47,14 @@ public class WhoAmIRouter extends BaseRouter {
     }
 
     private void handleGet(RoutingContext routingContext) {
-        whoAmIService.getAll()
-                .onSuccess(resList -> {
-                    Optional<WhoAmIData> whoAmIData = resList.stream().findFirst();
-                    if (whoAmIData.isEmpty()) {
+        whoAmIService.getWhoAmIFromDB()
+                .onSuccess(optionalWhoAmIData -> {
+                    if (optionalWhoAmIData.isEmpty()) {
                         logger.warn("Could not get WhoAmI data from db, returning default value..");
                         sendOKResponse(routingContext, jsonManager.toJson(getDefaultData()), "Sent DEFAULT WhoAmIData back to client");
                         return;
                     }
-                    sendOKResponse(routingContext, jsonManager.toJson(whoAmIData.get()), "Sent WhoAmIData back to client");
+                    sendOKResponse(routingContext, jsonManager.toJson(optionalWhoAmIData.get()), "Sent WhoAmIData back to client");
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting WhoAmI data, error: %s".formatted(err.getMessage())));
     }
@@ -73,10 +74,27 @@ public class WhoAmIRouter extends BaseRouter {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(updateWhoAmIDataRequest.getCurrentUser()));
                         return;
                     }
-                    WhoAmIData whoAmIData = updateWhoAmIDataRequest.getWhoAmIData();
+                    whoAmIService.getWhoAmIFromDB()
+                            .onSuccess(optionalWhoAmIData -> {
+                                WhoAmIData whoAmIData = optionalWhoAmIData.orElse(new WhoAmIData());
+                                WhoAmIData clientWhoAmIData = updateWhoAmIDataRequest.getWhoAmIData();
+                                whoAmIData.setHeaderTitle(clientWhoAmIData.getHeaderTitle());
+                                whoAmIData.setHeaderIntro(clientWhoAmIData.getHeaderIntro());
+                                whoAmIData.setMainContentQuestion(clientWhoAmIData.getMainContentQuestion());
+                                whoAmIData.setMainContentFirstTitle(clientWhoAmIData.getMainContentFirstTitle());
+                                whoAmIData.setMainContentFirstData(clientWhoAmIData.getMainContentFirstData());
+                                whoAmIData.setMainContentSecondTitle(clientWhoAmIData.getMainContentSecondTitle());
+                                whoAmIData.setMainContentSecondData(clientWhoAmIData.getMainContentSecondData());
+                                whoAmIData.setCvButton(clientWhoAmIData.getCvButton());
 
-                    whoAmIService.update(whoAmIData)
-                            .onSuccess(updatedWhoAmIData -> sendOKResponse(routingContext, jsonManager.toJson(updatedWhoAmIData), "User %s updated WhoAmIData".formatted(currentUser)))
+                                List<String> photos = clientWhoAmIData.getPhotos();
+                                photos.forEach(photo -> Base64.getDecoder().decode(photo));
+                                whoAmIData.setPhotos(photos);
+
+                                whoAmIService.update(whoAmIData)
+                                        .onSuccess(_ -> sendOKResponse(routingContext, "Successfully updated WhoAmI data", "User %s updated WhoAmIData".formatted(currentUser)))
+                                        .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while updating WhoAmIData, error: %s".formatted(err.getMessage())));
+                            })
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while updating WhoAmIData, error: %s".formatted(err.getMessage())));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error while updating WhoAmIData, error: %s".formatted(err.getMessage())));
@@ -99,6 +117,18 @@ public class WhoAmIRouter extends BaseRouter {
         mainContentSecondData.add("√ Innovator: Delivered impactful solutions, including stateless microservices and custom infrastructure improvements.");
         whoAmIData.setMainContentSecondData(mainContentSecondData);
         whoAmIData.setCvButton("→ Learn more ←");
+        List<String> photos = new ArrayList<>();
+        try {
+            byte[] fileContent = Files.readAllBytes(Path.of("D:\\dev\\azar\\azar-server\\src\\main\\resources\\photo-1.jpg"));
+            photos.add(Base64.getEncoder().encodeToString(fileContent));
+            fileContent = Files.readAllBytes(Path.of("D:\\dev\\azar\\azar-server\\src\\main\\resources\\photo-2.jpg"));
+            photos.add(Base64.getEncoder().encodeToString(fileContent));
+            fileContent = Files.readAllBytes(Path.of("D:\\dev\\azar\\azar-server\\src\\main\\resources\\photo-3.jpg"));
+            photos.add(Base64.getEncoder().encodeToString(fileContent));
+        } catch (Exception e) {
+
+        }
+        whoAmIData.setPhotos(photos);
         return whoAmIData;
     }
 }

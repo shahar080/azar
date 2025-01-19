@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Box, CssBaseline, Grid, Paper, Toolbar, useMediaQuery} from "@mui/material";
-import AppBarHeader from "../components/general/AppBarHeader.tsx";
-import DrawerMenu from "../components/general/DrawerMenu.tsx";
+import AppBarHeader from "../../shared/components/AppBarHeader.tsx";
+import CloudDrawerMenu from "../components/general/DrawerMenu.tsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import {RootState} from "../store/store.ts";
+import {RootState} from "../../shared/store/store.ts";
 import PDFSearchBar from "../components/pdf/PDFSearchBar.tsx";
 import PdfList from "../components/pdf/PdfList.tsx";
 import ExtendedPdfInfo from "../components/pdf/ExtendedPdfInfo.tsx";
@@ -15,13 +15,23 @@ import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
 import {formatDate, loadPreferences} from "../utils/utilities.ts";
 import {useLoading} from "../../shared/utils/LoadingContext.tsx";
-import {useToast} from "../utils/ToastContext.tsx";
-import {getDrawerPinnedState, getUserId, getUserName, getUserType, setDrawerPinnedState} from "../utils/AppState.ts";
+import {useToast} from "../../shared/utils/ToastContext.tsx";
+import {
+    getDrawerPinnedState,
+    getUserId,
+    getUserName,
+    getUserType,
+    setDrawerPinnedState
+} from "../../shared/utils/AppState.ts";
 import {updatePreference} from "../server/api/preferencesApi.ts";
-import {LOGIN_ROUTE, MANAGE_PREFERENCES_ROUTE, MANAGE_USERS_ROUTE} from "../../shared/utils/reactRoutes.ts";
+import {
+    CLOUD_LOGIN_ROUTE,
+    CLOUD_MANAGE_PREFERENCES_ROUTE,
+    CLOUD_MANAGE_USERS_ROUTE,
+    CLOUD_ROUTE
+} from "../../shared/utils/reactRoutes.ts";
 import {DRAWER_PIN_STR} from "../utils/constants.ts";
-
-const drawerWidth = 240;
+import {drawerWidth} from "../../shared/utils/constants.ts";
 
 const CloudHomePage: React.FC = () => {
     const theme = useTheme();
@@ -50,7 +60,7 @@ const CloudHomePage: React.FC = () => {
         if (!isLoggedIn) {
             setPdfs([]);
             setFilteredPdfs([]);
-            navigate(LOGIN_ROUTE);
+            navigate(CLOUD_LOGIN_ROUTE);
         }
     }, [isLoggedIn, navigate]);
 
@@ -174,11 +184,11 @@ const CloudHomePage: React.FC = () => {
     };
 
     const handleRegisterUser = () => {
-        navigate(MANAGE_USERS_ROUTE)
+        navigate(CLOUD_MANAGE_USERS_ROUTE)
     };
 
     const handleMangePreferences = () => {
-        navigate(MANAGE_PREFERENCES_ROUTE)
+        navigate(CLOUD_MANAGE_PREFERENCES_ROUTE)
     }
 
     const toggleDrawer = () => {
@@ -250,15 +260,13 @@ const CloudHomePage: React.FC = () => {
             <CssBaseline/>
 
             {/* AppBar */}
-            <AppBarHeader onMenuToggle={toggleDrawer} onLogoClick={() => navigate('/')}/>
+            <AppBarHeader onMenuToggle={toggleDrawer} onLogoClick={() => navigate(CLOUD_ROUTE)}/>
 
             {/* Drawer */}
-            <DrawerMenu
+            <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
                 onPinToggle={pinDrawer}
-                onNavigate={() => {
-                }}
                 onManageUser={handleRegisterUser}
                 onManagePreferences={handleMangePreferences}
                 onClose={() => setDrawerOpen(false)}

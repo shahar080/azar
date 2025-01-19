@@ -5,7 +5,9 @@ import azar.whoami.dal.dao.CVDao;
 import azar.whoami.entities.db.CV;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -15,10 +17,12 @@ import java.util.Set;
 public class CVService extends GenericService<CV> {
 
     private final CVDao cvDao;
+    private final Vertx vertx;
 
     @Inject
-    public CVService(CVDao cvDao) {
+    public CVService(CVDao cvDao, Vertx vertx) {
         this.cvDao = cvDao;
+        this.vertx = vertx;
     }
 
     @Override
@@ -49,5 +53,18 @@ public class CVService extends GenericService<CV> {
     @Override
     public Future<Boolean> removeById(Integer id) {
         return cvDao.removeById(id);
+    }
+
+    public Future<Optional<CV>> getCVFromDB() {
+        return Future.future(cvPromise -> {
+            vertx.executeBlocking(() -> {
+                getAll()
+                        .onSuccess(resList -> {
+                            cvPromise.complete(resList.stream().findFirst());
+                        })
+                        .onFailure(err -> cvPromise.complete(Optional.empty()));
+                return null;
+            }, false);
+        });
     }
 }

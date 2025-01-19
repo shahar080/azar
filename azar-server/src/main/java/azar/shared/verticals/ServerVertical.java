@@ -6,6 +6,7 @@ import azar.cloud.routers.TokenRouter;
 import azar.cloud.routers.UserRouter;
 import azar.shared.properties.AppProperties;
 import azar.whoami.routers.CVRouter;
+import azar.whoami.routers.EmailRouter;
 import azar.whoami.routers.WhoAmIRouter;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
@@ -34,11 +35,12 @@ public class ServerVertical extends AbstractVerticle {
     private final TokenRouter tokenRouter;
     private final CVRouter cvRouter;
     private final WhoAmIRouter whoAmIRouter;
+    private final EmailRouter emailRouter;
 
     @Inject
     public ServerVertical(AppProperties appProperties, PdfRouter pdfRouter, UserRouter userRouter,
                           PreferencesRouter preferencesRouter, TokenRouter tokenRouter,
-                          CVRouter cvRouter, WhoAmIRouter whoAmIRouter) {
+                          CVRouter cvRouter, WhoAmIRouter whoAmIRouter, EmailRouter emailRouter) {
         this.appProperties = appProperties;
         this.pdfRouter = pdfRouter;
         this.userRouter = userRouter;
@@ -46,6 +48,7 @@ public class ServerVertical extends AbstractVerticle {
         this.tokenRouter = tokenRouter;
         this.cvRouter = cvRouter;
         this.whoAmIRouter = whoAmIRouter;
+        this.emailRouter = emailRouter;
     }
 
     @Override
@@ -80,6 +83,7 @@ public class ServerVertical extends AbstractVerticle {
             apiRouter.route("/preference/*").subRouter(preferencesRouter.create(vertx));
             apiRouter.route("/cv/*").subRouter(cvRouter.create(vertx));
             apiRouter.route("/whoami/*").subRouter(whoAmIRouter.create(vertx));
+            apiRouter.route("/email/*").subRouter(emailRouter.create(vertx));
 
             apiRouter.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
 

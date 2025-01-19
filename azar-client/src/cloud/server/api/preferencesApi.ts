@@ -1,7 +1,8 @@
-import {BaseRequest, PreferenceGetAllRequest, PreferenceUpsertRequest} from "./requests.ts";
+import {PreferenceGetAllRequest, PreferenceUpsertRequest} from "./requests.ts";
 import apiClient from "../../../shared/server/api/apiClient.ts";
 import {Preference} from "../../models/models.ts";
 import {PREFERENCE_ADD_API, PREFERENCE_DELETE_API, PREFERENCE_UPDATE_API} from "../../utils/constants.ts";
+import {BaseRequest} from "../../../shared/server/api/requests.ts";
 
 export async function add(preferenceAddRequest: PreferenceUpsertRequest): Promise<boolean> {
 

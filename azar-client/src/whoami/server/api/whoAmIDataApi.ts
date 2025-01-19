@@ -13,10 +13,10 @@ export async function getWhoAmIData(): Promise<WhoAmIData> {
     }
 }
 
-export async function updateWhoAmIData(updateWhoAmIDataRequest: UpdateWhoAmIDataRequest): Promise<WhoAmIData> {
+export async function updateWhoAmIData(updateWhoAmIDataRequest: UpdateWhoAmIDataRequest): Promise<boolean> {
     try {
         const response = await apiClient.post(WHO_AM_I_UPDATE_API, updateWhoAmIDataRequest);
-        return response.data;
+        return response.status === 200;
     } catch (error) {
         console.error("Failed to update WhoAmIData", error);
         throw error;

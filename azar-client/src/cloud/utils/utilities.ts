@@ -2,7 +2,7 @@ import {fetchPDF} from "../server/api/pdfFileApi.ts";
 import {PdfFile} from "../models/models.ts";
 import {getAllPreferences} from "../server/api/preferencesApi.ts";
 import {DRAWER_PIN_STR} from "./constants.ts";
-import {setDrawerPinnedState} from "./AppState.ts";
+import {setDrawerPinnedState} from "../../shared/utils/AppState.ts";
 
 export function formatDate(dateString: string): string {
     const date = new Date(dateString);

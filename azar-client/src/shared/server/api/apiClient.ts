@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {logout} from "../../../cloud/store/authSlice.ts";
-import {getAuthToken, setAuthToken} from "../../../cloud/utils/AppState.ts";
+import {logout} from "../../store/authSlice.ts";
+import {getAuthToken, setAuthToken} from "../../utils/AppState.ts";
 import {TOKEN_REFRESH_API} from "../../../cloud/utils/constants.ts";
 import {BASE_URL_API} from "../../utils/constants.ts";
 

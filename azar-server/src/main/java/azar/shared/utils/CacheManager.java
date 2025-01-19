@@ -1,4 +1,4 @@
-package azar.cloud.utils;
+package azar.shared.utils;
 
 
 import com.google.common.cache.Cache;

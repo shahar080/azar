@@ -4,7 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import {Preference} from "../../models/models.ts";
-import {getUserId} from "../../utils/AppState.ts";
+import {getUserId} from "../../../shared/utils/AppState.ts";
 
 interface AddPreferenceModalProps {
     open: boolean;

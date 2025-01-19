@@ -1,7 +1,8 @@
 import apiClient from "../../../shared/server/api/apiClient.ts";
 import {PdfFile} from "../../models/models.ts";
-import {BaseRequest, PdfUpdateRequest} from "./requests.ts";
+import {PdfUpdateRequest} from "./requests.ts";
 import {PDF_DELETE_API, PDF_GET_API, PDF_THUMBNAIL_API, PDF_UPDATE_API, PDF_UPLOAD_API} from "../../utils/constants.ts";
+import {BaseRequest} from "../../../shared/server/api/requests.ts";
 
 export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFile | undefined> {
     try {

@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {Box, Button, Typography} from "@mui/material";
 import {useDispatch} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import {login} from "../store/authSlice.ts";
+import {login} from "../../shared/store/authSlice.ts";
 import {LoginForm} from "../components/general/LoginForm.tsx";
 import {CLOUD_ROUTE} from "../../shared/utils/reactRoutes.ts";
 import {GeneralMenu} from "../../shared/GeneralMenu.tsx";

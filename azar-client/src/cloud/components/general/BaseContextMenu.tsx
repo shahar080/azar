@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from "react";
 import {Menu, MenuItem} from "@mui/material";
-import {BaseModel} from "../../models/models.ts";
+import {BaseModel} from "../../../shared/models/models";
 
 interface BaseContextMenuProps<T> {
     anchorPosition: { top: number; left: number } | null;

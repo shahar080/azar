@@ -47,7 +47,7 @@ public class CVRouter extends BaseRouter {
 
         cvRouter.route("/get").handler(this::handleGet);
         cvRouter.route("/sendToEmail").handler(this::handleSendToEmail);
-        cvRouter.route("/update").handler(this::handleUpdate);
+        cvRouter.route("/ops/update").handler(this::handleUpdate);
 
         return cvRouter;
     }

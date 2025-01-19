@@ -67,8 +67,8 @@ export async function downloadPdf(userName: string, pdfFile: PdfFile) {
     }
 }
 
-export function loadPreferences(userName: string, userId: string) {
-    getAllPreferences({currentUser: userName, userId: userId}, 1, 20)
+export async function loadPreferences(userName: string, userId: string) {
+    await getAllPreferences({currentUser: userName, userId: userId}, 1, 20)
         .then((preferences) => {
             const drawerPinned = preferences.filter(pref => pref.key === DRAWER_PIN_STR) || []
             if (drawerPinned.length > 0) {

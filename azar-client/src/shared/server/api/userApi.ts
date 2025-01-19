@@ -1,9 +1,16 @@
 import apiClient from "./apiClient.ts";
 import {User} from "../../../cloud/models/models.ts"
-import {BaseRequest, UserLoginRequest, UserUpsertRequest} from "../../../cloud/server/api/requests.ts";
+import {UserLoginRequest, UserUpsertRequest} from "../../../cloud/server/api/requests.ts";
 import {setAuthToken, setUserId, setUserName, setUserType} from "../../utils/AppState.ts";
-import {USER_ADD_API, USER_DELETE_API, USER_LOGIN_API, USER_UPDATE_API} from "../../../cloud/utils/constants.ts";
+import {
+    USER_ADD_API,
+    USER_DELETE_API,
+    USER_GET_ALL_API,
+    USER_LOGIN_API,
+    USER_UPDATE_API
+} from "../../../cloud/utils/constants.ts";
 import {LoginResponse} from "../../../cloud/server/api/responses.ts";
+import {BaseRequest} from "./requests.ts";
 
 export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {
     try {
@@ -37,7 +44,7 @@ export async function add(userAddRequest: UserUpsertRequest): Promise<boolean> {
 
 export async function getAllUsers(baseRequest: BaseRequest, page: number = 1, limit: number = 20): Promise<User[]> {
     try {
-        const response = await apiClient.post<User[]>(`/user/getAll?page=${page}&limit=${limit}`, baseRequest);
+        const response = await apiClient.post<User[]>(USER_GET_ALL_API + `?page=${page}&limit=${limit}`, baseRequest);
         const users: User[] = response.data;
         return users || []; // Return empty array if no data
     } catch (error) {

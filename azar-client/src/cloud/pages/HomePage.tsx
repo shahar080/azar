@@ -69,7 +69,11 @@ const CloudHomePage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        loadPreferences(getUserName(), getUserId());
+        loadPreferences(getUserName(), getUserId())
+            .then(() => {
+                setDrawerPinned(isDesktop && getDrawerPinnedState());
+                setDrawerOpen(isDesktop && getDrawerPinnedState());
+            });
     }, []);
 
     useEffect(() => {

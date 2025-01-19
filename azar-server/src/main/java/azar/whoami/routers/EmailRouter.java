@@ -34,8 +34,8 @@ public class EmailRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router cvRouter = Router.router(vertx);
 
-        cvRouter.route("/get").handler(this::handleGet);
-        cvRouter.route("/update").handler(this::handleUpdate);
+        cvRouter.route("/ops/get").handler(this::handleGet);
+        cvRouter.route("/ops/update").handler(this::handleUpdate);
 
         return cvRouter;
     }

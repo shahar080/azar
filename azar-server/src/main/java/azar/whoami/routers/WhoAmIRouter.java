@@ -41,7 +41,7 @@ public class WhoAmIRouter extends BaseRouter {
         Router cvRouter = Router.router(vertx);
 
         cvRouter.route("/get").handler(this::handleGet);
-        cvRouter.route("/update").handler(this::handleUpdate);
+        cvRouter.route("/ops/update").handler(this::handleUpdate);
 
         return cvRouter;
     }

@@ -1,16 +1,16 @@
 package azar.cloud.routers;
 
-import azar.shared.dal.service.UserService;
-import azar.cloud.entities.responses.LoginResponse;
-import azar.shared.entities.db.User;
 import azar.cloud.entities.db.UserNameAndPassword;
-import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.user.UserLoginRequest;
 import azar.cloud.entities.requests.user.UserUpsertRequest;
+import azar.cloud.entities.responses.LoginResponse;
 import azar.cloud.utils.AuthService;
-import azar.shared.utils.JsonManager;
 import azar.cloud.utils.PasswordManager;
+import azar.shared.dal.service.UserService;
+import azar.shared.entities.db.User;
+import azar.shared.entities.requests.BaseRequest;
 import azar.shared.routers.BaseRouter;
+import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -18,7 +18,6 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.JWTAuthHandler;
 
 /**
  * Author: Shahar Azar
@@ -42,9 +41,8 @@ public class UserRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router userRouter = Router.router(vertx);
 
-        userRouter.route("/ops/*").handler(JWTAuthHandler.create(jwtAuth));
         userRouter.route("/login").handler(this::handleUserLogin);
-        userRouter.route("/getAll").handler(this::getAllUsers);
+        userRouter.route("/ops/getAll").handler(this::getAllUsers);
         userRouter.route("/ops/add").handler(this::handleAddUser);
         userRouter.route("/ops/update").handler(this::handleUpdateUser);
         userRouter.route("/ops/delete/:id").handler(this::handleDeleteUser);

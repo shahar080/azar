@@ -18,6 +18,7 @@ export const PREFERENCE_UPDATE_API = PREFERENCE_PREFIX + "/update";
 const USER_PREFIX = "/user"
 export const USER_LOGIN_API = USER_PREFIX + "/login";
 export const USER_ADD_API = USER_PREFIX + OPS_PREFIX + "/add";
+export const USER_GET_ALL_API = USER_PREFIX + OPS_PREFIX + "/getAll";
 export const USER_DELETE_API = USER_PREFIX + OPS_PREFIX + "/delete/";
 export const USER_UPDATE_API = USER_PREFIX + OPS_PREFIX + "/update";
 

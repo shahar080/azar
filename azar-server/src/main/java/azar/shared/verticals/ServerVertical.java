@@ -4,6 +4,7 @@ import azar.cloud.routers.PdfRouter;
 import azar.cloud.routers.PreferencesRouter;
 import azar.cloud.routers.TokenRouter;
 import azar.cloud.routers.UserRouter;
+import azar.cloud.utils.AuthService;
 import azar.shared.properties.AppProperties;
 import azar.whoami.routers.CVRouter;
 import azar.whoami.routers.EmailRouter;
@@ -12,10 +13,12 @@ import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,7 @@ public class ServerVertical extends AbstractVerticle {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final AppProperties appProperties;
+    private final JWTAuth jwtAuth;
     private final PdfRouter pdfRouter;
     private final UserRouter userRouter;
     private final PreferencesRouter preferencesRouter;
@@ -37,11 +41,14 @@ public class ServerVertical extends AbstractVerticle {
     private final WhoAmIRouter whoAmIRouter;
     private final EmailRouter emailRouter;
 
+
     @Inject
-    public ServerVertical(AppProperties appProperties, PdfRouter pdfRouter, UserRouter userRouter,
-                          PreferencesRouter preferencesRouter, TokenRouter tokenRouter,
-                          CVRouter cvRouter, WhoAmIRouter whoAmIRouter, EmailRouter emailRouter) {
+    public ServerVertical(AppProperties appProperties, AuthService authService, PdfRouter pdfRouter,
+                          UserRouter userRouter, PreferencesRouter preferencesRouter,
+                          TokenRouter tokenRouter, CVRouter cvRouter, WhoAmIRouter whoAmIRouter,
+                          EmailRouter emailRouter) {
         this.appProperties = appProperties;
+        this.jwtAuth = authService.getJwtAuth();
         this.pdfRouter = pdfRouter;
         this.userRouter = userRouter;
         this.preferencesRouter = preferencesRouter;
@@ -77,6 +84,7 @@ public class ServerVertical extends AbstractVerticle {
 
             apiRouter.route().handler(this::catchAllRequests);
 
+            apiRouter.route("/ops/*").handler(JWTAuthHandler.create(jwtAuth));
             apiRouter.route("/pdf/*").subRouter(pdfRouter.create(vertx));
             apiRouter.route("/user/*").subRouter(userRouter.create(vertx));
             apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx));

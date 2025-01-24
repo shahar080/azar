@@ -10,7 +10,6 @@ import azar.whoami.entities.db.CV;
 import azar.whoami.entities.requests.EmailCVRequest;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -18,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static azar.cloud.utils.Constants.DEFAULT_CV_FILE_NAME;
+import static azar.cloud.utils.Constants.DEFAULT_CV_FILE_PATH;
 
 /**
  * Author: Shahar Azar
@@ -56,7 +58,8 @@ public class CVRouter extends BaseRouter {
         cvService.getCVFromDB()
                 .onSuccess(optionalCV -> {
                     if (optionalCV.isEmpty()) {
-                        sendInternalErrorResponse(routingContext, "Could not get CV from db!");
+                        logger.warn("Could not get cv from db, returning default value..");
+                        sendOKPDFResponse(routingContext, "Sending DEFAULT CV back to client", DEFAULT_CV_FILE_NAME, getFileContent(DEFAULT_CV_FILE_PATH));
                         return;
                     }
                     sendOKPDFResponse(routingContext, "Sending CV back to client", optionalCV.get().getFileName(), optionalCV.get().getData());

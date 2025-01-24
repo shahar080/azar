@@ -5,6 +5,9 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Author: Shahar Azar
  * Date:   20/12/2024
@@ -81,6 +84,23 @@ public abstract class BaseRouter {
         }
         logger.info("{} made a request for path: {}", userName, routingContext.currentRoute().getPath());
         return false;
+    }
+
+
+    protected byte[] getFileContent(String fileName) {
+        byte[] fileContent = new byte[0];
+        try (InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream(fileName)) {
+            if (inputStream == null) {
+                logger.warn("File not found: %s".formatted(fileName));
+                return fileContent;
+            }
+
+            fileContent = inputStream.readAllBytes();
+        } catch (IOException e) {
+            logger.warn("Could not load file: %s".formatted(fileName));
+        }
+        return fileContent;
     }
 
 }

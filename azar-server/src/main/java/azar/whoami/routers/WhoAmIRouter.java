@@ -13,11 +13,11 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+
+import static azar.cloud.utils.Constants.*;
 
 /**
  * Author: Shahar Azar
@@ -118,17 +118,14 @@ public class WhoAmIRouter extends BaseRouter {
         whoAmIData.setMainContentSecondData(mainContentSecondData);
         whoAmIData.setCvButton("→ Learn more ←");
         List<String> photos = new ArrayList<>();
-        try {
-            byte[] fileContent = Files.readAllBytes(Path.of("D:\\dev\\azar\\azar-server\\src\\main\\resources\\photo-1.jpg"));
-            photos.add(Base64.getEncoder().encodeToString(fileContent));
-            fileContent = Files.readAllBytes(Path.of("D:\\dev\\azar\\azar-server\\src\\main\\resources\\photo-2.jpg"));
-            photos.add(Base64.getEncoder().encodeToString(fileContent));
-            fileContent = Files.readAllBytes(Path.of("D:\\dev\\azar\\azar-server\\src\\main\\resources\\photo-3.jpg"));
-            photos.add(Base64.getEncoder().encodeToString(fileContent));
-        } catch (Exception e) {
-
-        }
+        byte[] fileContent = getFileContent(DEFAULT_PHOTO_1_FILE_PATH);
+        photos.add(Base64.getEncoder().encodeToString(fileContent));
+        fileContent = getFileContent(DEFAULT_PHOTO_2_FILE_PATH);
+        photos.add(Base64.getEncoder().encodeToString(fileContent));
+        fileContent = getFileContent(DEFAULT_PHOTO_3_FILE_PATH);
+        photos.add(Base64.getEncoder().encodeToString(fileContent));
         whoAmIData.setPhotos(photos);
         return whoAmIData;
     }
+
 }

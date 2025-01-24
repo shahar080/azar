@@ -31,6 +31,7 @@ export function GeneralMenu() {
                         backgroundColor: "primary",
                         color: "secondary",
                         textTransform: "none",
+                        borderRadius: "10vw"
                     }}
                 >
                     Menu

@@ -12,6 +12,7 @@ import azar.whoami.routers.WhoAmIRouter;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
@@ -21,6 +22,8 @@ import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static azar.cloud.utils.Constants.DOMAIN_URL;
 
 
 /**
@@ -128,7 +131,30 @@ public class ServerVertical extends AbstractVerticle {
 
     private void catchAllRequests(RoutingContext routingContext) {
         logger.info("A request was made for path: {}", routingContext.request().path());
+
+        if (!appProperties.getBooleanProperty("IS_DEV", false)) {
+            // validate header
+            if (!validateHeader(routingContext)) {
+                return;
+            }
+        }
+
         routingContext.next();
+    }
+
+    private boolean validateHeader(RoutingContext context) {
+
+        String requiredHeader = context.request().getHeader("X-Forwarded-Host");
+
+        if (requiredHeader == null || !requiredHeader.equalsIgnoreCase(DOMAIN_URL)) {
+            context.response()
+                    .setStatusCode(400)
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
+                    .end("Missing or invalid headers");
+            return false;
+        }
+
+        return true;
     }
 
 }

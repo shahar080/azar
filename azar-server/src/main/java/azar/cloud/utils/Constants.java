@@ -5,11 +5,13 @@ package azar.cloud.utils;
  * Date:   25/12/2024
  **/
 public class Constants {
+    /* General */
+    public static String DOMAIN_URL = "shahar-azar.com";
+
     public static final String THUMBNAIL = "thumbnail:";
 
     /* Preferences  */
     public static final String DRAWER_PINNED = "DRAWER_PINNED";
-
 
     /* Default files path */
     public static final String DEFAULT_APP_PROPERTIES_FILE_PATH = "app.properties";
@@ -19,4 +21,5 @@ public class Constants {
     public static final String DEFAULT_PHOTO_1_FILE_PATH = BACKUP_PREFIX + "photo-1.jpg";
     public static final String DEFAULT_PHOTO_2_FILE_PATH = BACKUP_PREFIX + "photo-2.jpg";
     public static final String DEFAULT_PHOTO_3_FILE_PATH = BACKUP_PREFIX + "photo-3.jpg";
+
 }

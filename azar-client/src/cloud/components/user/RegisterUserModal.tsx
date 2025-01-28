@@ -150,6 +150,9 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
                             </InputAdornment>
                         ),
                     }}
+                    inputProps={{
+                        autoComplete: 'new-user-name'
+                    }}
                 />
 
                 <PasswordField
@@ -159,6 +162,9 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
                     onChange={handleInputChange}
                     error={errors.password}
                     helperText={errors.password ? 'Password is required' : ''}
+                    inputProps={{
+                        autoComplete: 'new-password'
+                    }}
                 />
 
                 <PasswordField

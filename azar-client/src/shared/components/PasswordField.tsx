@@ -5,7 +5,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Lock from '@mui/icons-material/Lock';
-import {InputLabelProps} from "@mui/material";
+import {InputBaseComponentProps, InputLabelProps} from "@mui/material";
 
 interface PasswordFieldProps {
     label: string;
@@ -16,6 +16,7 @@ interface PasswordFieldProps {
     helperText?: string;
     InputLabelProps?: Partial<InputLabelProps> | undefined;
     tabIndex?: number;
+    inputProps?: InputBaseComponentProps | undefined
 }
 
 function PasswordField({
@@ -27,6 +28,7 @@ function PasswordField({
                            helperText = '',
                            InputLabelProps = undefined,
                            tabIndex = 0,
+                           inputProps = undefined,
                        }: PasswordFieldProps) {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -67,6 +69,7 @@ function PasswordField({
                 ),
             }}
             InputLabelProps={InputLabelProps}
+            inputProps={inputProps}
         />
     );
 }

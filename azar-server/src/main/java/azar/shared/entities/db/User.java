@@ -37,8 +37,8 @@ public class User {
     @Column(name = "user_type", nullable = false)
     private UserType userType = UserType.STANDARD;
 
-    public boolean isAdmin() {
-        return this.userType.equals(UserType.ADMIN);
+    public boolean IsNonAdmin() {
+        return !this.userType.equals(UserType.ADMIN);
     }
 }
 

@@ -5,9 +5,6 @@ package azar.cloud.utils;
  * Date:   25/12/2024
  **/
 public class Constants {
-    /* General */
-    public static String DOMAIN_URL = "shahar-azar.com";
-
     public static final String THUMBNAIL = "thumbnail:";
 
     /* Preferences  */

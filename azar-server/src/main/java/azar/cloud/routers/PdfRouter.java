@@ -1,18 +1,17 @@
 package azar.cloud.routers;
 
 import azar.cloud.dal.service.PdfFileService;
-import azar.shared.dal.service.UserService;
 import azar.cloud.entities.db.PdfFile;
-import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.pdf.PdfUpdateRequest;
-import azar.shared.utils.CacheManager;
 import azar.cloud.utils.Constants;
-import azar.shared.utils.JsonManager;
+import azar.shared.dal.service.UserService;
+import azar.shared.entities.requests.BaseRequest;
 import azar.shared.routers.BaseRouter;
+import azar.shared.utils.CacheManager;
+import azar.shared.utils.JsonManager;
 import azar.shared.utils.Utilities;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -85,7 +84,7 @@ public class PdfRouter extends BaseRouter {
                     try {
                         Utilities.generateThumbnail(pdfFile, vertx)
                                 .onSuccess(thumbnail -> {
-                                    pdfFile.setThumbnail(thumbnail); // TODO: 22/12/2024 AZAR-64
+                                    pdfFile.setThumbnail(thumbnail);
                                     pdfFileService.add(pdfFile)
                                             .onSuccess(savedPdfFile -> {
                                                 savedPdfFile.setData(new byte[0]);

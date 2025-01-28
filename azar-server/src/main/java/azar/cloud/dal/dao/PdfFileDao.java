@@ -30,25 +30,24 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
     }
 
     public Future<List<PdfFile>> getAllClientPaginated(int offset, int limit) {
-        return Future.future(listPromise -> {
-            vertx.executeBlocking(() -> {
-                try (Session session = openSession()) {
-                    List<PdfFile> paginatedResults = session
-                            .createQuery(
-                                    "SELECT new azar.cloud.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
-                                            " FROM PdfFile p",
-                                    PdfFile.class)
-                            .setFirstResult(offset) // Offset
-                            .setMaxResults(limit)   // Limit
-                            .getResultList();
+        return Future.future(listPromise ->
+                vertx.executeBlocking(() -> {
+                    try (Session session = openSession()) {
+                        List<PdfFile> paginatedResults = session
+                                .createQuery(
+                                        "SELECT new azar.cloud.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
+                                                " FROM PdfFile p",
+                                        PdfFile.class)
+                                .setFirstResult(offset) // Offset
+                                .setMaxResults(limit)   // Limit
+                                .getResultList();
 
-                    listPromise.complete(paginatedResults);
-                } catch (Exception e) {
-                    listPromise.fail(e);
-                }
-                return null;
-            }, false);
-        });
+                        listPromise.complete(paginatedResults);
+                    } catch (Exception e) {
+                        listPromise.fail(e);
+                    }
+                    return null;
+                }, false));
     }
 
     public Future<byte[]> getThumbnailById(Integer id) {
@@ -73,53 +72,51 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
     }
 
     public Future<String> getOwnerByPdfId(Integer id) {
-        return Future.future(pdfOwnerPromise -> {
-            vertx.executeBlocking(() -> {
-                try (Session session = openSession()) {
-                    String pdfOwner = session
-                            .createNativeQuery(
-                                    "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
-                                    String.class
-                            )
-                            .setParameter("id", id)
-                            .getSingleResult();
+        return Future.future(pdfOwnerPromise ->
+                vertx.executeBlocking(() -> {
+                    try (Session session = openSession()) {
+                        String pdfOwner = session
+                                .createNativeQuery(
+                                        "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
+                                        String.class
+                                )
+                                .setParameter("id", id)
+                                .getSingleResult();
 
-                    pdfOwnerPromise.complete(pdfOwner);
-                } catch (Exception e) {
-                    pdfOwnerPromise.fail(e);
-                }
-                return null;
-            }, false);
-        });
+                        pdfOwnerPromise.complete(pdfOwner);
+                    } catch (Exception e) {
+                        pdfOwnerPromise.fail(e);
+                    }
+                    return null;
+                }, false));
     }
 
     public Future<Boolean> updatePartial(azar.cloud.entities.db.PdfFile pdfFile) {
-        return Future.future(promise -> {
-            vertx.executeBlocking(() -> {
-                try (Session session = openSession()) {
-                    session.beginTransaction();
+        return Future.future(promise ->
+                vertx.executeBlocking(() -> {
+                    try (Session session = openSession()) {
+                        session.beginTransaction();
 
-                    // Use createMutationQuery for UPDATE queries
-                    MutationQuery query = session.createMutationQuery(
-                            "UPDATE PdfFile e " +
-                                    "SET e.fileName = :fileName, e.labels = :labels, e.description = :description " +
-                                    "WHERE e.id = :id"
-                    );
-                    query.setParameter("fileName", pdfFile.getFileName());
-                    query.setParameter("labels", pdfFile.getLabels());
-                    query.setParameter("description", pdfFile.getDescription());
-                    query.setParameter("id", pdfFile.getId());
+                        // Use createMutationQuery for UPDATE queries
+                        MutationQuery query = session.createMutationQuery(
+                                "UPDATE PdfFile e " +
+                                        "SET e.fileName = :fileName, e.labels = :labels, e.description = :description " +
+                                        "WHERE e.id = :id"
+                        );
+                        query.setParameter("fileName", pdfFile.getFileName());
+                        query.setParameter("labels", pdfFile.getLabels());
+                        query.setParameter("description", pdfFile.getDescription());
+                        query.setParameter("id", pdfFile.getId());
 
-                    int rowsUpdated = query.executeUpdate();
-                    session.getTransaction().commit();
+                        int rowsUpdated = query.executeUpdate();
+                        session.getTransaction().commit();
 
-                    promise.complete(rowsUpdated > 0); // Return true if rows were updated
-                } catch (Exception e) {
-                    promise.fail(e);
-                }
-                return null;
-            }, false);
-        });
+                        promise.complete(rowsUpdated > 0); // Return true if rows were updated
+                    } catch (Exception e) {
+                        promise.fail(e);
+                    }
+                    return null;
+                }, false));
     }
 
 

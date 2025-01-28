@@ -54,9 +54,9 @@ public abstract class BaseRouter {
                 .putHeader("Content-Type", "application/json")
                 .end(message);
         if (isOk) {
-            logger.info(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
+            logger.info("{} - {}", routingContext.currentRoute().getPath(), logMessage);
         } else {
-            logger.warn(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
+            logger.warn("{} - {}", routingContext.currentRoute().getPath(), logMessage);
         }
     }
 
@@ -66,7 +66,7 @@ public abstract class BaseRouter {
                 .putHeader("Content-Disposition", "inline; filename=" + fileName)
                 .setStatusCode(200)
                 .end(Buffer.buffer(data));
-        logger.info(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
+        logger.info("{} - {}", routingContext.currentRoute().getPath(), logMessage);
     }
 
     protected void sendOKImageResponse(RoutingContext routingContext, String logMessage, byte[] data) {
@@ -74,7 +74,7 @@ public abstract class BaseRouter {
                 .putHeader("Content-Type", "image/png")
                 .putHeader("Content-Length", String.valueOf(data.length))
                 .end(Buffer.buffer(data));
-        logger.info(String.format("%s - %s", routingContext.currentRoute().getPath(), logMessage));
+        logger.info("{} - {}", routingContext.currentRoute().getPath(), logMessage);
     }
 
     protected boolean isInvalidUsername(RoutingContext routingContext, String userName) {
@@ -92,13 +92,13 @@ public abstract class BaseRouter {
         try (InputStream inputStream = getClass().getClassLoader()
                 .getResourceAsStream(fileName)) {
             if (inputStream == null) {
-                logger.warn("File not found: %s".formatted(fileName));
+                logger.warn("File not found: {}", fileName);
                 return fileContent;
             }
 
             fileContent = inputStream.readAllBytes();
         } catch (IOException e) {
-            logger.warn("Could not load file: %s".formatted(fileName));
+            logger.warn("Could not load file: {}", fileName);
         }
         return fileContent;
     }

@@ -1,7 +1,7 @@
 package azar.cloud.dal.service;
 
-import azar.cloud.entities.client.PdfFile;
 import azar.cloud.dal.dao.PdfFileDao;
+import azar.cloud.entities.client.PdfFile;
 import azar.shared.dal.service.GenericService;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
@@ -44,11 +44,6 @@ public class PdfFileService extends GenericService<azar.cloud.entities.db.PdfFil
 
     public Future<byte[]> getThumbnailById(Integer id) {
         return pdfFileDao.getThumbnailById(id);
-    }
-
-    @Override
-    public Future<Boolean> remove(azar.cloud.entities.db.PdfFile pdfFile) {
-        return pdfFileDao.remove(pdfFile);
     }
 
     @Override

@@ -46,25 +46,17 @@ public class CVService extends GenericService<CV> {
     }
 
     @Override
-    public Future<Boolean> remove(CV whoAmIData) {
-        return cvDao.remove(whoAmIData);
-    }
-
-    @Override
     public Future<Boolean> removeById(Integer id) {
         return cvDao.removeById(id);
     }
 
     public Future<Optional<CV>> getCVFromDB() {
-        return Future.future(cvPromise -> {
-            vertx.executeBlocking(() -> {
-                getAll()
-                        .onSuccess(resList -> {
-                            cvPromise.complete(resList.stream().findFirst());
-                        })
-                        .onFailure(err -> cvPromise.complete(Optional.empty()));
-                return null;
-            }, false);
-        });
+        return Future.future(cvPromise ->
+                vertx.executeBlocking(() -> {
+                    getAll()
+                            .onSuccess(resList -> cvPromise.complete(resList.stream().findFirst()))
+                            .onFailure(_ -> cvPromise.complete(Optional.empty()));
+                    return null;
+                }, false));
     }
 }

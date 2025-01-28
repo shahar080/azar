@@ -70,7 +70,7 @@ public class WhoAmIRouter extends BaseRouter {
                         sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(updateWhoAmIDataRequest.getCurrentUser()));
                         return;
                     }
-                    if (!dbUser.isAdmin()) {
+                    if (dbUser.IsNonAdmin()) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(updateWhoAmIDataRequest.getCurrentUser()));
                         return;
                     }

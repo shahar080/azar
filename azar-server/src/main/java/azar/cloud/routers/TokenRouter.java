@@ -1,11 +1,11 @@
 package azar.cloud.routers;
 
+import azar.cloud.utils.AuthService;
 import azar.shared.dal.service.UserService;
 import azar.shared.entities.requests.BaseRequest;
 import azar.shared.properties.AppProperties;
-import azar.cloud.utils.AuthService;
-import azar.shared.utils.JsonManager;
 import azar.shared.routers.BaseRouter;
+import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;

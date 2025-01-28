@@ -2,7 +2,6 @@ package azar.whoami.entities.requests;
 
 import azar.shared.entities.requests.BaseRequest;
 import azar.whoami.entities.db.EmailData;
-import azar.whoami.entities.db.WhoAmIData;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

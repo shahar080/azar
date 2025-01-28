@@ -1,9 +1,12 @@
 package azar.shared.entities.db;
 
+import lombok.Getter;
+
 /**
  * Author: Shahar Azar
  * Date:   14/12/2024
  **/
+@Getter
 public enum UserType {
     ADMIN("ADMIN"),
     STANDARD("STANDARD");
@@ -14,9 +17,6 @@ public enum UserType {
         this.type = type;
     }
 
-    public String getType() {
-        return type;
-    }
 }
 
 

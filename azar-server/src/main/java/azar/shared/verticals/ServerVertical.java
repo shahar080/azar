@@ -23,7 +23,7 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static azar.cloud.utils.Constants.DOMAIN_URL;
+import java.util.List;
 
 
 /**
@@ -44,6 +44,11 @@ public class ServerVertical extends AbstractVerticle {
     private final WhoAmIRouter whoAmIRouter;
     private final EmailRouter emailRouter;
 
+    private final boolean IS_DEV;
+    private final String REQUIRED_HEADER_KEY;
+    private final String REQUIRED_HEADER_VALUE;
+    private final List<String> ALLOWED_ORIGINS;
+
 
     @Inject
     public ServerVertical(AppProperties appProperties, AuthService authService, PdfRouter pdfRouter,
@@ -59,24 +64,24 @@ public class ServerVertical extends AbstractVerticle {
         this.cvRouter = cvRouter;
         this.whoAmIRouter = whoAmIRouter;
         this.emailRouter = emailRouter;
+        this.IS_DEV = appProperties.getBooleanProperty("IS_DEV", false);
+        this.REQUIRED_HEADER_KEY = appProperties.getProperty("REQUIRED_HEADER_KEY");
+        this.REQUIRED_HEADER_VALUE = appProperties.getProperty("REQUIRED_HEADER_VALUE");
+        this.ALLOWED_ORIGINS = appProperties.getListProperty("ALLOWED_ORIGINS");
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
         try {
             Router mainRouter = Router.router(vertx);
-            // TODO: 13/12/2024 AZAR-1
             mainRouter.route().handler(CorsHandler.create()
-                    .addOrigin("*")// Allow requests from this origin
-                    .allowedMethod(HttpMethod.GET)           // Allow GET requests
-                    .allowedMethod(HttpMethod.POST)          // Allow POST requests
-                    .allowedMethod(HttpMethod.OPTIONS)          // Allow POST requests
-                    .allowedHeader("Content-Type")           // Allow Content-Type header
-                    .allowedHeader("Authorization")          // Allow Authorization header
-                    .allowedHeader("Access-Control-Allow-Origin") // Allow Access-Control-Allow-Origin header
-                    .allowedHeader("Access-Control-Allow-Methods") // Allow Allowed Methods header
-                    .allowedHeader("Access-Control-Allow-Headers") // Allow Allowed Headers
-                    .maxAgeSeconds(3600)  // Cache CORS preflight response for 1 hour
+                    .addOrigins(ALLOWED_ORIGINS)
+                    .allowedMethod(HttpMethod.GET)
+                    .allowedMethod(HttpMethod.POST)
+                    .allowedMethod(HttpMethod.OPTIONS)
+                    .allowedHeader("Content-Type")
+                    .allowedHeader("Authorization")
+                    .maxAgeSeconds(1800)
             );
 
             mainRouter.route().handler(BodyHandler.create()
@@ -132,7 +137,7 @@ public class ServerVertical extends AbstractVerticle {
     private void catchAllRequests(RoutingContext routingContext) {
         logger.info("A request was made for path: {}", routingContext.request().path());
 
-        if (!appProperties.getBooleanProperty("IS_DEV", false)) {
+        if (!IS_DEV) {
             // validate header
             if (!validateHeader(routingContext)) {
                 return;
@@ -144,9 +149,9 @@ public class ServerVertical extends AbstractVerticle {
 
     private boolean validateHeader(RoutingContext context) {
 
-        String requiredHeader = context.request().getHeader("X-Forwarded-Host");
+        String requiredHeader = context.request().getHeader(REQUIRED_HEADER_KEY);
 
-        if (requiredHeader == null || !requiredHeader.equalsIgnoreCase(DOMAIN_URL)) {
+        if (requiredHeader == null || !requiredHeader.equalsIgnoreCase(REQUIRED_HEADER_VALUE)) {
             context.response()
                     .setStatusCode(400)
                     .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")

@@ -10,8 +10,12 @@ import java.lang.reflect.Type;
  * Date:   12/12/2024
  **/
 public class JsonManager {
+    private final Gson gson;
+
     @Inject
-    private Gson gson;
+    public JsonManager(Gson gson) {
+        this.gson = gson;
+    }
 
     /**
      * A function to convert an object to a json without the type

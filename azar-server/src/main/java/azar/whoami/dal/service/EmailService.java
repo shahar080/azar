@@ -46,25 +46,17 @@ public class EmailService extends GenericService<EmailData> {
     }
 
     @Override
-    public Future<Boolean> remove(EmailData emailData) {
-        return emailDao.remove(emailData);
-    }
-
-    @Override
     public Future<Boolean> removeById(Integer id) {
         return emailDao.removeById(id);
     }
 
     public Future<Optional<EmailData>> getEmailFromDB() {
-        return Future.future(emailPromise -> {
-            vertx.executeBlocking(() -> {
-                getAll()
-                        .onSuccess(resList -> {
-                            emailPromise.complete(resList.stream().findFirst());
-                        })
-                        .onFailure(err -> emailPromise.complete(Optional.empty()));
-                return null;
-            }, false);
-        });
+        return Future.future(emailPromise ->
+                vertx.executeBlocking(() -> {
+                    getAll()
+                            .onSuccess(resList -> emailPromise.complete(resList.stream().findFirst()))
+                            .onFailure(_ -> emailPromise.complete(Optional.empty()));
+                    return null;
+                }, false));
     }
 }

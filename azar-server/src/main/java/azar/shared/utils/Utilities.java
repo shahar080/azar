@@ -10,7 +10,6 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Field;
 import java.util.regex.Pattern;
 
 /**
@@ -52,39 +51,6 @@ public class Utilities {
         return String.format("%.2f %s", sizeInUnits, units[unitIndex]);
     }
 
-    public static <T> void mergeNonNullFields(T source, T target) {
-        if (source == null || target == null) return;
-
-        try {
-            for (Field field : source.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-
-                Object sourceValue = field.get(source);
-                Object targetValue = field.get(target);
-
-                // Skip null fields from source
-                if (sourceValue == null) {
-                    continue;
-                }
-
-                // Handle byte[] fields specifically
-                if (sourceValue instanceof byte[] sourceBytes) {
-                    byte[] targetBytes = (byte[]) targetValue;
-
-                    // If source is an empty byte array, retain target's value
-                    if (sourceBytes.length == 0 && targetBytes != null) {
-                        continue; // Do not overwrite with an empty array
-                    }
-                }
-
-                // Update the field if sourceValue is valid
-                field.set(target, sourceValue);
-            }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to merge fields", e);
-        }
-    }
-
     public static Future<byte[]> generateThumbnail(PdfFile pdfFile, Vertx vertx) {
         return vertx.executeBlocking(() -> {
             try (PDDocument document = Loader.loadPDF(pdfFile.getData())) {
@@ -92,10 +58,10 @@ public class Utilities {
 
                 BufferedImage image = renderer.renderImageWithDPI(0, 150);
 
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(image, "PNG", baos);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ImageIO.write(image, "PNG", byteArrayOutputStream);
 
-                return baos.toByteArray();
+                return byteArrayOutputStream.toByteArray();
             }
         });
     }

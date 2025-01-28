@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import static azar.cloud.utils.Constants.DEFAULT_APP_PROPERTIES_FILE_PATH;
@@ -62,10 +65,10 @@ public class AppProperties {
         String propertyValue = properties.getProperty(key);
         if (propertyValue == null) {
             if (useDefaultValue) {
-                logger.warn("{} not found in properties file, using default value {}", key, defaultValue);
+                logWarnDefaultValue(key, defaultValue);
                 return defaultValue;
             } else {
-                logger.error("{} not found in properties file", key);
+                logErrorNotFound(key);
                 throw new RuntimeException();
             }
         }
@@ -84,10 +87,10 @@ public class AppProperties {
         String propertyValue = properties.getProperty(key);
         if (!Utilities.isNumber(propertyValue)) {
             if (useDefaultValue) {
-                logger.warn("{} not found in properties file, using default value {}", key, defaultValue);
+                logWarnDefaultValue(key, defaultValue);
                 return defaultValue;
             } else {
-                logger.error("{} not found in properties file", key);
+                logErrorNotFound(key);
                 throw new RuntimeException();
             }
         }
@@ -106,13 +109,44 @@ public class AppProperties {
         String propertyValue = properties.getProperty(key);
         if (!Utilities.isBoolean(propertyValue)) {
             if (useDefaultValue) {
-                logger.warn("{} not found in properties file, using default value {}", key, defaultValue);
+                logWarnDefaultValue(key, defaultValue);
                 return defaultValue;
             } else {
-                logger.error("{} not found in properties file", key);
+                logErrorNotFound(key);
                 throw new RuntimeException();
             }
         }
         return Boolean.parseBoolean(propertyValue);
+    }
+
+    public List<String> getListProperty(String key) {
+        return getListProperty(key, null, false);
+    }
+
+    public List<String> getListProperty(String key, List<String> defaultValue) {
+        return getListProperty(key, defaultValue, true);
+    }
+
+    private List<String> getListProperty(String key, List<String> defaultValue, boolean useDefaultValue) {
+        String propertyValue = properties.getProperty(key);
+        if (propertyValue == null) {
+            if (useDefaultValue) {
+                logWarnDefaultValue(key, defaultValue);
+                return defaultValue != null ? defaultValue : Collections.emptyList();
+            } else {
+                logErrorNotFound(key);
+                throw new RuntimeException(key + " not found in properties file");
+            }
+        }
+        return Arrays.asList(propertyValue.split(","));
+    }
+
+
+    private void logWarnDefaultValue(String key, Object defaultValue) {
+        logger.warn("{} not found in properties file, using default value {}", key, defaultValue);
+    }
+
+    private void logErrorNotFound(String key) {
+        logger.error("{} not found in properties file", key);
     }
 }

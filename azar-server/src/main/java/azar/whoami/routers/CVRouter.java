@@ -106,7 +106,7 @@ public class CVRouter extends BaseRouter {
                         sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(userName));
                         return;
                     }
-                    if (!dbUser.isAdmin()) {
+                    if (dbUser.IsNonAdmin()) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(userName));
                         return;
                     }

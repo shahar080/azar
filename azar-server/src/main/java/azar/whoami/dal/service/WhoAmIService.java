@@ -2,7 +2,6 @@ package azar.whoami.dal.service;
 
 import azar.shared.dal.service.GenericService;
 import azar.whoami.dal.dao.WhoAmIDao;
-import azar.whoami.entities.db.CV;
 import azar.whoami.entities.db.WhoAmIData;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
@@ -47,25 +46,17 @@ public class WhoAmIService extends GenericService<WhoAmIData> {
     }
 
     @Override
-    public Future<Boolean> remove(WhoAmIData whoAmIData) {
-        return whoAmIDao.remove(whoAmIData);
-    }
-
-    @Override
     public Future<Boolean> removeById(Integer id) {
         return whoAmIDao.removeById(id);
     }
 
     public Future<Optional<WhoAmIData>> getWhoAmIFromDB() {
-        return Future.future(whoAmIPromise -> {
-            vertx.executeBlocking(() -> {
-                getAll()
-                        .onSuccess(resList -> {
-                            whoAmIPromise.complete(resList.stream().findFirst());
-                        })
-                        .onFailure(err -> whoAmIPromise.complete(Optional.empty()));
-                return null;
-            }, false);
-        });
+        return Future.future(whoAmIPromise ->
+                vertx.executeBlocking(() -> {
+                    getAll()
+                            .onSuccess(resList -> whoAmIPromise.complete(resList.stream().findFirst()))
+                            .onFailure(_ -> whoAmIPromise.complete(Optional.empty()));
+                    return null;
+                }, false));
     }
 }

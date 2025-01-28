@@ -6,7 +6,6 @@ import azar.shared.dal.service.GenericService;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -47,11 +46,6 @@ public class PreferencesService extends GenericService<Preference> {
     }
 
     @Override
-    public Future<Boolean> remove(Preference preference) {
-        return preferencesDao.remove(preference);
-    }
-
-    @Override
     public Future<Boolean> removeById(Integer id) {
         return preferencesDao.removeById(id);
     }
@@ -68,7 +62,4 @@ public class PreferencesService extends GenericService<Preference> {
         return preferencesDao.getByKey(key, userId);
     }
 
-    public Future<List<Preference>> getAllClientPaginated(int offset, int limit, String whereClause) {
-        return preferencesDao.getAllPaginated(offset, limit, whereClause);
-    }
 }

@@ -64,7 +64,7 @@ public class EmailRouter extends BaseRouter {
                         sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(updateEmailDataRequest.getCurrentUser()));
                         return;
                     }
-                    if (!dbUser.isAdmin()) {
+                    if (dbUser.IsNonAdmin()) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(updateEmailDataRequest.getCurrentUser()));
                         return;
                     }

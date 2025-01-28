@@ -1,13 +1,13 @@
 package azar.cloud.routers;
 
 import azar.cloud.dal.service.PreferencesService;
-import azar.shared.dal.service.UserService;
 import azar.cloud.entities.db.Preference;
-import azar.shared.entities.requests.BaseRequest;
 import azar.cloud.entities.requests.preferences.PreferenceUpsertRequest;
 import azar.cloud.entities.requests.preferences.PreferencesGetAllRequest;
-import azar.shared.utils.JsonManager;
+import azar.shared.dal.service.UserService;
+import azar.shared.entities.requests.BaseRequest;
 import azar.shared.routers.BaseRouter;
+import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -48,15 +48,13 @@ public class PreferencesRouter extends BaseRouter {
         Preference preferenceToAdd = preferenceUpsertRequest.getPreference();
         userService.getUserByUserName(currentUser)
                 .onSuccess(dbUser -> {
-                    if (!dbUser.isAdmin()) {
+                    if (dbUser.IsNonAdmin()) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add preferences!".formatted(currentUser));
                         return;
                     }
 
                     preferencesService.add(preferenceToAdd)
-                            .onSuccess(_ -> {
-                                sendCreatedResponse(routingContext, "Successfully added preference", "Preference %s was added with value %s".formatted(preferenceToAdd.getKey(), preferenceToAdd.getValue()));
-                            })
+                            .onSuccess(_ -> sendCreatedResponse(routingContext, "Successfully added preference", "Preference %s was added with value %s".formatted(preferenceToAdd.getKey(), preferenceToAdd.getValue())))
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error adding preference, error: %s".formatted(err.getMessage())));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error adding preference, error: %s".formatted(err.getMessage())));
@@ -72,9 +70,7 @@ public class PreferencesRouter extends BaseRouter {
                 .onSuccess(dbPreference -> {
                     dbPreference.setValue(preferenceToUpdate.getValue());
                     preferencesService.update(dbPreference)
-                            .onSuccess(preference -> {
-                                sendOKResponse(routingContext, jsonManager.toJson(preference), "Preference %s was updated with value %s".formatted(preferenceToUpdate.getKey(), preferenceToUpdate.getValue()));
-                            })
+                            .onSuccess(preference -> sendOKResponse(routingContext, jsonManager.toJson(preference), "Preference %s was updated with value %s".formatted(preferenceToUpdate.getKey(), preferenceToUpdate.getValue())))
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
@@ -93,15 +89,13 @@ public class PreferencesRouter extends BaseRouter {
 
         userService.getUserByUserName(currentUser)
                 .onSuccess(dbUser -> {
-                    if (!dbUser.isAdmin()) {
+                    if (dbUser.IsNonAdmin()) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to delete preferences!".formatted(currentUser));
                         return;
                     }
 
                     preferencesService.removeById(Integer.valueOf(preferenceId))
-                            .onSuccess(_ -> {
-                                sendOKResponse(routingContext, "Successfully deleted preference", "Preference with id %s was deleted".formatted(preferenceId));
-                            })
+                            .onSuccess(_ -> sendOKResponse(routingContext, "Successfully deleted preference", "Preference with id %s was deleted".formatted(preferenceId)))
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error deleting preference, error: %s".formatted(err.getMessage())));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error deleting preference, error: %s".formatted(err.getMessage())));

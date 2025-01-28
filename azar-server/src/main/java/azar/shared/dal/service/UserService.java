@@ -50,17 +50,6 @@ public class UserService extends GenericService<User> {
     }
 
     /**
-     * A wrapper function to remove a given user from the db using a {@link User}
-     *
-     * @param user - the given user
-     */
-    @Override
-    public Future<Boolean> remove(User user) {
-        logger.info("Removing user from users db with the username: {}", user.getUserName());
-        return userDao.remove(user);
-    }
-
-    /**
      * A wrapper function to remove a given user from the db using users' id
      *
      * @param id - the given users' id

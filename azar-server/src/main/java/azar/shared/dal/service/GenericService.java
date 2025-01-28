@@ -19,8 +19,6 @@ public abstract class GenericService<T> {
 
     public abstract Future<T> getById(Integer id);
 
-    public abstract Future<Boolean> remove(T t);
-
     public abstract Future<Boolean> removeById(Integer id);
 
 }

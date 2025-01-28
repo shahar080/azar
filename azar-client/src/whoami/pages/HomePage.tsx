@@ -65,9 +65,10 @@ export function WhoAmIHomePage() {
     return (
         <Box
             sx={{
-                backgroundColor: "#f7f7f7", // Light page background
+                backgroundColor: "#f7f7f7",
                 minHeight: "100vh",
-                minWidth: "100vw",
+                overflow: "hidden",
+                width: "100vw",
             }}
         >
             {whoAmIData &&
@@ -238,13 +239,14 @@ export function WhoAmIHomePage() {
                             </Grid>
                         </Grid>
                     </Container>
-                    {!isMobile && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "end",
-                                justifyContent: "end",
-                            }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        {!isMobile &&
                             <Button
                                 variant="contained"
                                 onClick={handleLogin}
@@ -263,8 +265,28 @@ export function WhoAmIHomePage() {
                             >
                                 Login
                             </Button>
-                        </Box>
-                    )}
+                        }
+                        <Button
+                            variant="contained"
+                            href="https://bitbucket.org/Shahar0080/azar/src/main/"
+                            target="_blank"
+                            sx={{
+                                backgroundColor: "#4d9e00",
+                                color: "white",
+                                fontWeight: "bold",
+                                fontSize: "0.9rem",
+                                padding: "6px 12px",
+                                borderRadius: "10vw 0 0 10vw",
+                                ml: "auto",
+                                "&:hover": {
+                                    backgroundColor: "#1c8505",
+                                    color: "white"
+                                },
+                            }}
+                        >
+                            Source code
+                        </Button>
+                    </Box>
                     <PdfModal open={isShowPDF} onClose={() => setShowPDF(false)}/>
                     <Modal open={showLoginForm} onClose={handleCancel}>
                         <Box

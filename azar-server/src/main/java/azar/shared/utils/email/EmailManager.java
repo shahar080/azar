@@ -37,85 +37,83 @@ public class EmailManager {
     }
 
     public Future<Boolean> sendEmail(String recipientEmail, Vertx vertx) {
-        return Future.future(promise -> {
-            vertx.executeBlocking(() -> {
-                emailService.getEmailFromDB()
-                        .onSuccess(optionalEmailData -> {
-                            if (optionalEmailData.isEmpty()) {
-                                promise.succeed(false);
-                                return;
-                            }
-
-                            final String senderEmail = appProperties.getProperty("email.sender.email");
-                            final String senderPassword = appProperties.getProperty("email.sender.password");
-
-                            // Configure SMTP properties
-                            Properties props = new Properties();
-                            props.put("mail.smtp.host", "smtp.gmail.com");
-                            props.put("mail.smtp.port", "587");
-                            props.put("mail.smtp.auth", "true");
-                            props.put("mail.smtp.starttls.enable", "true");
-
-                            // Create a session with authentication
-                            Session session = Session.getInstance(props, new Authenticator() {
-                                @Override
-                                protected PasswordAuthentication getPasswordAuthentication() {
-                                    return new PasswordAuthentication(senderEmail, senderPassword);
+        return Future.future(promise ->
+                vertx.executeBlocking(() -> {
+                    emailService.getEmailFromDB()
+                            .onSuccess(optionalEmailData -> {
+                                if (optionalEmailData.isEmpty()) {
+                                    promise.succeed(false);
+                                    return;
                                 }
-                            });
 
-                            try {
-                                // Create a new email message
-                                Message message = new MimeMessage(session);
-                                message.setFrom(new InternetAddress(senderEmail));
-                                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-                                message.setSubject(optionalEmailData.get().getTitle());
+                                final String senderEmail = appProperties.getProperty("email.sender.email");
+                                final String senderPassword = appProperties.getProperty("email.sender.password");
 
-                                // Create the email body part
-                                MimeBodyPart textPart = new MimeBodyPart();
-                                textPart.setText(optionalEmailData.get().getBody());
+                                // Configure SMTP properties
+                                Properties props = new Properties();
+                                props.put("mail.smtp.host", "smtp.gmail.com");
+                                props.put("mail.smtp.port", "587");
+                                props.put("mail.smtp.auth", "true");
+                                props.put("mail.smtp.starttls.enable", "true");
 
-                                // Create the file attachment part
-                                MimeBodyPart attachmentPart = new MimeBodyPart();
-                                cvService.getCVFromDB()
-                                        .onSuccess(optionalCV -> {
-                                            if (optionalCV.isEmpty()) {
-                                                logger.error("Can't send email due to empty CV");
-                                                promise.complete(false);
-                                                return;
-                                            }
-                                            try {
-                                                ByteArrayDataSource dataSource = new ByteArrayDataSource(optionalCV.get().getData(), "application/pdf");
-                                                attachmentPart.setDataHandler(new DataHandler(dataSource));
-                                                attachmentPart.setFileName(optionalCV.get().getFileName());
+                                // Create a session with authentication
+                                Session session = Session.getInstance(props, new Authenticator() {
+                                    @Override
+                                    protected PasswordAuthentication getPasswordAuthentication() {
+                                        return new PasswordAuthentication(senderEmail, senderPassword);
+                                    }
+                                });
 
-                                                // Combine the parts into a multipart message
-                                                Multipart multipart = new MimeMultipart();
-                                                multipart.addBodyPart(textPart); // Add the text body
-                                                multipart.addBodyPart(attachmentPart); // Add the file attachment
+                                try {
+                                    // Create a new email message
+                                    Message message = new MimeMessage(session);
+                                    message.setFrom(new InternetAddress(senderEmail));
+                                    message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+                                    message.setSubject(optionalEmailData.get().getTitle());
 
-                                                // Set the content of the message
-                                                message.setContent(multipart);
+                                    // Create the email body part
+                                    MimeBodyPart textPart = new MimeBodyPart();
+                                    textPart.setText(optionalEmailData.get().getBody());
 
-                                                // Send the email
-                                                Transport.send(message);
+                                    // Create the file attachment part
+                                    MimeBodyPart attachmentPart = new MimeBodyPart();
+                                    cvService.getCVFromDB()
+                                            .onSuccess(optionalCV -> {
+                                                if (optionalCV.isEmpty()) {
+                                                    logger.error("Can't send email due to empty CV");
+                                                    promise.complete(false);
+                                                    return;
+                                                }
+                                                try {
+                                                    ByteArrayDataSource dataSource = new ByteArrayDataSource(optionalCV.get().getData(), "application/pdf");
+                                                    attachmentPart.setDataHandler(new DataHandler(dataSource));
+                                                    attachmentPart.setFileName(optionalCV.get().getFileName());
 
-                                                logger.info("Successfully sent email to %s".formatted(recipientEmail));
-                                                promise.complete(true);
-                                            } catch (Exception e) {
-                                                logger.error("Can't send email due to %s".formatted(e));
-                                                promise.fail(e);
-                                            }
-                                        })
-                                        .onFailure(promise::fail);
-                            } catch (MessagingException e) {
-                                logger.error("Failed to send email to %s".formatted(recipientEmail), e);
-                            }
-                        })
-                        .onFailure(err -> {
-                        });
-                return null;
-            }, false);
-        });
+                                                    // Combine the parts into a multipart message
+                                                    Multipart multipart = new MimeMultipart();
+                                                    multipart.addBodyPart(textPart); // Add the text body
+                                                    multipart.addBodyPart(attachmentPart); // Add the file attachment
+
+                                                    // Set the content of the message
+                                                    message.setContent(multipart);
+
+                                                    // Send the email
+                                                    Transport.send(message);
+
+                                                    logger.info("Successfully sent email to {}", recipientEmail);
+                                                    promise.complete(true);
+                                                } catch (Exception e) {
+                                                    logger.error("Can't send email due to ", e);
+                                                    promise.fail(e);
+                                                }
+                                            })
+                                            .onFailure(promise::fail);
+                                } catch (MessagingException e) {
+                                    logger.error("Failed to send email to {}", (recipientEmail), e);
+                                }
+                            })
+                            .onFailure(promise::fail);
+                    return null;
+                }, false));
     }
 }

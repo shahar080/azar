@@ -19,6 +19,8 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
+import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
+
 /**
  * Author: Shahar Azar
  * Date:   20/12/2024
@@ -41,11 +43,11 @@ public class UserRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router userRouter = Router.router(vertx);
 
-        userRouter.route("/login").handler(this::handleUserLogin);
-        userRouter.route("/ops/getAll").handler(this::getAllUsers);
-        userRouter.route("/ops/add").handler(this::handleAddUser);
-        userRouter.route("/ops/update").handler(this::handleUpdateUser);
-        userRouter.route("/ops/delete/:id").handler(this::handleDeleteUser);
+        userRouter.post("/login").handler(this::handleUserLogin);
+        userRouter.post(OPS_PREFIX_STRING + "/getAll").handler(this::getAllUsers);
+        userRouter.post(OPS_PREFIX_STRING + "/add").handler(this::handleAddUser);
+        userRouter.post(OPS_PREFIX_STRING + "/update").handler(this::handleUpdateUser);
+        userRouter.post(OPS_PREFIX_STRING + "/delete/:id").handler(this::handleDeleteUser);
 
         return userRouter;
     }

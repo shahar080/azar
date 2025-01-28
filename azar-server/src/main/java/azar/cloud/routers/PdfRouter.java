@@ -47,12 +47,12 @@ public class PdfRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router pdfRouter = Router.router(vertx);
 
-        pdfRouter.route("/upload").handler(this::handlePdfUpload);
-        pdfRouter.route("/getAll").handler(this::handleGetAllPdfs);
-        pdfRouter.route("/delete/:id").handler(this::handleDeletePdfById);
-        pdfRouter.route("/update").handler(this::handleUpdatePdf);
-        pdfRouter.route("/thumbnail/:id").handler(this::handleThumbnailRequest);
-        pdfRouter.route("/get/:id").handler(this::handlePDFGet);
+        pdfRouter.post("/upload").handler(this::handlePdfUpload);
+        pdfRouter.post("/getAll").handler(this::handleGetAllPdfs);
+        pdfRouter.post("/delete/:id").handler(this::handleDeletePdfById);
+        pdfRouter.post("/update").handler(this::handleUpdatePdf);
+        pdfRouter.post("/thumbnail/:id").handler(this::handleThumbnailRequest);
+        pdfRouter.post("/get/:id").handler(this::handlePDFGet);
 
         return pdfRouter;
     }

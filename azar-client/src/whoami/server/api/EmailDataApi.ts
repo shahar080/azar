@@ -5,7 +5,7 @@ import {EMAIL_GET_API, EMAIL_UPDATE_API} from "../../utils/constants.ts";
 
 export async function getEmailData(): Promise<EmailData> {
     try {
-        const response = await apiClient.post(EMAIL_GET_API);
+        const response = await apiClient.get(EMAIL_GET_API);
         return response.data;
     } catch (error) {
         console.error("Failed to fetch email data", error);

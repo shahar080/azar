@@ -18,8 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static azar.cloud.utils.Constants.DEFAULT_CV_FILE_NAME;
-import static azar.cloud.utils.Constants.DEFAULT_CV_FILE_PATH;
+import static azar.cloud.utils.Constants.*;
 
 /**
  * Author: Shahar Azar
@@ -47,9 +46,9 @@ public class CVRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router cvRouter = Router.router(vertx);
 
-        cvRouter.route("/get").handler(this::handleGet);
-        cvRouter.route("/sendToEmail").handler(this::handleSendToEmail);
-        cvRouter.route("/ops/update").handler(this::handleUpdate);
+        cvRouter.get("/get").handler(this::handleGet);
+        cvRouter.post("/sendToEmail").handler(this::handleSendToEmail);
+        cvRouter.post(OPS_PREFIX_STRING + "/update").handler(this::handleUpdate);
 
         return cvRouter;
     }

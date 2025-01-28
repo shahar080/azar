@@ -13,6 +13,8 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
+
 /**
  * Author: Shahar Azar
  * Date:   19/01/2025
@@ -34,8 +36,8 @@ public class EmailRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router cvRouter = Router.router(vertx);
 
-        cvRouter.route("/ops/get").handler(this::handleGet);
-        cvRouter.route("/ops/update").handler(this::handleUpdate);
+        cvRouter.get(OPS_PREFIX_STRING + "/get").handler(this::handleGet);
+        cvRouter.post(OPS_PREFIX_STRING + "/update").handler(this::handleUpdate);
 
         return cvRouter;
     }

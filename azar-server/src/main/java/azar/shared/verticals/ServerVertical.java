@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
+
 
 /**
  * Author: Shahar Azar
@@ -92,7 +94,7 @@ public class ServerVertical extends AbstractVerticle {
 
             apiRouter.route().handler(this::catchAllRequests);
 
-            apiRouter.route("/ops/*").handler(JWTAuthHandler.create(jwtAuth));
+            apiRouter.route(OPS_PREFIX_STRING + "/*").handler(JWTAuthHandler.create(jwtAuth));
             apiRouter.route("/pdf/*").subRouter(pdfRouter.create(vertx));
             apiRouter.route("/user/*").subRouter(userRouter.create(vertx));
             apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx));

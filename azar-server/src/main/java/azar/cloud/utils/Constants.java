@@ -5,7 +5,9 @@ package azar.cloud.utils;
  * Date:   25/12/2024
  **/
 public class Constants {
+    /* General */
     public static final String THUMBNAIL = "thumbnail:";
+    public static final String OPS_PREFIX_STRING = "/ops";
 
     /* Preferences  */
     public static final String DRAWER_PINNED = "DRAWER_PINNED";

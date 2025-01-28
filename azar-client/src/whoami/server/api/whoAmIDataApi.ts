@@ -5,7 +5,7 @@ import {WHO_AM_I_GET_API, WHO_AM_I_UPDATE_API} from "../../utils/constants.ts";
 
 export async function getWhoAmIData(): Promise<WhoAmIData> {
     try {
-        const response = await apiClient.post(WHO_AM_I_GET_API);
+        const response = await apiClient.get(WHO_AM_I_GET_API);
         return response.data;
     } catch (error) {
         console.error("Failed to fetch WhoAmIData", error);

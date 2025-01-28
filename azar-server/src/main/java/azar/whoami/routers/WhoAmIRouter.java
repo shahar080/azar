@@ -40,8 +40,8 @@ public class WhoAmIRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router cvRouter = Router.router(vertx);
 
-        cvRouter.route("/get").handler(this::handleGet);
-        cvRouter.route("/ops/update").handler(this::handleUpdate);
+        cvRouter.get("/get").handler(this::handleGet);
+        cvRouter.post(OPS_PREFIX_STRING + "/update").handler(this::handleUpdate);
 
         return cvRouter;
     }

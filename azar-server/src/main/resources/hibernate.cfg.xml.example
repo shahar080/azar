@@ -4,15 +4,19 @@
 <hibernate-configuration>
     <session-factory>
 
-        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
 
         <!-- Use one of the options based on your setup -->
-        <property name="hibernate.connection.url">
+        <property name="hibernate.hikari.jdbcUrl">
             jdbc:postgresql://<server_path>>&amp;socketFactory=com.google.cloud.sql.postgres.SocketFactory
         </property>
 
-        <property name="hibernate.connection.username">_</property>
-        <property name="hibernate.connection.password">_</property>
+        <property name="hibernate.hikari.username">_</property>
+        <property name="hibernate.hikari.password">_</property>
+        <property name="hibernate.hikari.maximumPoolSize">10</property>
+        <property name="hibernate.hikari.minimumIdle">2</property>
+        <property name="hibernate.hikari.idleTimeout">30000</property>
+        <property name="hibernate.hikari.connectionTimeout">20000</property>
 
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>

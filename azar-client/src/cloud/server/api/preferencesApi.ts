@@ -1,7 +1,12 @@
 import {PreferenceGetAllRequest, PreferenceUpsertRequest} from "./requests.ts";
 import apiClient from "../../../shared/server/api/apiClient.ts";
 import {Preference} from "../../models/models.ts";
-import {PREFERENCE_ADD_API, PREFERENCE_DELETE_API, PREFERENCE_UPDATE_API} from "../../utils/constants.ts";
+import {
+    PREFERENCE_ADD_API,
+    PREFERENCE_DELETE_API,
+    PREFERENCE_GET_ALL_API,
+    PREFERENCE_UPDATE_API
+} from "../../utils/constants.ts";
 import {BaseRequest} from "../../../shared/server/api/requests.ts";
 
 export async function add(preferenceAddRequest: PreferenceUpsertRequest): Promise<boolean> {
@@ -17,7 +22,7 @@ export async function add(preferenceAddRequest: PreferenceUpsertRequest): Promis
 
 export async function getAllPreferences(preferenceGetAllRequest: PreferenceGetAllRequest, page: number = 1, limit: number = 20): Promise<Preference[]> {
     try {
-        const response = await apiClient.post<Preference[]>(`/preference/getAll?page=${page}&limit=${limit}`, preferenceGetAllRequest);
+        const response = await apiClient.post<Preference[]>(PREFERENCE_GET_ALL_API + `?page=${page}&limit=${limit}`, preferenceGetAllRequest);
         const preferences: Preference[] = response.data;
         return preferences || []; // Return empty array if no data
     } catch (error) {

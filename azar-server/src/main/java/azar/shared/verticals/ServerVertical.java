@@ -95,15 +95,14 @@ public class ServerVertical extends AbstractVerticle {
             apiRouter.route().handler(this::catchAllRequests);
 
             apiRouter.route(OPS_PREFIX_STRING + "/*").handler(JWTAuthHandler.create(jwtAuth));
-            apiRouter.route("/pdf/*").subRouter(pdfRouter.create(vertx));
-            apiRouter.route("/user/*").subRouter(userRouter.create(vertx));
-            apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx));
-            apiRouter.route("/preference/*").subRouter(preferencesRouter.create(vertx));
+            apiRouter.route(OPS_PREFIX_STRING + "/pdf/*").subRouter(pdfRouter.create(vertx, jwtAuth));
+            apiRouter.route(OPS_PREFIX_STRING + "/preference/*").subRouter(preferencesRouter.create(vertx, jwtAuth));
+            apiRouter.route("/user/*").subRouter(userRouter.create(vertx, jwtAuth));
+            apiRouter.route("/token/*").subRouter(tokenRouter.create(vertx, jwtAuth));
+
             apiRouter.route("/cv/*").subRouter(cvRouter.create(vertx));
             apiRouter.route("/whoami/*").subRouter(whoAmIRouter.create(vertx));
             apiRouter.route("/email/*").subRouter(emailRouter.create(vertx));
-
-            apiRouter.route("/test/").handler(routingContext -> routingContext.response().setStatusCode(200).end("Hi"));
 
             mainRouter.route("/api/*").subRouter(apiRouter);
 

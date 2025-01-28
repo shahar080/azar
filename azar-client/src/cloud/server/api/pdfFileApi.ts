@@ -1,7 +1,14 @@
 import apiClient from "../../../shared/server/api/apiClient.ts";
 import {PdfFile} from "../../models/models.ts";
 import {PdfUpdateRequest} from "./requests.ts";
-import {PDF_DELETE_API, PDF_GET_API, PDF_THUMBNAIL_API, PDF_UPDATE_API, PDF_UPLOAD_API} from "../../utils/constants.ts";
+import {
+    PDF_DELETE_API,
+    PDF_GET_ALL_API,
+    PDF_GET_API,
+    PDF_THUMBNAIL_API,
+    PDF_UPDATE_API,
+    PDF_UPLOAD_API
+} from "../../utils/constants.ts";
 import {BaseRequest} from "../../../shared/server/api/requests.ts";
 
 export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFile | undefined> {
@@ -48,7 +55,7 @@ export async function updatePdf(pdfUpdateRequest: PdfUpdateRequest): Promise<Pdf
 
 export async function getAllPdfs(baseRequest: BaseRequest, page: number = 1, limit: number = 20): Promise<PdfFile[]> {
     try {
-        const response = await apiClient.post<PdfFile[]>(`/pdf/getAll?page=${page}&limit=${limit}`, baseRequest);
+        const response = await apiClient.post<PdfFile[]>(PDF_GET_ALL_API + `?page=${page}&limit=${limit}`, baseRequest);
         const pdfFiles: PdfFile[] = response.data;
         return pdfFiles || []; // Return empty array if no data
     } catch (error) {

@@ -1,9 +1,7 @@
 package azar.cloud.routers;
 
-import azar.cloud.utils.AuthService;
 import azar.shared.dal.service.UserService;
 import azar.shared.entities.requests.BaseRequest;
-import azar.shared.properties.AppProperties;
 import azar.shared.routers.BaseRouter;
 import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
@@ -13,8 +11,11 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 
 import java.util.Base64;
+
+import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
 
 /**
  * Author: Shahar Azar
@@ -22,28 +23,23 @@ import java.util.Base64;
  **/
 public class TokenRouter extends BaseRouter {
     private final UserService userService;
-    private final AppProperties appProperties;
     private final JsonManager jsonManager;
-    private JWTAuth jwtAuth;
 
     @Inject
-    public TokenRouter(UserService userService, AppProperties appProperties, JsonManager jsonManager) {
+    public TokenRouter(UserService userService, JsonManager jsonManager) {
         this.userService = userService;
-        this.appProperties = appProperties;
         this.jsonManager = jsonManager;
     }
 
-    public Router create(Vertx vertx) {
+    public Router create(Vertx vertx, JWTAuth jwtAuth) {
         Router tokenRouter = Router.router(vertx);
 
-        this.jwtAuth = new AuthService(vertx, appProperties).getJwtAuth();
-
-        tokenRouter.post("/refresh").handler(this::handleRefreshToken);
+        tokenRouter.post("/refresh").handler(routingContext -> handleRefreshToken(routingContext, jwtAuth));
 
         return tokenRouter;
     }
 
-    private void handleRefreshToken(RoutingContext routingContext) {
+    private void handleRefreshToken(RoutingContext routingContext, JWTAuth jwtAuth) {
         BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
         String currentUser = baseRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;

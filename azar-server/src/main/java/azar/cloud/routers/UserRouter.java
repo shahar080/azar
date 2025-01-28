@@ -18,6 +18,7 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 
 import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
 
@@ -29,21 +30,19 @@ public class UserRouter extends BaseRouter {
     private final UserService userService;
     private final JsonManager jsonManager;
     private final PasswordManager passwordManager;
-    private final JWTAuth jwtAuth;
 
     @Inject
-    public UserRouter(UserService userService, JsonManager jsonManager, PasswordManager passwordManager,
-                      AuthService authService) {
+    public UserRouter(UserService userService, JsonManager jsonManager, PasswordManager passwordManager) {
         this.userService = userService;
         this.jsonManager = jsonManager;
         this.passwordManager = passwordManager;
-        this.jwtAuth = authService.getJwtAuth();
     }
 
-    public Router create(Vertx vertx) {
+    public Router create(Vertx vertx, JWTAuth jwtAuth) {
         Router userRouter = Router.router(vertx);
+        userRouter.route(OPS_PREFIX_STRING + "/*").handler(JWTAuthHandler.create(jwtAuth));
 
-        userRouter.post("/login").handler(this::handleUserLogin);
+        userRouter.post("/login").handler(routingContext -> handleUserLogin(routingContext, jwtAuth));
         userRouter.post(OPS_PREFIX_STRING + "/getAll").handler(this::getAllUsers);
         userRouter.post(OPS_PREFIX_STRING + "/add").handler(this::handleAddUser);
         userRouter.post(OPS_PREFIX_STRING + "/update").handler(this::handleUpdateUser);
@@ -52,7 +51,7 @@ public class UserRouter extends BaseRouter {
         return userRouter;
     }
 
-    private void handleUserLogin(RoutingContext routingContext) {
+    private void handleUserLogin(RoutingContext routingContext, JWTAuth jwtAuth) {
         UserLoginRequest userLoginRequest = jsonManager.fromJson(routingContext.body().asString(), UserLoginRequest.class);
         String currentUser = userLoginRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;

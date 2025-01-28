@@ -10,8 +10,12 @@ import azar.shared.routers.BaseRouter;
 import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.JWTAuthHandler;
+
+import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
 
 /**
  * Author: Shahar Azar
@@ -29,8 +33,9 @@ public class PreferencesRouter extends BaseRouter {
         this.jsonManager = jsonManager;
     }
 
-    public Router create(Vertx vertx) {
+    public Router create(Vertx vertx, JWTAuth jwtAuth) {
         Router preferencesRouter = Router.router(vertx);
+        preferencesRouter.route(OPS_PREFIX_STRING + "/*").handler(JWTAuthHandler.create(jwtAuth));
 
         preferencesRouter.post("/add").handler(this::handleAddPreference);
         preferencesRouter.post("/update").handler(this::handleUpdatePreference);

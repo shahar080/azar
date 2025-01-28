@@ -12,15 +12,19 @@ import azar.shared.utils.JsonManager;
 import azar.shared.utils.Utilities;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
 
 /**
  * Author: Shahar Azar
@@ -44,8 +48,9 @@ public class PdfRouter extends BaseRouter {
         this.vertx = vertx;
     }
 
-    public Router create(Vertx vertx) {
+    public Router create(Vertx vertx, JWTAuth jwtAuth) {
         Router pdfRouter = Router.router(vertx);
+        pdfRouter.route(OPS_PREFIX_STRING + "/*").handler(JWTAuthHandler.create(jwtAuth));
 
         pdfRouter.post("/upload").handler(this::handlePdfUpload);
         pdfRouter.post("/getAll").handler(this::handleGetAllPdfs);

@@ -62,6 +62,8 @@ public class Utilities {
                 ImageIO.write(image, "PNG", byteArrayOutputStream);
 
                 return byteArrayOutputStream.toByteArray();
+            } catch (Exception e) {
+                return null;
             }
         });
     }

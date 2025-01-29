@@ -8,8 +8,8 @@ import {
 } from "../../shared/utils/reactRoutes.ts";
 import {useNavigate} from "react-router-dom";
 import WhoAmIDrawerMenu from "../components/DrawerMenu.tsx";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
-import {useToast} from "../../shared/utils/ToastContext.tsx";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
+import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {getUserName} from "../../shared/utils/AppState.ts";
 import {updateCV} from "../server/api/cvApi.ts";
 import PdfModal from "../components/PdfModal.tsx";
@@ -25,7 +25,6 @@ const WhoAmIManageCVPage: React.FC = () => {
     const handleOnUploadCV = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
-            //file: File
             setLoadingAnimation(true);
             if (userName === null) {
                 showToast("Error uploading CV \"" + file.name + "\"", "error");
@@ -55,7 +54,6 @@ const WhoAmIManageCVPage: React.FC = () => {
                 onManageEmail={() => navigate(WHOAMI_MANAGE_EMAIL_ROUTE)}
             />
 
-            {/* Main Content */}
             <Box
                 component="main"
                 sx={{
@@ -68,12 +66,9 @@ const WhoAmIManageCVPage: React.FC = () => {
                     overflow: "hidden",
                 }}
             >
-                {/* Ensures AppBar Offset */}
                 <Toolbar/>
 
-                {/* Grid Layout */}
                 <Grid container spacing={2} sx={{height: "100%"}}>
-                    {/* Left Section: Search and PDF Table */}
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
                             <Box>

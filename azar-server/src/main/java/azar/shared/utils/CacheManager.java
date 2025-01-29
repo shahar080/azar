@@ -20,7 +20,7 @@ public class CacheManager {
     @Inject
     public CacheManager() {
         this.cache = CacheBuilder.newBuilder()
-                .expireAfterWrite(1, TimeUnit.HOURS) // Set timeout (1 hour)
+                .expireAfterWrite(1, TimeUnit.HOURS)
                 .build();
     }
 

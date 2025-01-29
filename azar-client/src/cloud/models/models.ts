@@ -1,4 +1,4 @@
-import { BaseModel } from "../../shared/models/models";
+import {BaseModel} from "../../shared/models/models";
 
 export interface User extends BaseModel {
     firstName: string;
@@ -22,11 +22,9 @@ export function getUserTypeFromStr(value: string | null): UserType {
     if (value === null || value === undefined) {
         return UserType.STANDARD;
     }
-    // Check if the value exists in the enum
     if (Object.values(UserType).includes(value as UserType)) {
         return value as UserType;
     }
-    // Return the default value if not found
     return UserType.STANDARD;
 }
 

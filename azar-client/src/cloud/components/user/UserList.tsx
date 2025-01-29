@@ -14,6 +14,7 @@ import {useTheme} from "@mui/material/styles";
 import {User} from "../../models/models.ts";
 import RegisterUserModal from "./RegisterUserModal.tsx";
 import BaseContextMenu from "../general/BaseContextMenu.tsx";
+import {handleRequestSort, sortData} from "../sharedLogic.ts";
 
 interface UserListProps {
     users: User[];
@@ -64,29 +65,8 @@ const UserList: React.FC<UserListProps> = ({
         return () => container?.removeEventListener("scroll", handleScroll);
     }, [onLoadMore]);
 
-    // Sorting Logic
-    const handleRequestSort = (property: string) => {
-        const isAsc = orderBy === property && order === 'asc';
-        setOrder(isAsc ? 'desc' : 'asc');
-        setOrderBy(property);
-    };
+    const sortedUsers = sortData([...users], order, orderBy);
 
-    const sortData = (array: any[]) => {
-        return array.sort((a, b) => {
-            const isAsc = order === 'asc';
-            if (a[orderBy] < b[orderBy]) {
-                return isAsc ? -1 : 1;
-            }
-            if (a[orderBy] > b[orderBy]) {
-                return isAsc ? 1 : -1;
-            }
-            return 0;
-        });
-    };
-
-    const sortedUsers = sortData([...users]);
-
-    // Context Menu Logic
     const handleRightClick = (event: MouseEvent<HTMLTableRowElement>, user: User) => {
         if (!isMobile) {
             event.preventDefault();
@@ -103,7 +83,7 @@ const UserList: React.FC<UserListProps> = ({
                     left: event.touches[0].clientX,
                 });
                 setSelectedUser(user);
-            }, 600); // Long-press duration
+            }, 600);
         }
     };
 
@@ -159,7 +139,7 @@ const UserList: React.FC<UserListProps> = ({
                                     <TableSortLabel
                                         active={orderBy === field}
                                         direction={orderBy === field ? order : 'asc'}
-                                        onClick={() => handleRequestSort(field)}
+                                        onClick={() => handleRequestSort(field, orderBy, order, setOrder, setOrderBy)}
                                     >
                                         {field.charAt(0).toUpperCase() + field.slice(1)}
                                     </TableSortLabel>
@@ -177,11 +157,11 @@ const UserList: React.FC<UserListProps> = ({
                                 onTouchEnd={handleTouchEnd}
                                 sx={{
                                     cursor: "pointer",
-                                    userSelect: "none",              // Prevents text selection
-                                    WebkitTouchCallout: "none",     // Disables iOS native menu
-                                    WebkitUserSelect: "none",       // Prevents Safari text selection
-                                    MozUserSelect: "none",          // Prevents Firefox text selection
-                                    msUserSelect: "none",           // Prevents IE/Edge text selection
+                                    userSelect: "none",
+                                    WebkitTouchCallout: "none",
+                                    WebkitUserSelect: "none",
+                                    MozUserSelect: "none",
+                                    msUserSelect: "none",
                                 }}
                             >
                                 <TableCell>{user.firstName}</TableCell>

@@ -7,7 +7,7 @@ import {LoginForm} from "../components/LoginForm.tsx";
 import {login} from "../../shared/store/authSlice.ts";
 import {useDispatch} from "react-redux";
 import {LoginResponse} from "../../cloud/server/api/responses.ts";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
 import {getWhoAmIData} from "../server/api/whoAmIDataApi.ts";
 import {WhoAmIData} from "../models/models.ts";
 import {useNavigate} from "react-router-dom";
@@ -24,10 +24,6 @@ export function WhoAmIHomePage() {
 
     const [whoAmIData, setWhoAmIData] = useState<WhoAmIData>();
 
-    // const photos = [photo1,
-    //     photo2,
-    //     photo3];
-
     const handleLogin = () => {
         setShowLoginForm(!showLoginForm);
     };
@@ -39,15 +35,15 @@ export function WhoAmIHomePage() {
     const onLoginSuccess = (loginResponse: LoginResponse) => {
         dispatch(login(loginResponse));
         navigate(WHOAMI_MANAGE_CV_ROUTE);
-        setShowLoginForm(false); // Close modal after successful login
+        setShowLoginForm(false);
     };
 
     function calculateDynamicPosition(index: number, total: number) {
-        const radius = isMobile ? 50 : 120; // Radius of the circular layout
-        const angle = (2 * Math.PI * index) / total; // Spread items around a circle
+        const radius = isMobile ? 50 : 120;
+        const angle = (2 * Math.PI * index) / total;
 
-        const top = `${50 + radius * Math.sin(angle)}px`; // Calculate top using sine
-        const left = `${(isMobile ? 50 : 150) + radius * Math.cos(angle)}px`; // Calculate left using cosine
+        const top = `${50 + radius * Math.sin(angle)}px`;
+        const left = `${(isMobile ? 50 : 150) + radius * Math.cos(angle)}px`;
 
         return {top, left};
     }
@@ -60,7 +56,7 @@ export function WhoAmIHomePage() {
                 setLoadingAnimation(false);
             })
 
-    }, []);
+    }, [setLoadingAnimation]);
 
     return (
         <Box
@@ -73,7 +69,6 @@ export function WhoAmIHomePage() {
         >
             {whoAmIData &&
                 <>
-                    {/* Header Section */}
                     <Box
                         sx={{
                             position: "relative",
@@ -88,7 +83,6 @@ export function WhoAmIHomePage() {
                         }}
                     >
                         <GeneralMenu/>
-                        {/* Header Content */}
                         <Typography
                             variant="h2"
                             component="h1"
@@ -96,7 +90,7 @@ export function WhoAmIHomePage() {
                                 color: "white",
                                 textAlign: "center",
                                 fontWeight: "bold",
-                                fontSize: {xs: "2rem", sm: "2.5rem", md: "3rem"}, // Responsive font size
+                                fontSize: {xs: "2rem", sm: "2.5rem", md: "3rem"},
                             }}
                         >
                             {whoAmIData.headerTitle}
@@ -108,7 +102,7 @@ export function WhoAmIHomePage() {
                                     mt: 1,
                                     color: "white",
                                     fontWeight: 300,
-                                    fontSize: {xs: "1rem", sm: "1.25rem", md: "1.5rem"}, // Responsive font size
+                                    fontSize: {xs: "1rem", sm: "1.25rem", md: "1.5rem"},
                                 }}
                             >
                                 {whoAmIData.headerIntro}
@@ -116,9 +110,7 @@ export function WhoAmIHomePage() {
                         </Typography>
                     </Box>
 
-                    {/* Main Content */}
                     <Container sx={{mt: {xs: 2, sm: 4, md: 5}}}>
-                        {/* Title */}
                         <Typography
                             variant="h4"
                             component="h2"
@@ -127,15 +119,13 @@ export function WhoAmIHomePage() {
                             sx={{
                                 color: "#28b485",
                                 fontWeight: "bold",
-                                fontSize: {xs: "1.5rem", sm: "2rem", md: "2.5rem"}, // Responsive font size
+                                fontSize: {xs: "1.5rem", sm: "2rem", md: "2.5rem"},
                             }}
                         >
                             {whoAmIData.mainContentQuestion}
                         </Typography>
 
-                        {/* Content Grid */}
                         <Grid container spacing={4} alignItems="center">
-                            {/* Left Column */}
                             <Grid item xs={12} md={6}>
                                 <Typography
                                     variant="h6"
@@ -154,7 +144,7 @@ export function WhoAmIHomePage() {
                                             color: "#555",
                                             fontSize: {xs: "0.9rem", sm: "1rem"},
                                         }}
-                                        key={line} // Always use a key when rendering lists
+                                        key={line}
                                     >
                                         {line}
                                     </Typography>
@@ -176,7 +166,7 @@ export function WhoAmIHomePage() {
                                             color: "#555",
                                             fontSize: {xs: "0.9rem", sm: "1rem"},
                                         }}
-                                        key={line} // Always use a key when rendering lists
+                                        key={line}
                                     >
                                         {line}
                                     </Typography>
@@ -193,15 +183,14 @@ export function WhoAmIHomePage() {
                                             backgroundColor: "#28b485",
                                             color: "white",
                                         },
-                                        fontSize: {xs: "0.8rem", sm: "1rem"}, // Responsive font size
-                                        padding: {xs: "6px 12px", sm: "8px 16px"}, // Responsive padding
+                                        fontSize: {xs: "0.8rem", sm: "1rem"},
+                                        padding: {xs: "6px 12px", sm: "8px 16px"},
                                     }}
                                 >
                                     {whoAmIData.cvButton}
                                 </Button>
                             </Grid>
 
-                            {/* Right Column - Images */}
                             <Grid item xs={12} md={6}>
                                 <Box
                                     sx={{
@@ -211,7 +200,7 @@ export function WhoAmIHomePage() {
                                     }}
                                 >
                                     {whoAmIData.photos.map((photo, index) => {
-                                        const position = calculateDynamicPosition(index, whoAmIData.photos.length); // Calculate position based on index
+                                        const position = calculateDynamicPosition(index, whoAmIData.photos.length);
                                         return (
                                             <Box
                                                 key={index}
@@ -220,16 +209,16 @@ export function WhoAmIHomePage() {
                                                 alt={"photo"}
                                                 sx={{
                                                     position: "absolute",
-                                                    ...position, // Dynamically apply calculated position
+                                                    ...position,
                                                     width: "45%",
                                                     boxShadow: 3,
                                                     borderRadius: 2,
                                                     transition: "all 0.2s",
-                                                    zIndex: 1, // Default z-index for all photos
+                                                    zIndex: 1,
                                                     "&:hover": {
-                                                        transform: "scale(1.1)", // Enlarge on hover
-                                                        zIndex: 10, // Bring to the front on hover
-                                                        boxShadow: 6, // Add more emphasis
+                                                        transform: "scale(1.1)",
+                                                        zIndex: 10,
+                                                        boxShadow: 6,
                                                     },
                                                 }}
                                             />
@@ -298,10 +287,10 @@ export function WhoAmIHomePage() {
                                 bgcolor: "background.paper",
                                 boxShadow: 24,
                                 borderRadius: 2,
-                                width: "90%", // Adjust for responsiveness
-                                maxWidth: "400px", // Limit maximum width
-                                maxHeight: "90vh", // Ensure it doesn't exceed the viewport height
-                                overflow: "auto", // Add scroll if content exceeds max height
+                                width: "90%",
+                                maxWidth: "400px",
+                                maxHeight: "90vh",
+                                overflow: "auto",
                             }}
                         >
                             <LoginForm handleCancel={handleCancel} onLoginSuccess={onLoginSuccess}/>

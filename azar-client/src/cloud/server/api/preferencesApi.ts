@@ -1,46 +1,17 @@
 import {PreferenceGetAllRequest, PreferenceUpsertRequest} from "./requests.ts";
 import apiClient from "../../../shared/server/api/apiClient.ts";
 import {Preference} from "../../models/models.ts";
-import {
-    PREFERENCE_ADD_API,
-    PREFERENCE_DELETE_API,
-    PREFERENCE_GET_ALL_API,
-    PREFERENCE_UPDATE_API
-} from "../../utils/constants.ts";
-import {BaseRequest} from "../../../shared/server/api/requests.ts";
-
-export async function add(preferenceAddRequest: PreferenceUpsertRequest): Promise<boolean> {
-
-    try {
-        const response = await apiClient.post(PREFERENCE_ADD_API, preferenceAddRequest);
-        return response.status === 201;
-    } catch (error) {
-        console.error('Create preference failed:', error);
-        return false;
-    }
-}
+import {PREFERENCE_GET_ALL_API, PREFERENCE_UPDATE_API} from "../../utils/constants.ts";
 
 export async function getAllPreferences(preferenceGetAllRequest: PreferenceGetAllRequest, page: number = 1, limit: number = 20): Promise<Preference[]> {
     try {
         const response = await apiClient.post<Preference[]>(PREFERENCE_GET_ALL_API + `?page=${page}&limit=${limit}`, preferenceGetAllRequest);
         const preferences: Preference[] = response.data;
-        return preferences || []; // Return empty array if no data
+        return preferences || [];
     } catch (error) {
         console.error(`Error getting preferences from server (page: ${page})!`, error);
         return [];
     }
-}
-
-export async function deletePreference(preferenceId: string, baseRequest: BaseRequest): Promise<boolean> {
-    try {
-        const response = await apiClient.post(PREFERENCE_DELETE_API + preferenceId, baseRequest);
-        if (response.status === 200) {
-            return true;
-        }
-    } catch (error) {
-        console.error('Delete preference ' + preferenceId + ' failed', error);
-    }
-    return false;
 }
 
 export async function updatePreference(preferenceUpdateRequest: PreferenceUpsertRequest): Promise<Preference | undefined> {

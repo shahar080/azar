@@ -41,7 +41,7 @@ const CloudDrawerMenu: React.FC<DrawerMenuProps> = ({
                                                    userType = UserType.STANDARD,
                                                }) => {
     const theme = useTheme();
-    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
     const dispatch = useDispatch();
     const navigate = useNavigate();
 

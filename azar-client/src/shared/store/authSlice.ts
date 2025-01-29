@@ -1,4 +1,3 @@
-// src/store/authSlice.ts
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {getAuthToken} from "../utils/AppState.ts";
 import {LoginResponse} from "../../cloud/server/api/responses.ts";
@@ -17,11 +16,7 @@ const authSlice = createSlice({
     reducers: {
         login(state, action: PayloadAction<LoginResponse>) {
             const loginResponse = action.payload;
-            if (loginResponse.success) {
-                state.isLoggedIn = true;
-            } else {
-                state.isLoggedIn = false;
-            }
+            state.isLoggedIn = loginResponse.success;
         },
         logout(state) {
             state.isLoggedIn = false;

@@ -28,15 +28,13 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
                                                        }) => {
     const menuRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
-    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
     const userName = getUserName();
 
-    // Close menu when mouse leaves the menu area
     const handleMouseLeave = () => {
         onClose();
     };
 
-    // Effect to automatically close when anchorPosition is null
     useEffect(() => {
         if (!anchorPosition) {
             onClose();
@@ -54,7 +52,7 @@ const PdfContextMenu: React.FC<PdfContextMenuProps> = ({
                     : undefined
             }
             MenuListProps={{
-                onMouseLeave: handleMouseLeave, // Close on mouse leave
+                onMouseLeave: handleMouseLeave,
             }}
             ref={menuRef}
         >

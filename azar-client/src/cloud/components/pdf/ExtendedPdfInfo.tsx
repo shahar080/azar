@@ -23,8 +23,8 @@ const ExtendedPdfInfo: React.FC<ExtendedPdfInfoProps> = ({
             sx={{
                 padding: 3,
                 marginTop: 2,
-                width: '100%', // Take full container width
-                height: '200px', // Customize height
+                width: '100%',
+                height: '200px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',

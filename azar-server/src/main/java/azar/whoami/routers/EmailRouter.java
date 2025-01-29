@@ -60,13 +60,9 @@ public class EmailRouter extends BaseRouter {
         String currentUser = updateEmailDataRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        userService.getUserByUserName(updateEmailDataRequest.getCurrentUser())
-                .onSuccess(dbUser -> {
-                    if (dbUser == null) {
-                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(updateEmailDataRequest.getCurrentUser()));
-                        return;
-                    }
-                    if (dbUser.IsNonAdmin()) {
+        userService.isAdmin(updateEmailDataRequest.getCurrentUser())
+                .onSuccess(isAdmin -> {
+                    if (!isAdmin) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(updateEmailDataRequest.getCurrentUser()));
                         return;
                     }

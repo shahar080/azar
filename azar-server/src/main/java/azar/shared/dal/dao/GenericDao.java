@@ -32,8 +32,7 @@ public abstract class GenericDao<T> {
 
     public Future<Set<T>> getAll() {
         return Future.future(promise ->
-                vertx.executeBlocking(() ->
-                {
+                vertx.executeBlocking(() -> {
                     try (Session session = openSession()) {
                         Class<T> type = this.getType();
                         List<T> items = session.createQuery("from " + type.getName() + " s", type).getResultList();

@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useState} from "react";
+import React, {createContext, useState} from "react";
 
 interface LoadingContextType {
     isLoading: boolean;
@@ -21,4 +21,5 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({childr
     );
 };
 
-export const useLoading = () => useContext(LoadingContext);
+// Export the context for external use in the hook
+export {LoadingContext};

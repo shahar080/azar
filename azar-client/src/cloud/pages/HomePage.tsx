@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Box, CssBaseline, Grid, Paper, Toolbar, useMediaQuery} from "@mui/material";
 import AppBarHeader from "../../shared/components/AppBarHeader.tsx";
 import CloudDrawerMenu from "../components/general/DrawerMenu.tsx";
@@ -14,28 +14,21 @@ import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
 import {formatDate, loadPreferences} from "../utils/utilities.ts";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
-import {useToast} from "../../shared/utils/ToastContext.tsx";
-import {
-    getDrawerPinnedState,
-    getUserId,
-    getUserName,
-    getUserType,
-    setDrawerPinnedState
-} from "../../shared/utils/AppState.ts";
-import {updatePreference} from "../server/api/preferencesApi.ts";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
+import {useToast} from "../../shared/utils/toast/useToast.ts";
+import {getDrawerPinnedState, getUserId, getUserName, getUserType} from "../../shared/utils/AppState.ts";
 import {
     CLOUD_LOGIN_ROUTE,
     CLOUD_MANAGE_PREFERENCES_ROUTE,
     CLOUD_MANAGE_USERS_ROUTE,
     CLOUD_ROUTE
 } from "../../shared/utils/reactRoutes.ts";
-import {DRAWER_PIN_STR} from "../utils/constants.ts";
 import {drawerWidth} from "../../shared/utils/constants.ts";
+import {pinDrawer, toggleDrawer} from "../components/sharedLogic.ts";
 
 const CloudHomePage: React.FC = () => {
     const theme = useTheme();
-    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
     const [drawerPinned, setDrawerPinned] = useState(isDesktop && getDrawerPinnedState());
     const [drawerOpen, setDrawerOpen] = useState(drawerPinned);
     const [pdfs, setPdfs] = useState<PdfFile[]>([]);
@@ -56,6 +49,39 @@ const CloudHomePage: React.FC = () => {
     const userName = getUserName();
     const navigate = useNavigate();
 
+    const loadPdfs = useCallback(
+        (forceLoad: boolean = false) => {
+            if (!forceLoad && (loading || !hasMore)) return;
+            setLoading(true);
+            setLoadingAnimation(true);
+            const currentPage = forceLoad ? 1 : page;
+
+            getAllPdfs({currentUser: userName}, currentPage, 20)
+                .then((newPdfs) => {
+                    if (newPdfs.length < 20) {
+                        setHasMore(false);
+                    }
+
+                    setPdfs((prevPdfs) =>
+                        forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]
+                    );
+                    setFilteredPdfs((prevPdfs) =>
+                        forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]
+                    );
+
+                    if (!forceLoad) {
+                        setPage((prev) => prev + 1);
+                    }
+                })
+                .catch((err) => console.error('Failed to load PDFs:', err))
+                .finally(() => {
+                    setLoading(false);
+                    setLoadingAnimation(false);
+                });
+        },
+        [loading, hasMore, page, userName, setLoading, setLoadingAnimation, setPdfs, setFilteredPdfs, setHasMore, setPage] // Add all dependencies here
+    );
+
     useEffect(() => {
         if (!isLoggedIn) {
             setPdfs([]);
@@ -66,7 +92,7 @@ const CloudHomePage: React.FC = () => {
 
     useEffect(() => {
         loadPdfs();
-    }, []);
+    }, [loadPdfs]);
 
     useEffect(() => {
         loadPreferences(getUserName(), getUserId())
@@ -74,39 +100,11 @@ const CloudHomePage: React.FC = () => {
                 setDrawerPinned(isDesktop && getDrawerPinnedState());
                 setDrawerOpen(isDesktop && getDrawerPinnedState());
             });
-    }, []);
+    }, [isDesktop]);
 
     useEffect(() => {
         updateLabels(pdfs);
     }, [pdfs]);
-
-    const loadPdfs = (forceLoad: boolean = false) => {
-        if (!forceLoad && (loading || !hasMore)) return;
-        setLoading(true);
-        setLoadingAnimation(true)
-        const currentPage = forceLoad ? 1 : page;
-
-        getAllPdfs({currentUser: userName}, currentPage, 20)
-            .then((newPdfs) => {
-                if (newPdfs.length < 20) {
-                    setHasMore(false);
-                }
-
-                // If forceLoad is true, replace PDFs; otherwise, append
-                setPdfs((prevPdfs) => (forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]));
-                setFilteredPdfs((prevPdfs) => (forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]));
-
-                if (!forceLoad) {
-                    setPage((prev) => prev + 1); // Increment page only if not forcing reload
-                }
-            })
-            .catch((err) => console.error("Failed to load PDFs:", err))
-            .finally(() => {
-                setLoading(false);
-                setLoadingAnimation(false);
-            });
-    };
-
 
     const handleSearch = (query: string, labels: string[]) => {
         setPage(1);
@@ -140,7 +138,6 @@ const CloudHomePage: React.FC = () => {
         }
         uploadPdf(file, userName).then((newPdf) => {
             if (newPdf !== undefined) {
-                // Reset pagination and reload PDFs
                 resetPaginationAndReload();
                 showToast("Successfully uploaded PDF \"" + newPdf.fileName + "\"", "success");
             } else {
@@ -167,7 +164,6 @@ const CloudHomePage: React.FC = () => {
                 } else {
                     showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error")
                 }
-                // Reset pagination and reload PDFs
                 resetPaginationAndReload();
                 setSelectedPdf(null);
             })
@@ -179,8 +175,8 @@ const CloudHomePage: React.FC = () => {
     const resetPaginationAndReload = () => {
         setPage(1);
         setHasMore(true);
-        setPdfs([]); // Clear the list of PDFs
-        loadPdfs(true); // Force reload starting from page 1
+        setPdfs([]);
+        loadPdfs(true);
     };
 
     const handleRowClick = (pdfFile: PdfFile) => {
@@ -195,34 +191,6 @@ const CloudHomePage: React.FC = () => {
         navigate(CLOUD_MANAGE_PREFERENCES_ROUTE)
     }
 
-    const toggleDrawer = () => {
-        if (!drawerPinned) {
-            setDrawerOpen(!drawerOpen);
-        }
-    };
-
-    const pinDrawer = () => {
-        setDrawerPinned((prevPinned) => {
-            setDrawerOpen(!prevPinned); // Close the drawer when unpinning
-            const updatedPreference = {
-                userId: Number(getUserId()),
-                key: DRAWER_PIN_STR,
-                value: (!prevPinned).toString()
-            }
-            updatePreference({preference: updatedPreference, currentUser: userName})
-                .then(updatedPreference => {
-                    if (updatedPreference) {
-                        setDrawerPinnedState(JSON.parse(updatedPreference.value));
-                        setDrawerPinned(JSON.parse(updatedPreference.value));
-                        setDrawerOpen(JSON.parse(updatedPreference.value));
-                    } else {
-                        showToast("Error updating preference drawer pinned", "error")
-                    }
-                })
-            return !prevPinned;
-        });
-    };
-
     const handleEditPdf = (pdf: PdfFile) => {
         setSelectedPdfForEdit(pdf);
         setEditModalOpen(true);
@@ -233,12 +201,12 @@ const CloudHomePage: React.FC = () => {
         updatePdf({currentUser: userName, pdfFile: updatedPdf}).then((res) => {
             if (res && res.id === updatedPdf.id) {
                 setSelectedPdf(res);
-                const tempPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
-                setPdfs(tempPdfs);
+                const updatedPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
+                setPdfs(updatedPdfs);
                 setFilteredPdfs((prev) =>
                     prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
                 );
-                updateLabels(tempPdfs)
+                updateLabels(updatedPdfs)
                 showToast("PDF \"" + res.fileName + "\" updated successfully.", "success");
             } else {
                 showToast("Error updating PDF \"" + updatedPdf.fileName + "\"", "error");
@@ -250,7 +218,6 @@ const CloudHomePage: React.FC = () => {
     };
 
     const updateLabels = (pdfs: PdfFile[]) => {
-        // Extract unique labels
         const labels = Array.from(new Set(pdfs.flatMap((pdf) => pdf.labels || [])));
         setAllLabels(labels);
     }
@@ -263,21 +230,19 @@ const CloudHomePage: React.FC = () => {
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
             <CssBaseline/>
 
-            {/* AppBar */}
-            <AppBarHeader onMenuToggle={toggleDrawer} onLogoClick={() => navigate(CLOUD_ROUTE)}/>
+            <AppBarHeader onMenuToggle={() => toggleDrawer(drawerPinned, setDrawerOpen, drawerOpen)}
+                          onLogoClick={() => navigate(CLOUD_ROUTE)}/>
 
-            {/* Drawer */}
             <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
-                onPinToggle={pinDrawer}
+                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, userName, showToast)}
                 onManageUser={handleRegisterUser}
                 onManagePreferences={handleMangePreferences}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
             />
 
-            {/* Main Content */}
             <Box
                 component="main"
                 sx={{
@@ -290,12 +255,9 @@ const CloudHomePage: React.FC = () => {
                     overflow: "hidden",
                 }}
             >
-                {/* Ensures AppBar Offset */}
                 <Toolbar/>
 
-                {/* Grid Layout */}
                 <Grid container spacing={2} sx={{height: "100%"}}>
-                    {/* Left Section: Search and PDF Table */}
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <PDFSearchBar
                             onSearch={handleSearch}
@@ -333,7 +295,6 @@ const CloudHomePage: React.FC = () => {
                         </Box>
                     </Grid>
 
-                    {/* Right Section: Extended PDF Info (Only on Desktop) */}
                     {isDesktop && (
                         <Grid item md={4} sx={{height: "100%"}}>
                             {selectedPdf ? (

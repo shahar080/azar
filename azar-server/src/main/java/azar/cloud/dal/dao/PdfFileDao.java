@@ -38,8 +38,8 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
                                         "SELECT new azar.cloud.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
                                                 " FROM PdfFile p",
                                         PdfFile.class)
-                                .setFirstResult(offset) // Offset
-                                .setMaxResults(limit)   // Limit
+                                .setFirstResult(offset)
+                                .setMaxResults(limit)
                                 .getResultList();
 
                         listPromise.complete(paginatedResults);
@@ -52,8 +52,8 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
 
     public Future<byte[]> getThumbnailById(Integer id) {
         return Future.future(thumbnailPromise -> {
-            try (Session session = openSession()) {
-                vertx.executeBlocking(() -> {
+            vertx.executeBlocking(() -> {
+                try (Session session = openSession()) {
                     byte[] thumbnail = session
                             .createNativeQuery(
                                     "SELECT lo_get(p.thumbnail) FROM pdf_files p WHERE p.id = :id",
@@ -63,11 +63,11 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
                             .getSingleResult();
 
                     thumbnailPromise.complete(thumbnail);
-                    return null;
-                }, false);
-            } catch (Exception e) {
-                thumbnailPromise.fail(e);
-            }
+                } catch (Exception e) {
+                    thumbnailPromise.fail(e);
+                }
+                return null;
+            }, false);
         });
     }
 
@@ -97,7 +97,7 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
                     try (Session session = openSession()) {
                         session.beginTransaction();
 
-                        // Use createMutationQuery for UPDATE queries
+
                         MutationQuery query = session.createMutationQuery(
                                 "UPDATE PdfFile e " +
                                         "SET e.fileName = :fileName, e.labels = :labels, e.description = :description " +
@@ -111,7 +111,7 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
                         int rowsUpdated = query.executeUpdate();
                         session.getTransaction().commit();
 
-                        promise.complete(rowsUpdated > 0); // Return true if rows were updated
+                        promise.complete(rowsUpdated > 0);
                     } catch (Exception e) {
                         promise.fail(e);
                     }

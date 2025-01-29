@@ -18,7 +18,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
         userName: '',
         password: '',
         confirmPassword: '',
-        userType: 'STANDARD', // Default value
+        userType: 'STANDARD',
     });
 
     const [errors, setErrors] = useState({
@@ -69,14 +69,14 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({open, onClose, onS
         if (validateForm()) {
             const {firstName, lastName, userName, password, userType} = formData;
             onSubmit({firstName, lastName, userName, password, userType});
-            resetForm(); // Clear the form after successful submission
-            onClose();   // Close the modal
+            resetForm();
+            onClose();
         }
     };
 
     const handleCancel = () => {
-        resetForm();  // Reset form on cancel
-        onClose();    // Close the modal
+        resetForm();
+        onClose();
     };
 
     return (

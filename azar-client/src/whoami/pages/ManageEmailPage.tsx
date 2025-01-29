@@ -8,9 +8,9 @@ import {
 } from "../../shared/utils/reactRoutes.ts";
 import {useNavigate} from "react-router-dom";
 import WhoAmIDrawerMenu from "../components/DrawerMenu.tsx";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
 import {getUserName} from "../../shared/utils/AppState.ts";
-import {useToast} from "../../shared/utils/ToastContext.tsx";
+import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {EmailData} from "../models/models.ts";
 import {getEmailData, updateEmailData} from "../server/api/EmailDataApi.ts";
 
@@ -54,7 +54,7 @@ const ManageEmailPage: React.FC = () => {
                 setFormData(value);
             })
             .finally(() => setLoadingAnimation(false))
-    }, []);
+    }, [setLoadingAnimation]);
 
     return (
         <Box sx={{
@@ -95,8 +95,8 @@ const ManageEmailPage: React.FC = () => {
                         mt: 3,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 2, // Reduced gap between elements
-                        maxWidth: "80%", // Set a max width for the form
+                        gap: 2,
+                        maxWidth: "80%",
                     }}
                 >
                     <TextField
@@ -104,7 +104,7 @@ const ManageEmailPage: React.FC = () => {
                         value={formData.title}
                         onChange={(e) => handleInputChange("title", e.target.value)}
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     <TextField
                         label="Email Body"
@@ -112,14 +112,14 @@ const ManageEmailPage: React.FC = () => {
                         onChange={(e) => handleInputChange("body", e.target.value)}
                         fullWidth
                         multiline
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     <Button
                         variant="contained"
                         color="primary"
                         sx={{
                             mt: 2,
-                            alignSelf: "flex-start", // Align the button to the start
+                            alignSelf: "flex-start",
                         }}
                         onClick={handleSave}
                     >

@@ -3,7 +3,7 @@ import {Box, Button, TextField, Typography} from "@mui/material";
 import {AxiosError} from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 import {AccountCircle} from "@mui/icons-material";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
 import PasswordField from "../../shared/components/PasswordField.tsx";
 import {getUserTypeFromStr, UserType} from "../../cloud/models/models.ts";
 import {login} from "../../shared/server/api/userApi.ts";
@@ -29,7 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         setLoadingAnimation(true);
         try {
-            setErrorMessage(""); // Clear previous error
+            setErrorMessage("");
 
             const response = await login({currentUser: formData.userName, userNameAndPassword: formData});
 
@@ -44,7 +44,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             }
         } catch (error: unknown) {
             if (error instanceof AxiosError) {
-                // Display server-provided error message or fallback to a generic error
                 setErrorMessage(
                     error.response?.data?.message || "Unable to login. Please try again."
                 );
@@ -57,7 +56,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({...formData, [e.target.name]: e.target.value});
-        setErrorMessage(""); // Clear error on user input
+        setErrorMessage("");
     };
 
     return (
@@ -75,7 +74,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 padding: "2rem",
                 backgroundColor: "rgba(40, 180, 133, 0.1)",
                 borderRadius: "12px",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)", // Add a shadow for depth
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
             }}
         >
             <Typography
@@ -105,8 +104,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 }}
                 InputLabelProps={{
                     sx: {
-                        fontSize: "1.4rem", // Increase the font size of the label
-                        fontWeight: "bold", // Optional: Make the label bold
+                        fontSize: "1.4rem",
+                        fontWeight: "bold",
                     },
                 }}
                 error={Boolean(errorMessage)}
@@ -116,11 +115,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                         : ""
                 }
                 FormHelperTextProps={{
-                    sx: {pointerEvents: "none"}, // Prevent focus on helper text
+                    sx: {pointerEvents: "none"},
                 }}
                 sx={{
                     "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px", // Consistent rounded corners
+                        borderRadius: "8px",
                     },
                 }}
             />
@@ -137,8 +136,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 }
                 InputLabelProps={{
                     sx: {
-                        fontSize: "1.4rem", // Increase the font size of the label
-                        fontWeight: "bold", // Optional: Make the label bold
+                        fontSize: "1.4rem",
+                        fontWeight: "bold",
                     },
                 }}
             />
@@ -151,7 +150,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                     padding: "10px",
                     borderRadius: "8px",
                     fontWeight: "bold",
-                    textTransform: "none", // Keep button text original case
+                    textTransform: "none",
                 }}
             >
                 Login

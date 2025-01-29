@@ -64,13 +64,9 @@ public class WhoAmIRouter extends BaseRouter {
         String currentUser = updateWhoAmIDataRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        userService.getUserByUserName(updateWhoAmIDataRequest.getCurrentUser())
-                .onSuccess(dbUser -> {
-                    if (dbUser == null) {
-                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(updateWhoAmIDataRequest.getCurrentUser()));
-                        return;
-                    }
-                    if (dbUser.IsNonAdmin()) {
+        userService.isAdmin(updateWhoAmIDataRequest.getCurrentUser())
+                .onSuccess(isAdmin -> {
+                    if (!isAdmin) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(updateWhoAmIDataRequest.getCurrentUser()));
                         return;
                     }

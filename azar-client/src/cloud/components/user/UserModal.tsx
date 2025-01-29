@@ -8,8 +8,8 @@ interface UserModalProps {
     open: boolean;
     user: User | null;
     onClose: () => void;
-    onSave?: (updatedUser: User) => void; // Optional, only used in edit mode
-    mode: "view" | "edit"; // Determines whether the modal is for viewing or editing
+    onSave?: (updatedUser: User) => void;
+    mode: "view" | "edit";
 }
 
 const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}) => {
@@ -59,7 +59,6 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
                     {mode === "view" ? "View User" : "Edit User"}
                 </Typography>
 
-                {/* First Name Field */}
                 <TextField
                     fullWidth
                     label="First Name"
@@ -76,7 +75,6 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
                     }}
                 />
 
-                {/* Last Name Field */}
                 <TextField
                     fullWidth
                     label="Last Name"
@@ -93,7 +91,6 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
                     }}
                 />
 
-                {/* Username Field */}
                 <TextField
                     fullWidth
                     label="Username"
@@ -126,7 +123,6 @@ const UserModal: React.FC<UserModalProps> = ({open, user, onClose, onSave, mode}
                     ))}
                 </TextField>
 
-                {/* Actions */}
                 <Stack direction="row" spacing={2} mt={2}>
                     {mode === "edit" && (
                         <Button variant="outlined" onClick={handleSave}>

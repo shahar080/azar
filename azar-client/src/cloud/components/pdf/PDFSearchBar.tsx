@@ -31,12 +31,10 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
     const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
     const [dropdownLabel, setDropdownLabel] = useState('');
 
-    /** Trigger search on any change */
     const triggerSearch = (query: string, labels: string[]) => {
         onSearch(query, labels);
     };
 
-    /** Handle adding labels */
     const handleAddLabel = (label: string) => {
         if (availableLabels.includes(label) && !selectedLabels.includes(label)) {
             const updatedLabels = [...selectedLabels, label];
@@ -46,21 +44,18 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
-    /** Handle removing labels */
     const handleRemoveLabel = (label: string) => {
         const updatedLabels = selectedLabels.filter((l) => l !== label);
         setSelectedLabels(updatedLabels);
         triggerSearch(searchQuery, updatedLabels);
     };
 
-    /** Handle search bar text input */
     const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
         triggerSearch(e.target.value, selectedLabels);
     };
 
-    /** Handle pressing Enter in search bar */
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && searchQuery.trim()) {
             e.preventDefault();
@@ -69,7 +64,6 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
-    /** Handle dropdown label selection */
     const handleDropdownChange = (e: SelectChangeEvent) => {
         const label = e.target.value;
         if (label) {
@@ -78,7 +72,6 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
-    /** Handle file uploads */
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             onFileUpload(e.target.files[0]);
@@ -87,7 +80,6 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-            {/* Search Bar and Labels */}
             <Box sx={{display: 'flex', gap: 1, alignItems: 'center', width: '100%'}}>
                 <Autocomplete
                     multiple
@@ -120,7 +112,6 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
                     sx={{flexGrow: 1}}
                 />
 
-                {/* Dropdown for Labels */}
                 <Select
                     value={dropdownLabel}
                     displayEmpty
@@ -154,7 +145,6 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
                     gap: 2,
                 }}
             >
-                {/* Left Side: Upload PDF Button */}
                 <Box>
                     <Button variant="outlined" component="label" color="secondary">
                         Upload PDF
@@ -167,7 +157,6 @@ const PDFSearchBar: React.FC<SearchBarProps> = ({
                     </Button>
                 </Box>
 
-                {/* Right Side: View Toggle Buttons */}
                 <Box>
                     <ToggleButtonGroup
                         value={viewMode}

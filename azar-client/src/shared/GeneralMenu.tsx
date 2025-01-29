@@ -16,7 +16,6 @@ export function GeneralMenu() {
 
     return (
         <>
-            {/* Dropdown Menu in Top Left */}
             <Box
                 sx={{
                     position: "absolute",

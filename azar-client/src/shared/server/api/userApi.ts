@@ -17,7 +17,6 @@ export async function login(userLoginRequest: UserLoginRequest): Promise<LoginRe
         const response = await apiClient.post(USER_LOGIN_API, userLoginRequest);
         const loginResponse: LoginResponse = response.data;
         if (loginResponse && loginResponse.success) {
-            // Securely store the token
             setAuthToken(loginResponse.token);
             setUserName(loginResponse.userName);
             setUserType(loginResponse.userType);
@@ -46,7 +45,7 @@ export async function getAllUsers(baseRequest: BaseRequest, page: number = 1, li
     try {
         const response = await apiClient.post<User[]>(USER_GET_ALL_API + `?page=${page}&limit=${limit}`, baseRequest);
         const users: User[] = response.data;
-        return users || []; // Return empty array if no data
+        return users || [];
     } catch (error) {
         console.error(`Error getting users from server (page: ${page})!`, error);
         return [];

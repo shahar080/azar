@@ -17,12 +17,14 @@ const ShowPDF: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText})
             }
         };
 
-        loadShowPDF();
+        const promise = loadShowPDF();
 
         return () => {
             if (showPDFUrl) URL.revokeObjectURL(showPDFUrl);
+            promise.catch((error) => console.error("Error during cleanup of loadShowPDF:", error));
         };
-    }, [pdfId]);
+    }, [pdfId, showPDFUrl, userName]);
+
 
     if (!showPDFUrl) {
         return <div>Loading PDF...</div>;

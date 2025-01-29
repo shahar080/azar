@@ -1,4 +1,4 @@
-import React, {createContext, ReactNode, useContext, useState} from "react";
+import React, {createContext, ReactNode, useState} from "react";
 import {Alert, AlertColor, Snackbar} from "@mui/material";
 
 interface ToastContextType {
@@ -43,10 +43,4 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({children}) => 
     );
 };
 
-export const useToast = () => {
-    const context = useContext(ToastContext);
-    if (!context) {
-        throw new Error("useToast must be used within a ToastProvider");
-    }
-    return context;
-};
+export {ToastContext};

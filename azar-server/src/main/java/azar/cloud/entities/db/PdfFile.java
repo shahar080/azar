@@ -31,7 +31,7 @@ public class PdfFile {
     @Column(nullable = false)
     private byte[] data;
 
-    private String contentType; // For MIME type
+    private String contentType;
 
     @Column(nullable = false)
     private List<String> labels;
@@ -51,7 +51,7 @@ public class PdfFile {
 
     @PrePersist
     protected void onCreate() {
-        uploadedAt = Instant.now(); // Set current time before persisting
+        uploadedAt = Instant.now();
     }
 
 }

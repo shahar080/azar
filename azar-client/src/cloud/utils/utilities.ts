@@ -35,13 +35,13 @@ export function parseSize(size: string): number {
 
     switch (unit) {
         case 'MB':
-            return value * 1024; // Convert MB to KB
+            return value * 1024;
         case 'GB':
-            return value * 1024 * 1024; // Convert GB to KB
+            return value * 1024 * 1024;
         case 'KB':
-            return value; // Already in KB
+            return value;
         case 'B':
-            return value / 1024; // Convert Bytes to KB
+            return value / 1024;
         default:
             return 0;
     }
@@ -49,19 +49,19 @@ export function parseSize(size: string): number {
 
 export async function downloadPdf(userName: string, pdfFile: PdfFile) {
     try {
-        const blob = await fetchPDF({currentUser: userName}, pdfFile.id); // Fetch the PDF from the database
+        const blob = await fetchPDF({currentUser: userName}, pdfFile.id);
         const url = URL.createObjectURL(blob);
 
         const anchor = document.createElement("a");
         anchor.href = url;
-        anchor.download = `${pdfFile.fileName}`; // Set the desired filename
+        anchor.download = `${pdfFile.fileName}`;
         anchor.style.display = "none";
 
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);
 
-        URL.revokeObjectURL(url); // Clean up the object URL after the download
+        URL.revokeObjectURL(url);
     } catch (error) {
         console.error("Failed to download the PDF:", error);
     }

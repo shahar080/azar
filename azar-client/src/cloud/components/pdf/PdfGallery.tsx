@@ -24,7 +24,6 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    // Context Menu Handlers
     const handleRightClick = (event: MouseEvent<HTMLDivElement>, pdf: PdfFile) => {
         if (!isMobile) {
             event.preventDefault();
@@ -41,7 +40,7 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                     left: event.touches[0].clientX,
                 });
                 setSelectedPdf(pdf);
-            }, 600); // Long press duration
+            }, 600);
         }
     };
 
@@ -79,19 +78,19 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
         handleCloseMenu();
     };
 
-    const handleScroll = () => {
-        const container = containerRef.current;
-        if (container) {
-            const bottomReached =
-                Math.ceil(container.scrollTop + container.clientHeight) >= container.scrollHeight;
-
-            if (bottomReached) {
-                onLoadMore();
-            }
-        }
-    };
-
     useEffect(() => {
+        const handleScroll = () => {
+            const container = containerRef.current;
+            if (container) {
+                const bottomReached =
+                    Math.ceil(container.scrollTop + container.clientHeight) >= container.scrollHeight;
+
+                if (bottomReached) {
+                    onLoadMore();
+                }
+            }
+        };
+
         const container = containerRef.current;
 
         if (container) {
@@ -104,7 +103,6 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
 
     return (
         <>
-            {/* Scrollable Container */}
             <Box
                 ref={containerRef}
                 sx={{
@@ -129,9 +127,9 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                                 style={{cursor: "context-menu"}}
                                 sx={{
                                     cursor: "context-menu",
-                                    userSelect: "none", // Prevents text selection
-                                    WebkitTouchCallout: "none", // Disables the native iOS menu
-                                    WebkitUserSelect: "none", // Disables selection on Safari
+                                    userSelect: "none",
+                                    WebkitTouchCallout: "none",
+                                    WebkitUserSelect: "none",
                                 }}
                             >
                                 <CardActionArea onClick={() => handleThumbnailClick(pdf)}>
@@ -148,7 +146,6 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                 </Grid>
             </Box>
 
-            {/* Context Menu */}
             <PdfContextMenu
                 anchorPosition={anchorPosition}
                 pdfFile={selectedPdf}
@@ -159,7 +156,6 @@ const PdfGallery: React.FC<PdfGalleryProps> = ({pdfs, onLoadMore, onRowClick, on
                 onDelete={handleDelete}
             />
 
-            {/* Show PDF Modal */}
             <ShowPDFModal
                 open={isShowPDF}
                 pdfFile={selectedPdf}

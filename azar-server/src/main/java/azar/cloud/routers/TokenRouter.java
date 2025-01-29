@@ -53,10 +53,8 @@ public class TokenRouter extends BaseRouter {
         String token = authHeader.substring("Bearer ".length());
 
         try {
-            // Decode token without enforcing expiration checks
             JsonObject decodedToken = decodeToken(token);
 
-            // Extract user information (e.g., username) from the decoded token
             String username = decodedToken.getString("userName");
             if (username == null) {
                 sendUnauthorizedErrorResponse(routingContext, "Missing or invalid token");
@@ -68,28 +66,24 @@ public class TokenRouter extends BaseRouter {
                 return;
             }
 
-            // Generate a new token
             String newToken = jwtAuth.generateToken(
                     new JsonObject().put("username", username),
-                    new JWTOptions().setExpiresInSeconds(3600) // New token valid for 1 hour
+                    new JWTOptions().setExpiresInSeconds(3600)
             );
 
             sendOKResponse(routingContext, new JsonObject().put("token", newToken).encode(), "Successfully refreshed token");
         } catch (Exception e) {
-            // Handle decoding errors or invalid tokens
             sendUnauthorizedErrorResponse(routingContext, "Invalid or expired token");
         }
     }
 
     private JsonObject decodeToken(String token) {
         try {
-            // Split the token into parts (header.payload.signature)
             String[] parts = token.split("\\.");
             if (parts.length != 3) {
                 throw new IllegalArgumentException("Invalid JWT token format");
             }
 
-            // Decode the payload (second part) from Base64
             String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
             return new JsonObject(payload);
         } catch (Exception e) {

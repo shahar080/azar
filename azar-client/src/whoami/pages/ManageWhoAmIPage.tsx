@@ -11,9 +11,9 @@ import {
 import {useNavigate} from "react-router-dom";
 import WhoAmIDrawerMenu from "../components/DrawerMenu.tsx";
 import {getWhoAmIData, updateWhoAmIData} from "../server/api/whoAmIDataApi.ts";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
 import {getUserName} from "../../shared/utils/AppState.ts";
-import {useToast} from "../../shared/utils/ToastContext.tsx";
+import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {WhoAmIData} from "../models/models.ts";
 
 const initialData: WhoAmIData = {
@@ -105,7 +105,7 @@ const ManageWhoAmIPage: React.FC = () => {
                 setFormData(value);
             })
             .finally(() => setLoadingAnimation(false))
-    }, []);
+    }, [setLoadingAnimation]);
 
     return (
         <Box sx={{
@@ -146,8 +146,8 @@ const ManageWhoAmIPage: React.FC = () => {
                         mt: 3,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 2, // Reduced gap between elements
-                        maxWidth: "80%", // Set a max width for the form
+                        gap: 2,
+                        maxWidth: "80%",
                     }}
                 >
                     <Typography variant="h6" sx={{fontSize: "1rem", mt: 2}}>
@@ -158,14 +158,14 @@ const ManageWhoAmIPage: React.FC = () => {
                         value={formData.headerTitle}
                         onChange={(e) => handleInputChange("headerTitle", e.target.value)}
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     <TextField
                         label="Header Intro"
                         value={formData.headerIntro}
                         onChange={(e) => handleInputChange("headerIntro", e.target.value)}
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     <TextField
                         label="Main Content Question"
@@ -174,7 +174,7 @@ const ManageWhoAmIPage: React.FC = () => {
                             handleInputChange("mainContentQuestion", e.target.value)
                         }
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     <Typography variant="h6" sx={{fontSize: "1rem", mt: 2}}>
                         First Main Content
@@ -186,7 +186,7 @@ const ManageWhoAmIPage: React.FC = () => {
                             handleInputChange("mainContentFirstTitle", e.target.value)
                         }
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     {formData.mainContentFirstData.map((item, index) => (
                         <Box
@@ -203,7 +203,7 @@ const ManageWhoAmIPage: React.FC = () => {
                                     handleInputChange("mainContentFirstData", e.target.value, index)
                                 }
                                 fullWidth
-                                size="small" // Smaller input size
+                                size="small"
                             />
                             <IconButton onClick={() => addArrayItem("mainContentFirstData")}>
                                 <AddCircleOutlineIcon/>
@@ -227,7 +227,7 @@ const ManageWhoAmIPage: React.FC = () => {
                             handleInputChange("mainContentSecondTitle", e.target.value)
                         }
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     {formData.mainContentSecondData.map((item, index) => (
                         <Box
@@ -244,7 +244,7 @@ const ManageWhoAmIPage: React.FC = () => {
                                     handleInputChange("mainContentSecondData", e.target.value, index)
                                 }
                                 fullWidth
-                                size="small" // Smaller input size
+                                size="small"
                             />
                             <IconButton onClick={() => addArrayItem("mainContentSecondData")}>
                                 <AddCircleOutlineIcon/>
@@ -263,7 +263,7 @@ const ManageWhoAmIPage: React.FC = () => {
                         value={formData.cvButton}
                         onChange={(e) => handleInputChange("cvButton", e.target.value)}
                         fullWidth
-                        size="small" // Smaller input size
+                        size="small"
                     />
                     <Typography variant="h6" sx={{ fontSize: "1rem", mt: 2 }}>
                         Photos
@@ -284,8 +284,8 @@ const ManageWhoAmIPage: React.FC = () => {
                                         src={`data:image/jpeg;base64,${photo}`}
                                         alt={`Photo ${index + 1}`}
                                         sx={{
-                                            maxWidth: 200, // Set a maximum width for the image in the tooltip
-                                            maxHeight: 200, // Set a maximum height for the image in the tooltip
+                                            maxWidth: 200,
+                                            maxHeight: 200,
                                         }}
                                     />
                                 }
@@ -342,7 +342,7 @@ const ManageWhoAmIPage: React.FC = () => {
                         color="primary"
                         sx={{
                             mt: 2,
-                            alignSelf: "flex-start", // Align the button to the start
+                            alignSelf: "flex-start",
                         }}
                         onClick={handleSave}
                     >

@@ -10,6 +10,7 @@ import {
     PDF_UPLOAD_API
 } from "../../utils/constants.ts";
 import {BaseRequest} from "../../../shared/server/api/requests.ts";
+import {AxiosError} from "axios";
 
 export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFile | undefined> {
     try {
@@ -32,10 +33,12 @@ export async function deletePdf(pdfId: string, baseRequest: BaseRequest): Promis
     try {
         const response = await apiClient.post(PDF_DELETE_API + pdfId, baseRequest);
         return response.status;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Delete pdf ' + pdfId + ' failed', error);
-        if (error.response && error.response.status) {
-            return error.response.status; // Return the actual status code (e.g., 401)
+        if (error instanceof AxiosError) {
+            if (error.response && error.response.status) {
+                return error.response.status;
+            }
         }
     }
     return 400;
@@ -57,7 +60,7 @@ export async function getAllPdfs(baseRequest: BaseRequest, page: number = 1, lim
     try {
         const response = await apiClient.post<PdfFile[]>(PDF_GET_ALL_API + `?page=${page}&limit=${limit}`, baseRequest);
         const pdfFiles: PdfFile[] = response.data;
-        return pdfFiles || []; // Return empty array if no data
+        return pdfFiles || [];
     } catch (error) {
         console.error(`Error getting PDFs from server (page: ${page})!`, error);
         return [];
@@ -67,7 +70,7 @@ export async function getAllPdfs(baseRequest: BaseRequest, page: number = 1, lim
 export const fetchPdfThumbnail = async (baseRequest: BaseRequest, pdfId: string): Promise<Blob> => {
     try {
         const response = await apiClient.post(PDF_THUMBNAIL_API + pdfId, baseRequest, {
-            responseType: "blob", // Fetch the response as a binary blob
+            responseType: "blob",
         });
 
         return response.data;
@@ -80,7 +83,7 @@ export const fetchPdfThumbnail = async (baseRequest: BaseRequest, pdfId: string)
 export const fetchPDF = async (baseRequest: BaseRequest, pdfId: string): Promise<Blob> => {
     try {
         const response = await apiClient.post(PDF_GET_API + pdfId, baseRequest, {
-            responseType: "blob", // Fetch the response as a binary blob
+            responseType: "blob",
         });
 
         return response.data;

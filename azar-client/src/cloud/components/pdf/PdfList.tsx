@@ -14,7 +14,8 @@ import {useTheme} from "@mui/material/styles";
 import {PdfFile} from "../../models/models.ts";
 import PdfContextMenu from "./PdfContextMenu.tsx";
 import ShowPDFModal from "./ShowPDFModal.tsx";
-import {downloadPdf, formatDate, parseSize} from "../../utils/utilities.ts";
+import {downloadPdf, formatDate} from "../../utils/utilities.ts";
+import {handleRequestSort, sortData} from "../sharedLogic.ts";
 
 interface PdfListProps {
     pdfs: PdfFile[];
@@ -54,34 +55,8 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
         return () => container?.removeEventListener("scroll", handleScroll);
     }, [onLoadMore]);
 
-    // Sorting Logic
-    const handleRequestSort = (property: string) => {
-        const isAsc = orderBy === property && order === 'asc';
-        setOrder(isAsc ? 'desc' : 'asc');
-        setOrderBy(property);
-    };
+    const sortedPdfs = sortData([...pdfs], order, orderBy, true);
 
-    const sortData = (array: any[]) => {
-        return array.sort((a, b) => {
-            const isAsc = order === 'asc';
-            if (orderBy === 'size') {
-                const sizeA = parseSize(a.size);
-                const sizeB = parseSize(b.size);
-                return isAsc ? sizeA - sizeB : sizeB - sizeA;
-            }
-            if (a[orderBy] < b[orderBy]) {
-                return isAsc ? -1 : 1;
-            }
-            if (a[orderBy] > b[orderBy]) {
-                return isAsc ? 1 : -1;
-            }
-            return 0;
-        });
-    };
-
-    const sortedPdfs = sortData([...pdfs]);
-
-    // Context Menu Logic
     const handleRightClick = (event: MouseEvent<HTMLTableRowElement>, pdf: PdfFile) => {
         if (!isMobile) {
             event.preventDefault();
@@ -98,7 +73,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                     left: event.touches[0].clientX,
                 });
                 setSelectedPdf(pdf);
-            }, 600); // Long-press duration
+            }, 600);
         }
     };
 
@@ -159,7 +134,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                                     <TableSortLabel
                                         active={orderBy === field}
                                         direction={orderBy === field ? order : 'asc'}
-                                        onClick={() => handleRequestSort(field)}
+                                        onClick={() => handleRequestSort(field, orderBy, order, setOrder, setOrderBy)}
                                     >
                                         {field.charAt(0).toUpperCase() + field.slice(1)}
                                     </TableSortLabel>
@@ -178,11 +153,11 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                                 onTouchEnd={handleTouchEnd}
                                 sx={{
                                     cursor: "pointer",
-                                    userSelect: "none",              // Prevents text selection
-                                    WebkitTouchCallout: "none",     // Disables iOS native menu
-                                    WebkitUserSelect: "none",       // Prevents Safari text selection
-                                    MozUserSelect: "none",          // Prevents Firefox text selection
-                                    msUserSelect: "none",           // Prevents IE/Edge text selection
+                                    userSelect: "none",
+                                    WebkitTouchCallout: "none",
+                                    WebkitUserSelect: "none",
+                                    MozUserSelect: "none",
+                                    msUserSelect: "none",
                                 }}
                             >
                                 <TableCell>{pdf.fileName}</TableCell>

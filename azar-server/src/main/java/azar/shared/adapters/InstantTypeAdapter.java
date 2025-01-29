@@ -18,13 +18,13 @@ public class InstantTypeAdapter extends TypeAdapter<Instant> {
         if (value == null) {
             out.nullValue();
         } else {
-            out.value(value.toString()); // Serialize Instant as ISO-8601 string
+            out.value(value.toString());
         }
     }
 
     @Override
     public Instant read(JsonReader in) throws IOException {
         String timestamp = in.nextString();
-        return Instant.parse(timestamp); // Deserialize Instant from ISO-8601 string
+        return Instant.parse(timestamp);
     }
 }

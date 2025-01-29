@@ -34,13 +34,17 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                 .catch((error) => {
                     console.error("Failed to fetch PDF", error);
                 });
-        } else {
-            if (pdfUrl) {
+        }
+    }, [open]);
+
+    useEffect(() => {
+        return () => {
+            if (!open && pdfUrl) {
                 URL.revokeObjectURL(pdfUrl);
                 setPdfUrl(null);
             }
-        }
-    }, [open]);
+        };
+    }, [open, pdfUrl]);
 
     useEffect(() => {
         switch (status) {
@@ -58,7 +62,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
         }
     }, [status]);
 
-    // Dynamically adjust container dimensions and scale
     useEffect(() => {
         const updateContainerDimensions = () => {
             const container = document.getElementById("pdf-container");
@@ -68,7 +71,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                 setContainerWidth(width);
                 setContainerHeight(height);
 
-                // Adjust scale based on container dimensions
                 const pdfDefaultWidth = 800;
                 const pdfDefaultHeight = 1131;
                 const scaleWidth = width / pdfDefaultWidth;
@@ -137,7 +139,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                     overflow: "hidden",
                 }}
             >
-                {/* Modal Header */}
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="h6" color="primary">
                         Shahar Azar CV
@@ -147,7 +148,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                     </IconButton>
                 </Box>
 
-                {/* PDF Viewer */}
                 <Box
                     id="pdf-container"
                     sx={{
@@ -159,22 +159,21 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                         backgroundColor: "#f5f5f5",
                         position: "relative",
                         "&::-webkit-scrollbar": {
-                            width: "8px", // Scrollbar width
+                            width: "8px",
                         },
                         "&::-webkit-scrollbar-track": {
-                            backgroundColor: "#f0f0f0", // Track color
-                            borderRadius: "4px", // Rounded corners for track
+                            backgroundColor: "#f0f0f0",
+                            borderRadius: "4px",
                         },
                         "&::-webkit-scrollbar-thumb": {
-                            backgroundColor: "#90caf9", // Thumb color (MUI primary light)
-                            borderRadius: "4px", // Rounded corners for thumb
+                            backgroundColor: "#90caf9",
+                            borderRadius: "4px",
                         },
                         "&::-webkit-scrollbar-thumb:hover": {
-                            backgroundColor: "#42a5f5", // Thumb hover color (MUI primary main)
+                            backgroundColor: "#42a5f5",
                         },
                     }}
                 >
-                    {/* Loading Overlay */}
                     {status !== "" && (
                         <Box
                             sx={{
@@ -207,7 +206,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                         <Typography>Loading PDF...</Typography>
                     )}
 
-                    {/* Zoom Buttons */}
                     {!isMobile && (
                         <Box
                             sx={{
@@ -238,7 +236,6 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                     )}
                 </Box>
 
-                {/* Footer Buttons */}
                 <Box
                     display="flex"
                     flexWrap="wrap"

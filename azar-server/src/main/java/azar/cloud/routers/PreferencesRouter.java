@@ -51,9 +51,9 @@ public class PreferencesRouter extends BaseRouter {
         if (isInvalidUsername(routingContext, currentUser)) return;
 
         Preference preferenceToAdd = preferenceUpsertRequest.getPreference();
-        userService.getUserByUserName(currentUser)
-                .onSuccess(dbUser -> {
-                    if (dbUser.IsNonAdmin()) {
+        userService.isAdmin(currentUser)
+                .onSuccess(isAdmin -> {
+                    if (!isAdmin) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add preferences!".formatted(currentUser));
                         return;
                     }
@@ -92,9 +92,9 @@ public class PreferencesRouter extends BaseRouter {
             return;
         }
 
-        userService.getUserByUserName(currentUser)
-                .onSuccess(dbUser -> {
-                    if (dbUser.IsNonAdmin()) {
+        userService.isAdmin(currentUser)
+                .onSuccess(isAdmin -> {
+                    if (!isAdmin) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to delete preferences!".formatted(currentUser));
                         return;
                     }
@@ -111,7 +111,7 @@ public class PreferencesRouter extends BaseRouter {
         String currentUser = preferencesGetAllRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        preferencesService.getAllUsers(preferencesGetAllRequest.getUserId()) // Fetch paginated results
+        preferencesService.getAllUsers(preferencesGetAllRequest.getUserId())
                 .onSuccess(preferences -> sendOKResponse(routingContext, jsonManager.toJson(preferences),
                         "Returned %s preferences to client".formatted(preferences.size())))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting preferences from DB, error: %s".formatted(err.getMessage())));

@@ -22,7 +22,7 @@ public class GsonModule extends AbstractModule {
     @Provides
     public Gson provideGson() {
         return new GsonBuilder()
-                .registerTypeAdapter(Instant.class, new InstantTypeAdapter()) // Register the custom adapter
+                .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
                 .create();
     }
 }

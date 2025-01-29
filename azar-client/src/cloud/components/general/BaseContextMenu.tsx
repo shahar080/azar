@@ -21,12 +21,10 @@ const BaseContextMenu: React.FC<BaseContextMenuProps<BaseModel>> = ({
                                                         }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Close menu when mouse leaves the menu area
     const handleMouseLeave = () => {
         onClose();
     };
 
-    // Effect to automatically close when anchorPosition is null
     useEffect(() => {
         if (!anchorPosition) {
             onClose();
@@ -44,7 +42,7 @@ const BaseContextMenu: React.FC<BaseContextMenuProps<BaseModel>> = ({
                     : undefined
             }
             MenuListProps={{
-                onMouseLeave: handleMouseLeave, // Close on mouse leave
+                onMouseLeave: handleMouseLeave,
             }}
             ref={menuRef}
         >

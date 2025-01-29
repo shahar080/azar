@@ -3,7 +3,7 @@ import {Autocomplete, Box, Button, Modal, Stack, TextField, Typography,} from "@
 import {PdfFile} from "../../models/models.ts";
 import CustomLabel from "../label/CustomLabel.tsx";
 import InputAdornment from "@mui/material/InputAdornment";
-import {Description, Notes} from "@mui/icons-material"; // Your existing label component
+import {Description, Notes} from "@mui/icons-material";
 
 interface EditPdfModalProps {
     open: boolean;
@@ -24,7 +24,6 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
     const [labels, setLabels] = useState<string[]>([]);
     const [description, setDescription] = useState("");
 
-    // Load PDF data when modal opens
     useEffect(() => {
         if (pdf) {
             setFileName(pdf.fileName || "");
@@ -33,12 +32,10 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
         }
     }, [pdf]);
 
-    // Remove a label
     const handleRemoveLabel = (labelToRemove: string) => {
         setLabels(labels.filter((label) => label !== labelToRemove));
     };
 
-    // Save the updated PDF
     const handleSave = () => {
         if (pdf) {
             onSave({
@@ -70,16 +67,15 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     Edit PDF
                 </Typography>
 
-                {/* Name Field */}
                 <TextField
                     fullWidth
                     label="Name"
                     value={fileName}
-                    onChange={(e) => setFileName(e.target.value)} // Update the name as the user types
+                    onChange={(e) => setFileName(e.target.value)}
                     onBlur={() => {
                         if (!fileName.endsWith('.pdf')) {
-                            const baseName = fileName.replace(/\.[^/.]+$/, ''); // Remove any existing extension
-                            setFileName(`${baseName}.pdf`); // Enforce .pdf extension on blur
+                            const baseName = fileName.replace(/\.[^/.]+$/, '');
+                            setFileName(`${baseName}.pdf`);
                         }
                     }}
                     margin="dense"
@@ -92,11 +88,10 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     }}
                 />
 
-                {/* Labels with Autocomplete */}
                 <Autocomplete
                     multiple
                     freeSolo
-                    options={allLabels.filter((option) => !labels.includes(option))} // Filter existing labels
+                    options={allLabels.filter((option) => !labels.includes(option))}
                     value={labels}
                     onChange={(_event, newValue) => setLabels(newValue)}
                     renderTags={(value, getTagProps) =>
@@ -116,25 +111,24 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                             margin="dense"
                             inputProps={{
                                 ...params.inputProps,
-                                inputMode: 'text', // Ensure proper input mode
-                                type: 'text',      // Prevent "Next" from appearing
-                                enterKeyHint: 'done', // Suggest "Enter" instead of "Next" on the keyboard
+                                inputMode: 'text',
+                                type: 'text',
+                                enterKeyHint: 'done',
                             }}
                             onKeyDown={(event) => {
                                 if (event.key === 'Enter' && (event.target as HTMLInputElement).value) {
-                                    event.preventDefault(); // Prevent default behavior
-                                    const inputValue = (event.target as HTMLInputElement).value.trim(); // Type casting
+                                    event.preventDefault();
+                                    const inputValue = (event.target as HTMLInputElement).value.trim();
                                     if (inputValue && !labels.includes(inputValue)) {
-                                        setLabels([...labels, inputValue]); // Add the new label
+                                        setLabels([...labels, inputValue]);
                                     }
-                                    (event.target as HTMLInputElement).value = ''; // Clear the input
+                                    (event.target as HTMLInputElement).value = '';
                                 }
                             }}
                         />
                     )}
                 />
 
-                {/* Description Field */}
                 <TextField
                     fullWidth
                     label="Description"
@@ -152,7 +146,6 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     }}
                 />
 
-                {/* Actions */}
                 <Stack direction="row" spacing={2} mt={2}>
                     <Button variant="outlined" onClick={handleSave}>
                         Save

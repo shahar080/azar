@@ -5,7 +5,7 @@ import {CV_GET_API, CV_SEND_TO_EMAIL_API, CV_UPDATE_API} from "../../utils/const
 export async function getCV(): Promise<Blob> {
     try {
         const response = await apiClient.get(CV_GET_API, {
-            responseType: "arraybuffer", // Fetch the response as a binary blob
+            responseType: "arraybuffer",
         });
 
         return new Blob([response.data], {type: "application/pdf"});

@@ -7,22 +7,35 @@ const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altT
     const userName = getUserName();
 
     useEffect(() => {
+        let isCancelled = false;
+
         const loadThumbnail = async () => {
             try {
                 const blob = await fetchPdfThumbnail({currentUser: userName}, pdfId);
-                const url = URL.createObjectURL(blob);
-                setThumbnailUrl(url);
+                if (!isCancelled) {
+                    const url = URL.createObjectURL(blob);
+                    setThumbnailUrl((prevUrl) => {
+                        if (prevUrl) URL.revokeObjectURL(prevUrl); // Revoke previous URL
+                        return url;
+                    });
+                }
             } catch (error) {
-                console.error("Error loading thumbnail", error);
+                if (!isCancelled) {
+                    console.error("Error loading thumbnail", error);
+                }
             }
         };
-        loadThumbnail();
 
-        // Cleanup the blob URL when the component unmounts
+        const promise = loadThumbnail();
+
         return () => {
-            if (thumbnailUrl) URL.revokeObjectURL(thumbnailUrl);
+            isCancelled = true;
+            promise.catch((error) => console.error("Error cleaning up loadThumbnail", error));
         };
-    }, [pdfId]);
+    }, [pdfId, userName]);
+
+
+
 
     return (
         <img

@@ -12,11 +12,6 @@ export interface WhoAmIData extends BaseModel {
     photos: string[];
 }
 
-export interface CV extends BaseModel {
-    fileName: string;
-    data: string
-}
-
 export interface EmailData extends BaseModel {
     title: string;
     body: string;

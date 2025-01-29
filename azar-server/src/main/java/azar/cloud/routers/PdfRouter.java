@@ -115,7 +115,7 @@ public class PdfRouter extends BaseRouter {
         String currentUser = baseRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        // Default values for pagination
+
         int page = Integer.parseInt(routingContext.queryParams().get("page"));
         int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
 
@@ -126,7 +126,7 @@ public class PdfRouter extends BaseRouter {
 
         int offset = (page - 1) * limit;
 
-        pdfFileService.getAllClientPaginated(offset, limit) // Fetch paginated results
+        pdfFileService.getAllClientPaginated(offset, limit)
                 .onSuccess(pdfFiles -> sendOKResponse(routingContext, jsonManager.toJson(pdfFiles),
                         "Returned %s PDFs to client (page: %s, limit: %s)".formatted(pdfFiles.size(), page, limit)))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting PDFs from DB, error: %s".formatted(err.getMessage())));
@@ -137,7 +137,7 @@ public class PdfRouter extends BaseRouter {
         String currentUser = baseRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        // Extract the PDF ID from the request path
+
         String pdfId = routingContext.pathParam("id");
         if (pdfId == null || pdfId.isEmpty()) {
             sendBadRequestResponse(routingContext, "PDF ID is required");
@@ -223,7 +223,7 @@ public class PdfRouter extends BaseRouter {
 
         String pdfId = routingContext.pathParam("id");
 
-        // Fetch the PDF file from your database/service
+
         pdfFileService.getById(Integer.valueOf(pdfId))
                 .onSuccess(pdfFile -> {
                     if (pdfFile == null) {

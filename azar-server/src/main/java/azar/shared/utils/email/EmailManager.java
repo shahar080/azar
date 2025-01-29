@@ -49,14 +49,12 @@ public class EmailManager {
                                 final String senderEmail = appProperties.getProperty("email.sender.email");
                                 final String senderPassword = appProperties.getProperty("email.sender.password");
 
-                                // Configure SMTP properties
                                 Properties props = new Properties();
                                 props.put("mail.smtp.host", "smtp.gmail.com");
                                 props.put("mail.smtp.port", "587");
                                 props.put("mail.smtp.auth", "true");
                                 props.put("mail.smtp.starttls.enable", "true");
 
-                                // Create a session with authentication
                                 Session session = Session.getInstance(props, new Authenticator() {
                                     @Override
                                     protected PasswordAuthentication getPasswordAuthentication() {
@@ -65,17 +63,14 @@ public class EmailManager {
                                 });
 
                                 try {
-                                    // Create a new email message
                                     Message message = new MimeMessage(session);
                                     message.setFrom(new InternetAddress(senderEmail));
                                     message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
                                     message.setSubject(optionalEmailData.get().getTitle());
 
-                                    // Create the email body part
                                     MimeBodyPart textPart = new MimeBodyPart();
                                     textPart.setText(optionalEmailData.get().getBody());
 
-                                    // Create the file attachment part
                                     MimeBodyPart attachmentPart = new MimeBodyPart();
                                     cvService.getCVFromDB()
                                             .onSuccess(optionalCV -> {
@@ -89,15 +84,12 @@ public class EmailManager {
                                                     attachmentPart.setDataHandler(new DataHandler(dataSource));
                                                     attachmentPart.setFileName(optionalCV.get().getFileName());
 
-                                                    // Combine the parts into a multipart message
                                                     Multipart multipart = new MimeMultipart();
-                                                    multipart.addBodyPart(textPart); // Add the text body
-                                                    multipart.addBodyPart(attachmentPart); // Add the file attachment
+                                                    multipart.addBodyPart(textPart);
+                                                    multipart.addBodyPart(attachmentPart);
 
-                                                    // Set the content of the message
                                                     message.setContent(multipart);
 
-                                                    // Send the email
                                                     Transport.send(message);
 
                                                     logger.info("Successfully sent email to {}", recipientEmail);

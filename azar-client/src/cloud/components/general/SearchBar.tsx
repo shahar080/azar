@@ -9,20 +9,17 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({onSearch, onAddOperation}) => {
     const [searchQuery, setSearchQuery] = useState('');
 
-    /** Handle search bar text input */
     const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
         onSearch(e.target.value)
     };
 
-    /** Trigger search when the button is clicked */
     const handleSearchClick = () => {
         onSearch(searchQuery);
     };
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-            {/* Search Bar */}
             <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
                 <TextField
                     value={searchQuery}

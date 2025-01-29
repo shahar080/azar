@@ -30,9 +30,7 @@ public class AppProperties {
         loadPropertiesFromFile();
     }
 
-    // Load environment variables and override the properties if set
     private void loadEnvironmentVariables() {
-        // Iterate through system environment variables and override matching properties
         for (String key : System.getenv().keySet()) {
             String envValue = System.getenv(key);
             if (envValue != null) {

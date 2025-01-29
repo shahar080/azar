@@ -1,6 +1,6 @@
 import React from "react";
 import {Backdrop, CircularProgress} from "@mui/material";
-import {useLoading} from "../../../shared/utils/LoadingContext.tsx";
+import {useLoading} from "../../../shared/utils/loading/useLoading.ts";
 
 const LoadingOverlay: React.FC = () => {
     const {isLoading} = useLoading();

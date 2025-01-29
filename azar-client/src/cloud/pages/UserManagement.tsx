@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Box, CssBaseline, Grid, Toolbar, useMediaQuery} from "@mui/material";
 import AppBarHeader from "../../shared/components/AppBarHeader.tsx";
 import CloudDrawerMenu from "../components/general/DrawerMenu.tsx";
@@ -11,23 +11,16 @@ import {useTheme} from "@mui/material/styles";
 import SearchBar from "../components/general/SearchBar.tsx";
 import UserList from "../components/user/UserList.tsx";
 import UserModal from "../components/user/UserModal.tsx";
-import {useLoading} from "../../shared/utils/LoadingContext.tsx";
-import {useToast} from "../../shared/utils/ToastContext.tsx";
-import {
-    getDrawerPinnedState,
-    getUserId,
-    getUserName,
-    getUserType,
-    setDrawerPinnedState
-} from "../../shared/utils/AppState.ts";
-import {DRAWER_PIN_STR} from "../utils/constants.ts";
-import {updatePreference} from "../server/api/preferencesApi.ts";
+import {useLoading} from "../../shared/utils/loading/useLoading.ts";
+import {useToast} from "../../shared/utils/toast/useToast.ts";
+import {getDrawerPinnedState, getUserName, getUserType} from "../../shared/utils/AppState.ts";
 import {CLOUD_LOGIN_ROUTE, CLOUD_MANAGE_PREFERENCES_ROUTE, CLOUD_ROUTE} from "../../shared/utils/reactRoutes.ts";
 import {drawerWidth} from "../../shared/utils/constants.ts";
+import {pinDrawer, toggleDrawer} from "../components/sharedLogic.ts";
 
 const CloudUserManagement: React.FC = () => {
     const theme = useTheme();
-    const isDesktop = useMediaQuery(theme.breakpoints.up("md")); // Adjusts for "md" (desktop screens and above)
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
     const [drawerPinned, setDrawerPinned] = useState(isDesktop && getDrawerPinnedState());
     const [drawerOpen, setDrawerOpen] = useState(drawerPinned);
     const [users, setUsers] = useState<User[]>([]);
@@ -47,6 +40,41 @@ const CloudUserManagement: React.FC = () => {
     const userType = getUserTypeFromStr(getUserType());
     const navigate = useNavigate();
 
+    const loadUsers = useCallback(
+        (forceLoad: boolean = false) => {
+            if (!forceLoad && (loading || !hasMore)) return;
+            setLoading(true);
+            setLoadingAnimation(true);
+
+            const currentPage = forceLoad ? 1 : page;
+
+            getAllUsers({currentUser: userName}, currentPage, 20)
+                .then((newUsers) => {
+                    if (newUsers.length < 20) {
+                        setHasMore(false);
+                    }
+
+                    setUsers((prevUsers) =>
+                        forceLoad ? newUsers : [...prevUsers, ...newUsers]
+                    );
+                    setFilteredUsers((prevUsers) =>
+                        forceLoad ? newUsers : [...prevUsers, ...newUsers]
+                    );
+
+                    if (!forceLoad) {
+                        setPage((prev) => prev + 1);
+                    }
+                })
+                .catch((err) => console.error("Failed to load users:", err))
+                .finally(() => {
+                    setLoading(false);
+                    setLoadingAnimation(false);
+                });
+        },
+        [loading, hasMore, page, userName, setLoading, setLoadingAnimation, setHasMore, setUsers,
+            setFilteredUsers, setPage,]
+    );
+
     useEffect(() => {
         if (!isLoggedIn) {
             setUsers([]);
@@ -57,35 +85,7 @@ const CloudUserManagement: React.FC = () => {
 
     useEffect(() => {
         loadUsers();
-    }, []);
-
-    const loadUsers = (forceLoad: boolean = false) => {
-        if (!forceLoad && (loading || !hasMore)) return;
-        setLoading(true);
-
-        const currentPage = forceLoad ? 1 : page;
-        setLoadingAnimation(true);
-        getAllUsers({currentUser: userName}, currentPage, 20)
-            .then((newUsers) => {
-                if (newUsers.length < 20) {
-                    setHasMore(false);
-                }
-
-                // If forceLoad is true, replace PDFs; otherwise, append
-                setUsers((prevUsers) => (forceLoad ? newUsers : [...prevUsers, ...newUsers]));
-                setFilteredUsers((prevUsers) => (forceLoad ? newUsers : [...prevUsers, ...newUsers]));
-
-                if (!forceLoad) {
-                    setPage((prev) => prev + 1); // Increment page only if not forcing reload
-                }
-            })
-            .catch((err) => console.error("Failed to load users:", err))
-            .finally(() => {
-                setLoading(false);
-                setLoadingAnimation(false);
-            });
-    };
-
+    }, [loadUsers]);
 
     const handleSearch = (query: string) => {
         setPage(1);
@@ -136,8 +136,8 @@ const CloudUserManagement: React.FC = () => {
         updateUser({user: updatedUser, currentUser: userName})
             .then((res) => {
                 if (res) {
-                    const tempUsers = users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
-                    setUsers(tempUsers);
+                    const updatedUsers = users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
+                    setUsers(updatedUsers);
                     setFilteredUsers((prev) =>
                         prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
                     );
@@ -154,36 +154,8 @@ const CloudUserManagement: React.FC = () => {
     const resetPaginationAndReload = () => {
         setPage(1);
         setHasMore(true);
-        setUsers([]); // Clear the list of PDFs
-        loadUsers(true); // Force reload starting from page 1
-    };
-
-    const toggleDrawer = () => {
-        if (!drawerPinned) {
-            setDrawerOpen(!drawerOpen);
-        }
-    };
-
-    const pinDrawer = () => {
-        setDrawerPinned((prevPinned) => {
-            setDrawerOpen(!prevPinned); // Close the drawer when unpinning
-            const updatedPreference = {
-                userId: Number(getUserId()),
-                key: DRAWER_PIN_STR,
-                value: (!prevPinned).toString()
-            }
-            updatePreference({preference: updatedPreference, currentUser: userName})
-                .then(updatedPreference => {
-                    if (updatedPreference) {
-                        setDrawerPinnedState(JSON.parse(updatedPreference.value));
-                        setDrawerPinned(JSON.parse(updatedPreference.value));
-                        setDrawerOpen(JSON.parse(updatedPreference.value));
-                    } else {
-                        showToast("Error updating preference drawer pinned", "error")
-                    }
-                })
-            return !prevPinned;
-        });
+        setUsers([]);
+        loadUsers(true);
     };
 
     const handleAddUser = () => {
@@ -219,21 +191,19 @@ const CloudUserManagement: React.FC = () => {
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
             <CssBaseline/>
 
-            {/* AppBar */}
-            <AppBarHeader onMenuToggle={toggleDrawer} onLogoClick={() => navigate(CLOUD_ROUTE)}/>
+            <AppBarHeader onMenuToggle={() => toggleDrawer(drawerPinned, setDrawerOpen, drawerOpen)}
+                          onLogoClick={() => navigate(CLOUD_ROUTE)}/>
 
-            {/* Drawer */}
             <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
-                onPinToggle={pinDrawer}
+                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, userName, showToast)}
                 onManageUser={handleManageUser}
                 onManagePreferences={handleMangePreferences}
                 onClose={() => setDrawerOpen(false)}
                 userType={userType}
             />
 
-            {/* Main Content */}
             <Box
                 component="main"
                 sx={{
@@ -246,12 +216,9 @@ const CloudUserManagement: React.FC = () => {
                     overflow: "hidden",
                 }}
             >
-                {/* Ensures AppBar Offset */}
                 <Toolbar/>
 
-                {/* Grid Layout */}
                 <Grid container spacing={2} sx={{height: "100%"}}>
-                    {/* Left Section: Search and PDF Table */}
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <SearchBar
                             onSearch={handleSearch}

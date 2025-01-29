@@ -4,7 +4,6 @@ import {getAuthToken, setAuthToken} from "../../utils/AppState.ts";
 import {TOKEN_REFRESH_API} from "../../../cloud/utils/constants.ts";
 import {BASE_URL_API} from "../../utils/constants.ts";
 
-// Create an Axios instance
 const apiClient = axios.create({
     baseURL: BASE_URL_API,
     timeout: 30000,
@@ -22,14 +21,14 @@ export async function refreshToken(): Promise<string | null> {
     try {
         const response = await apiClient.post(TOKEN_REFRESH_API, {}, {
             headers: {
-                Authorization: `Bearer ${getAuthToken()}`, // Use old token
+                Authorization: `Bearer ${getAuthToken()}`,
             },
         });
 
         const {token} = response.data;
 
         if (token) {
-            setAuthToken(token); // Save new token
+            setAuthToken(token);
             apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             return token;
         }
@@ -52,7 +51,7 @@ apiClient.interceptors.request.use((config) => {
 }, (error) => Promise.reject(error));
 
 apiClient.interceptors.response.use(
-    (response) => response, // Pass valid responses through
+    (response) => response,
     async (error) => {
         console.error('Interceptor caught error:', error);
 
@@ -65,19 +64,17 @@ apiClient.interceptors.response.use(
                 const newToken = await refreshToken();
                 if (newToken) {
 
-                    // Update request headers with new token
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
 
-                    // Retry the failed request
                     return apiClient(originalRequest);
                 }
             } catch (refreshError) {
                 console.error('Failed to refresh token:', refreshError);
-                logout(); // Redirect to login if refresh fails
+                logout();
             }
         }
 
-        return Promise.reject(error); // Reject if token refresh fails
+        return Promise.reject(error);
     }
 );
 export default apiClient;

@@ -99,13 +99,9 @@ public class CVRouter extends BaseRouter {
         FileUpload fileUpload = fileUploads.getFirst();
         String uploadedFilePath = fileUpload.uploadedFileName();
 
-        userService.getUserByUserName(userName)
-                .onSuccess(dbUser -> {
-                    if (dbUser == null) {
-                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(userName));
-                        return;
-                    }
-                    if (dbUser.IsNonAdmin()) {
+        userService.isAdmin(userName)
+                .onSuccess(isAdmin -> {
+                    if (!isAdmin) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(userName));
                         return;
                     }

@@ -56,7 +56,6 @@ public class UserRouter extends BaseRouter {
         String currentUser = userLoginRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        // Parse JSON body to UserNameAndPassword
         UserNameAndPassword userNameAndPassword = userLoginRequest.getUserNameAndPassword();
 
         if (userNameAndPassword == null) {
@@ -87,24 +86,19 @@ public class UserRouter extends BaseRouter {
         String currentUser = userUpsertRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        userService.getUserByUserName(userUpsertRequest.getCurrentUser())
-                .onSuccess(dbUser -> {
-                    if (dbUser == null) {
-                        sendBadRequestResponse(routingContext, "Can't find user with the username %s".formatted(userUpsertRequest.getCurrentUser()));
-                        return;
-                    }
-                    if (dbUser.IsNonAdmin()) {
+        userService.isAdmin(userUpsertRequest.getCurrentUser())
+                .onSuccess(isAdmin -> {
+                    if (!isAdmin) {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add users!".formatted(userUpsertRequest.getCurrentUser()));
                         return;
                     }
                     User user = userUpsertRequest.getUser();
-                    // Validate user data
+
                     if (userService.isInvalidUser(user)) {
                         sendBadRequestResponse(routingContext, "User to add is missing values");
                         return;
                     }
 
-                    // Check if username already exists
                     userService.getUserByUserName(user.getUserName())
                             .onSuccess(existingUser -> {
                                 if (existingUser != null) {
@@ -128,7 +122,6 @@ public class UserRouter extends BaseRouter {
         String currentUser = baseRequest.getCurrentUser();
         if (isInvalidUsername(routingContext, currentUser)) return;
 
-        // Default values for pagination
         int page = Integer.parseInt(routingContext.queryParams().get("page"));
         int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
 
@@ -139,7 +132,7 @@ public class UserRouter extends BaseRouter {
 
         int offset = (page - 1) * limit;
 
-        userService.getAllClientPaginated(offset, limit, "") // Fetch paginated results
+        userService.getAllClientPaginated(offset, limit, "")
                 .onSuccess(users -> sendOKResponse(routingContext, jsonManager.toJson(users),
                         "Returned %s users to client (page: %s, limit: %s)".formatted(users.size(), page, limit)))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting users from DB, error: %s".formatted(err.getMessage())));

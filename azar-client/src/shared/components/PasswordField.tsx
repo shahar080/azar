@@ -36,7 +36,7 @@ function PasswordField({
 
     return (
         <TextField
-            tabIndex={tabIndex !== 0 ? tabIndex : undefined} // Apply tabIndex only if not 0
+            tabIndex={tabIndex !== 0 ? tabIndex : undefined}
             label={label}
             name={name}
             type={showPassword ? "text" : "password"}
@@ -45,7 +45,7 @@ function PasswordField({
             error={error}
             helperText={helperText}
             FormHelperTextProps={{
-                sx: {pointerEvents: "none"}, // Prevent focus on helper text
+                sx: {pointerEvents: "none"},
             }}
             fullWidth
             required

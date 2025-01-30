@@ -79,7 +79,7 @@ const CloudHomePage: React.FC = () => {
                     setLoadingAnimation(false);
                 });
         },
-        [loading, hasMore, page, userName, setLoading, setLoadingAnimation, setPdfs, setFilteredPdfs, setHasMore, setPage] // Add all dependencies here
+        [hasMore, loading, page, setLoadingAnimation, userName]
     );
 
     useEffect(() => {
@@ -176,6 +176,7 @@ const CloudHomePage: React.FC = () => {
         setPage(1);
         setHasMore(true);
         setPdfs([]);
+        setFilteredPdfs([])
         loadPdfs(true);
     };
 

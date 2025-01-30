@@ -90,7 +90,6 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
             try (Session session = openSession()) {
                 session.beginTransaction();
 
-
                 MutationQuery query = session.createMutationQuery(
                         "UPDATE PdfFile e " +
                                 "SET e.fileName = :fileName, e.labels = :labels, e.description = :description " +

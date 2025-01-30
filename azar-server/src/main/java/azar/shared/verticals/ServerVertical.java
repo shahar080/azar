@@ -33,7 +33,6 @@ public class ServerVertical extends AbstractVerticle {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    // TODO: 29/01/2025 AZAR-94
     private final AppProperties appProperties;
     private final JWTAuth jwtAuth;
 

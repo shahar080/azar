@@ -1,37 +1,37 @@
+import {useEffect, useState} from "react";
 import {Box, Grid, Typography} from "@mui/material";
 import WeatherCard from "../components/WeatherCard";
 import {GeneralMenu} from "../../shared/components/GeneralMenu.tsx";
 import {WEATHER_LOCATIONS_STRING} from "../utils/constants.ts";
 import {DBWeatherLocation} from "../models/models.ts";
 import LocalStorageManager from "../../shared/utils/LocalStorageManager.ts";
-import {useEffect, useState} from "react";
 import AddWeatherCard from "../components/AddWeatherCard.tsx";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
+import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
 
 export function WeatherHomePage() {
     const [locations, setLocations] = useState<DBWeatherLocation[]>([]);
-
     const {showToast} = useToast();
 
     useEffect(() => {
-        setLocations(LocalStorageManager.getItemWithDefault(WEATHER_LOCATIONS_STRING, []))
+        setLocations(LocalStorageManager.getItemWithDefault(WEATHER_LOCATIONS_STRING, []));
     }, []);
 
     const addLocation = async (dbWeatherLocation: DBWeatherLocation) => {
         if (locations.some(location => location.id === dbWeatherLocation.id)) {
-            showToast("You can't add the same location twice", "warning")
+            showToast("You can't add the same location twice", "warning");
             return;
         }
         const updatedLocations = [...locations, dbWeatherLocation];
         setLocations(updatedLocations);
-        LocalStorageManager.setItem(WEATHER_LOCATIONS_STRING, updatedLocations)
-    }
+        LocalStorageManager.setItem(WEATHER_LOCATIONS_STRING, updatedLocations);
+    };
 
     const removeLocation = (id: number) => {
         const updatedLocations = locations.filter(location => location.id !== id);
         setLocations(updatedLocations);
         LocalStorageManager.setItem(WEATHER_LOCATIONS_STRING, updatedLocations);
-    }
+    };
 
     return (
         <Box
@@ -65,8 +65,6 @@ export function WeatherHomePage() {
                     zIndex: 1,
                 }}
             >
-
-
                 <Typography
                     variant="h4"
                     fontWeight="bold"
@@ -142,7 +140,8 @@ export function WeatherHomePage() {
                     </Grid>
                 </Box>
             </Box>
+
+            <SourceCodeButton/>
         </Box>
     );
 }
-

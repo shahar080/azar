@@ -12,6 +12,7 @@ import {getWhoAmIData} from "../server/api/whoAmIDataApi.ts";
 import {WhoAmIData} from "../models/models.ts";
 import {useNavigate} from "react-router-dom";
 import {WHOAMI_MANAGE_CV_ROUTE} from "../../shared/utils/reactRoutes.ts";
+import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
 
 export function WhoAmIHomePage() {
     const [isShowPDF, setShowPDF] = useState(false);
@@ -255,27 +256,8 @@ export function WhoAmIHomePage() {
                                 Login
                             </Button>
                         }
-                        <Button
-                            variant="contained"
-                            href="https://bitbucket.org/Shahar0080/azar/src/main/"
-                            target="_blank"
-                            sx={{
-                                backgroundColor: "#4d9e00",
-                                color: "white",
-                                fontWeight: "bold",
-                                fontSize: "0.9rem",
-                                padding: "6px 12px",
-                                borderRadius: "10vw 0 0 10vw",
-                                ml: "auto",
-                                "&:hover": {
-                                    backgroundColor: "#1c8505",
-                                    color: "white"
-                                },
-                            }}
-                        >
-                            Source code
-                        </Button>
                     </Box>
+                    <SourceCodeButton/>
                     <PdfModal open={isShowPDF} onClose={() => setShowPDF(false)}/>
                     <Modal open={showLoginForm} onClose={handleCancel}>
                         <Box

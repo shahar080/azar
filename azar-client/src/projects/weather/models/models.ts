@@ -36,3 +36,9 @@ export interface LatLongSys {
     sunrise: number;
     sunset: number;
 }
+
+export interface WeatherLocation {
+    name: string;
+    latitude: string;
+    longitude: string;
+}

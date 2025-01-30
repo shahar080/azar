@@ -1,19 +1,14 @@
 import {Box, Grid, Typography} from "@mui/material";
 import WeatherCard from "../components/WeatherCard";
 import {GeneralMenu} from "../../shared/components/GeneralMenu.tsx";
+import {WEATHER_LOCATIONS_STRING} from "../utils/constants.ts";
+import {WeatherLocation} from "../models/models.ts";
 
-const locations = [
-    {name: "Kaikoura, NZ", latitude: "-42.402699", longitude: "173.682999"},
-    {name: "Christchurch, NZ", latitude: "-43.525650", longitude: "172.639847"},
-    {name: "Oamaru, NZ", latitude: "-45.0950414", longitude: "170.96597"},
-    {name: "Queenstown, NZ", latitude: "-45.0339854", longitude: "168.6763353"},
-    {name: "Dallas, USA", latitude: "32.779167", longitude: "-96.808891"},
-    {name: "San Jose, USA", latitude: "37.335480", longitude: "-121.893028"},
-    {name: "Honolulu, USA", latitude: "21.315603", longitude: "-157.858093"},
-    {name: "Los Angeles, USA", latitude: "34.052235", longitude: "-118.243683"},
-];
+const locations: WeatherLocation[] = JSON.parse(localStorage.getItem(WEATHER_LOCATIONS_STRING) || '[]');
 
-// TODO AZAR-97
+// TODO AZAR-99
+// localStorage.setItem(WEATHER_LOCATIONS_STRING, JSON.stringify(locations));
+
 export function WeatherHomePage() {
     return (
         <Box

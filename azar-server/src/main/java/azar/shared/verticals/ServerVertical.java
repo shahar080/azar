@@ -6,6 +6,7 @@ import azar.cloud.routers.TokenRouter;
 import azar.cloud.routers.UserRouter;
 import azar.cloud.utils.AuthService;
 import azar.shared.properties.AppProperties;
+import azar.weather.routers.WeatherRouter;
 import azar.whoami.routers.CVRouter;
 import azar.whoami.routers.EmailRouter;
 import azar.whoami.routers.WhoAmIRouter;
@@ -36,6 +37,8 @@ public class ServerVertical extends AbstractVerticle {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    // TODO: 29/01/2025 AZAR-95
+    // TODO: 29/01/2025 AZAR-94
     private final AppProperties appProperties;
     private final JWTAuth jwtAuth;
     private final PdfRouter pdfRouter;
@@ -45,6 +48,7 @@ public class ServerVertical extends AbstractVerticle {
     private final CVRouter cvRouter;
     private final WhoAmIRouter whoAmIRouter;
     private final EmailRouter emailRouter;
+    private final WeatherRouter weatherRouter;
 
     private final boolean IS_DEV;
     private final String REQUIRED_HEADER_KEY;
@@ -56,7 +60,7 @@ public class ServerVertical extends AbstractVerticle {
     public ServerVertical(AppProperties appProperties, AuthService authService, PdfRouter pdfRouter,
                           UserRouter userRouter, PreferencesRouter preferencesRouter,
                           TokenRouter tokenRouter, CVRouter cvRouter, WhoAmIRouter whoAmIRouter,
-                          EmailRouter emailRouter) {
+                          EmailRouter emailRouter, WeatherRouter weatherRouter) {
         this.appProperties = appProperties;
         this.jwtAuth = authService.getJwtAuth();
         this.pdfRouter = pdfRouter;
@@ -66,6 +70,7 @@ public class ServerVertical extends AbstractVerticle {
         this.cvRouter = cvRouter;
         this.whoAmIRouter = whoAmIRouter;
         this.emailRouter = emailRouter;
+        this.weatherRouter = weatherRouter;
         this.IS_DEV = appProperties.getBooleanProperty("IS_DEV", false);
         this.REQUIRED_HEADER_KEY = appProperties.getProperty("REQUIRED_HEADER_KEY");
         this.REQUIRED_HEADER_VALUE = appProperties.getProperty("REQUIRED_HEADER_VALUE");
@@ -103,6 +108,7 @@ public class ServerVertical extends AbstractVerticle {
             apiRouter.route("/cv/*").subRouter(cvRouter.create(vertx));
             apiRouter.route("/whoami/*").subRouter(whoAmIRouter.create(vertx));
             apiRouter.route("/email/*").subRouter(emailRouter.create(vertx));
+            apiRouter.route("/weather/*").subRouter(weatherRouter.create(vertx));
 
             mainRouter.route("/api/*").subRouter(apiRouter);
 
@@ -136,7 +142,7 @@ public class ServerVertical extends AbstractVerticle {
     }
 
     private void catchAllRequests(RoutingContext routingContext) {
-        logger.info("A request was made for path: {}", routingContext.request().path());
+        logger.info("A {} request was made for path: {}", routingContext.request().method(), routingContext.request().path());
 
         if (!IS_DEV) {
             // validate header

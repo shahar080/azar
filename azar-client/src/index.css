@@ -89,3 +89,23 @@ html .MuiButton-root {
         background-color: #f9f9f9;
     }
 }
+
+::-webkit-scrollbar {
+    width: 1vw; /* Wider scrollbar for better usability */
+}
+
+::-webkit-scrollbar-track {
+    background-color: #e0e0e0; /* Softer track background */
+    border-radius: 4px; /* Rounded edges */
+    box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #90caf9, #42a5f5); /* Gradient for thumb */
+    border-radius: 4px; /* Smooth, rounded thumb */
+    border: 1px solid #428af5; /* Border to make the thumb more defined */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #42a5f5, #1e88e5); /* Darker gradient on hover */
+}

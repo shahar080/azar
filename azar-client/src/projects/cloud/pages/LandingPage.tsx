@@ -19,7 +19,7 @@ const CloudLandingPage: React.FC = () => {
         setShowLoginForm(true);
     };
 
-    const handleCancel = () => {
+    const handleGoBack = () => {
         setShowLoginForm(false);
     };
 
@@ -75,7 +75,7 @@ const CloudLandingPage: React.FC = () => {
             )}
 
             {showLoginForm && (
-                <LoginForm handleCancel={handleCancel} onLoginSuccess={onLoginSuccess}/>
+                <LoginForm handleGoBack={handleGoBack} onLoginSuccess={onLoginSuccess}/>
             )}
             <SourceCodeButton/>
         </Box>

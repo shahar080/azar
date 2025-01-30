@@ -51,9 +51,7 @@ function App() {
                        element={<ProtectedRoute
                            redirectPath={CLOUD_LOGIN_ROUTE}><CloudPreferenceManagement/></ProtectedRoute>}/>
 
-                {import.meta.env.VITE_IS_DEV === "true" &&
-                    <Route path={WEATHER_ROUTE} element={<WeatherHomePage/>}/>
-                }
+                <Route path={WEATHER_ROUTE} element={<WeatherHomePage/>}/>
             </Routes>
         </>
     )

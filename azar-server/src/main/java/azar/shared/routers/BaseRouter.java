@@ -54,7 +54,7 @@ public abstract class BaseRouter {
                 .putHeader("Content-Type", "application/json")
                 .end(message);
         if (isOk) {
-            logger.info("{} - {}", routingContext.currentRoute().getPath(), logMessage);
+            logger.debug("{} - {}", routingContext.currentRoute().getPath(), logMessage);
         } else {
             logger.warn("{} - {}", routingContext.currentRoute().getPath(), logMessage);
         }
@@ -66,7 +66,7 @@ public abstract class BaseRouter {
                 .putHeader("Content-Disposition", "inline; filename=" + fileName)
                 .setStatusCode(200)
                 .end(Buffer.buffer(data));
-        logger.info("{} - {}", routingContext.currentRoute().getPath(), logMessage);
+        logger.debug("{} - {}", routingContext.currentRoute().getPath(), logMessage);
     }
 
     protected void sendOKImageResponse(RoutingContext routingContext, String logMessage, byte[] data) {
@@ -74,7 +74,7 @@ public abstract class BaseRouter {
                 .putHeader("Content-Type", "image/png")
                 .putHeader("Content-Length", String.valueOf(data.length))
                 .end(Buffer.buffer(data));
-        logger.info("{} - {}", routingContext.currentRoute().getPath(), logMessage);
+        logger.debug("{} - {}", routingContext.currentRoute().getPath(), logMessage);
     }
 
     protected boolean isInvalidUsername(RoutingContext routingContext, String userName) {
@@ -82,7 +82,7 @@ public abstract class BaseRouter {
             sendBadRequestResponse(routingContext, "Username is mandatory to perform operations");
             return true;
         }
-        logger.info("{} made a request for path: {}", userName, routingContext.currentRoute().getPath());
+        logger.debug("{} made a request for path: {}", userName, routingContext.currentRoute().getPath());
         return false;
     }
 

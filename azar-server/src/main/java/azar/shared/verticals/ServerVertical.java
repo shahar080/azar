@@ -122,7 +122,7 @@ public class ServerVertical extends AbstractVerticle {
     }
 
     private void catchAllRequests(RoutingContext routingContext) {
-        logger.info("A {} request was made for path: {}", routingContext.request().method(), routingContext.request().path());
+        logger.debug("A {} request was made for path: {}", routingContext.request().method(), routingContext.request().path());
 
         if (!IS_DEV) {
             // validate header

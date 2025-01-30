@@ -37,8 +37,10 @@ export interface LatLongSys {
     sunset: number;
 }
 
-export interface WeatherLocation {
+export interface DBWeatherLocation {
+    id: number;
     name: string;
+    country: string;
     latitude: string;
     longitude: string;
 }

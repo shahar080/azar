@@ -13,14 +13,13 @@ const locations = [
     {name: "Los Angeles, USA", latitude: "34.052235", longitude: "-118.243683"},
 ];
 
-// TODO AZAR-96
 // TODO AZAR-97
 export function WeatherHomePage() {
     return (
         <Box
             sx={{
                 minHeight: "100vh",
-                width: "99vw",
+                width: "100vw",
                 overflowX: "hidden",
                 overflowY: "auto",
                 display: "flex",

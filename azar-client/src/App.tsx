@@ -1,4 +1,4 @@
-import {Route, Routes} from 'react-router-dom';
+import {Navigate, Route, Routes} from 'react-router-dom';
 import CloudLandingPage from "./projects/cloud/pages/LandingPage.tsx";
 import ProtectedRoute from "./projects/cloud/components/general/ProtectedRoute.tsx";
 import CloudUserManagement from "./projects/cloud/pages/UserManagement.tsx";
@@ -29,6 +29,8 @@ function App() {
             <LoadingOverlay/>
             <ScrollToTop/>
             <Routes>
+                <Route path="*" element={<Navigate to={LANDING_ROUTE} replace/>}/>
+
                 <Route path={LANDING_ROUTE} element={<WhoAmIHomePage/>}/>
                 <Route path={WHOAMI_MANAGE_CV_ROUTE}
                        element={<ProtectedRoute redirectPath={LANDING_ROUTE}><WhoAmIManageCVPage/></ProtectedRoute>}/>
@@ -49,7 +51,9 @@ function App() {
                        element={<ProtectedRoute
                            redirectPath={CLOUD_LOGIN_ROUTE}><CloudPreferenceManagement/></ProtectedRoute>}/>
 
-                <Route path={WEATHER_ROUTE} element={<WeatherHomePage/>}/>
+                {import.meta.env.VITE_IS_DEV === "true" &&
+                    <Route path={WEATHER_ROUTE} element={<WeatherHomePage/>}/>
+                }
             </Routes>
         </>
     )

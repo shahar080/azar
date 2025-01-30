@@ -51,9 +51,11 @@ export function GeneralMenu({zIndex = 1}: GeneralMenuProps) {
                     <MenuItem onClick={handleClose} component={Link} to={CLOUD_ROUTE}>
                         AzarCloud
                     </MenuItem>
-                    <MenuItem onClick={handleClose} component={Link} to={WEATHER_ROUTE}>
-                        Weather
-                    </MenuItem>
+                    {import.meta.env.VITE_IS_DEV === "true" &&
+                        <MenuItem onClick={handleClose} component={Link} to={WEATHER_ROUTE}>
+                            Weather
+                        </MenuItem>
+                    }
                 </Menu>
             </Box>
         </>

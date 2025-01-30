@@ -17,6 +17,7 @@
         <property name="hibernate.hikari.minimumIdle">2</property>
         <property name="hibernate.hikari.idleTimeout">30000</property>
         <property name="hibernate.hikari.connectionTimeout">60000</property>
+        <property name="hibernate.hikari.autoCommit">false</property>
 
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>

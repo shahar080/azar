@@ -82,44 +82,41 @@ public class UserDao extends GenericDao<User> {
      * @return the user if found, else, null
      */
     public Future<User> getUserByUserName(String userName) {
-        return Future.future(promise ->
-                vertx.executeBlocking(() -> {
-                    try (Session session = openSession()) {
-                        String hql = "FROM User U WHERE lower(U.userName) = lower(:userName)";
-                        Query<User> query = session.createQuery(hql, User.class);
-                        query.setParameter("userName", userName);
-                        List<User> results = query.list();
-                        if (!results.isEmpty()) {
-                            promise.complete(results.getFirst());
-                        } else {
-                            logger.warn("User {} not found in DB!", userName);
-                            promise.complete(null);
-                        }
-                    } catch (Exception e) {
-                        promise.fail(e.getMessage());
-                    }
-                    return null;
-                }, false));
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                String hql = "FROM User U WHERE lower(U.userName) = lower(:userName)";
+                Query<User> query = session.createQuery(hql, User.class);
+                query.setParameter("userName", userName);
+                List<User> results = query.list();
+                if (!results.isEmpty()) {
+                    return results.getFirst();
+                } else {
+                    logger.warn("User {} not found in DB!", userName);
+                }
+            } catch (Exception e) {
+                logger.error("Could not getUserByUsername from db! user: {}", userName, e);
+            }
+            return null;
+        }, false);
     }
 
     public Future<Boolean> isAdmin(String userName) {
-        return Future.future(pdfOwnerPromise ->
-                vertx.executeBlocking(() -> {
-                    try (Session session = openSession()) {
-                        String userType = session
-                                .createNativeQuery(
-                                        "SELECT u.user_type FROM users u WHERE u.user_name = :userName",
-                                        String.class
-                                )
-                                .setParameter("userName", userName)
-                                .getSingleResult();
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                String userType = session
+                        .createNativeQuery(
+                                "SELECT u.user_type FROM users u WHERE u.user_name = :userName",
+                                String.class
+                        )
+                        .setParameter("userName", userName)
+                        .getSingleResult();
 
-                        pdfOwnerPromise.complete(Objects.equals(userType, UserType.ADMIN.getType()));
-                    } catch (Exception e) {
-                        pdfOwnerPromise.fail(e);
-                    }
-                    return null;
-                }, false));
+                return Objects.equals(userType, UserType.ADMIN.getType());
+            } catch (Exception e) {
+                logger.error("Could not perform isAdmin from db! userName: {}", userName, e);
+            }
+            return false;
+        }, false);
     }
 
     @Override

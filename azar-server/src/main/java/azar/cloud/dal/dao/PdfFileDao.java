@@ -9,7 +9,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,6 +21,7 @@ import java.util.List;
  **/
 @Singleton
 public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Inject
     public PdfFileDao(Vertx vertx, SessionFactoryProvider sessionFactoryProvider) {
@@ -30,93 +34,82 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
     }
 
     public Future<List<PdfFile>> getAllClientPaginated(int offset, int limit) {
-        return Future.future(listPromise ->
-                vertx.executeBlocking(() -> {
-                    try (Session session = openSession()) {
-                        List<PdfFile> paginatedResults = session
-                                .createQuery(
-                                        "SELECT new azar.cloud.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
-                                                " FROM PdfFile p",
-                                        PdfFile.class)
-                                .setFirstResult(offset)
-                                .setMaxResults(limit)
-                                .getResultList();
-
-                        listPromise.complete(paginatedResults);
-                    } catch (Exception e) {
-                        listPromise.fail(e);
-                    }
-                    return null;
-                }, false));
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                return session
+                        .createQuery(
+                                "SELECT new azar.cloud.entities.client.PdfFile(p.id, p.uploadedBy, p.fileName, p.contentType, p.labels, p.size, p.uploadedAt, p.description)" +
+                                        " FROM PdfFile p",
+                                PdfFile.class)
+                        .setFirstResult(offset)
+                        .setMaxResults(limit)
+                        .getResultList();
+            } catch (Exception e) {
+                logger.error("Could not get PdfFiles from db!", e);
+            }
+            return Collections.emptyList();
+        }, false);
     }
 
     public Future<byte[]> getThumbnailById(Integer id) {
-        return Future.future(thumbnailPromise -> {
-            vertx.executeBlocking(() -> {
-                try (Session session = openSession()) {
-                    byte[] thumbnail = session
-                            .createNativeQuery(
-                                    "SELECT lo_get(p.thumbnail) FROM pdf_files p WHERE p.id = :id",
-                                    byte[].class
-                            )
-                            .setParameter("id", id)
-                            .getSingleResult();
-
-                    thumbnailPromise.complete(thumbnail);
-                } catch (Exception e) {
-                    thumbnailPromise.fail(e);
-                }
-                return null;
-            }, false);
-        });
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                return session
+                        .createNativeQuery(
+                                "SELECT lo_get(p.thumbnail) FROM pdf_files p WHERE p.id = :id",
+                                byte[].class
+                        )
+                        .setParameter("id", id)
+                        .getSingleResult();
+            } catch (Exception e) {
+                logger.error("Could not get thumbnail by id from db!", e);
+            }
+            return new byte[0];
+        }, false);
     }
 
     public Future<String> getOwnerByPdfId(Integer id) {
-        return Future.future(pdfOwnerPromise ->
-                vertx.executeBlocking(() -> {
-                    try (Session session = openSession()) {
-                        String pdfOwner = session
-                                .createNativeQuery(
-                                        "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
-                                        String.class
-                                )
-                                .setParameter("id", id)
-                                .getSingleResult();
-
-                        pdfOwnerPromise.complete(pdfOwner);
-                    } catch (Exception e) {
-                        pdfOwnerPromise.fail(e);
-                    }
-                    return null;
-                }, false));
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                return session
+                        .createNativeQuery(
+                                "SELECT p.uploadedBy FROM pdf_files p WHERE p.id = :id",
+                                String.class
+                        )
+                        .setParameter("id", id)
+                        .getSingleResult();
+            } catch (Exception e) {
+                logger.error("Could not get pdf owner from db!", e);
+            }
+            return "";
+        }, false);
     }
 
     public Future<Boolean> updatePartial(azar.cloud.entities.db.PdfFile pdfFile) {
-        return Future.future(promise ->
-                vertx.executeBlocking(() -> {
-                    try (Session session = openSession()) {
-                        session.beginTransaction();
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                session.beginTransaction();
 
 
-                        MutationQuery query = session.createMutationQuery(
-                                "UPDATE PdfFile e " +
-                                        "SET e.fileName = :fileName, e.labels = :labels, e.description = :description " +
-                                        "WHERE e.id = :id"
-                        );
-                        query.setParameter("fileName", pdfFile.getFileName());
-                        query.setParameter("labels", pdfFile.getLabels());
-                        query.setParameter("description", pdfFile.getDescription());
-                        query.setParameter("id", pdfFile.getId());
+                MutationQuery query = session.createMutationQuery(
+                        "UPDATE PdfFile e " +
+                                "SET e.fileName = :fileName, e.labels = :labels, e.description = :description " +
+                                "WHERE e.id = :id"
+                );
+                query.setParameter("fileName", pdfFile.getFileName());
+                query.setParameter("labels", pdfFile.getLabels());
+                query.setParameter("description", pdfFile.getDescription());
+                query.setParameter("id", pdfFile.getId());
 
-                        int rowsUpdated = query.executeUpdate();
-                        session.getTransaction().commit();
+                int rowsUpdated = query.executeUpdate();
+                session.getTransaction().commit();
 
-                        promise.complete(rowsUpdated > 0);
-                    } catch (Exception e) {
-                        promise.fail(e);
-                    }
-                    return null;
-                }, false));
+                return rowsUpdated > 0;
+            } catch (Exception e) {
+                logger.error("Could not update pdf partially in db!", e);
+            }
+            return false;
+        }, false);
     }
 
 

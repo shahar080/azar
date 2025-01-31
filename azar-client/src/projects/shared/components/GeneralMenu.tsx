@@ -1,8 +1,9 @@
 import React, {useState} from "react";
-import {Box, Button, Menu, MenuItem} from "@mui/material";
+import {Box, Button, GlobalStyles, Menu, MenuItem} from "@mui/material";
 import {ArrowDropDown} from "@mui/icons-material";
 import {Link} from "react-router-dom";
 import {CLOUD_ROUTE, LANDING_ROUTE, WEATHER_ROUTE} from "../utils/reactRoutes.ts";
+import {COMIC_NEUE_FONT} from "../utils/constants.ts";
 
 type GeneralMenuProps = {
     zIndex?: number;
@@ -21,6 +22,13 @@ export function GeneralMenu({zIndex = 1}: GeneralMenuProps) {
 
     return (
         <>
+            <GlobalStyles
+                styles={{
+                    "*": {
+                        fontFamily: COMIC_NEUE_FONT,
+                    },
+                }}
+            />
             <Box
                 sx={{
                     position: "absolute",

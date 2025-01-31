@@ -1,30 +1,36 @@
 import React, {useEffect, useState} from "react";
-import {Box, Card, CardContent, CircularProgress, Grid, IconButton, Tooltip, Typography} from "@mui/material";
-import {Cloud, Delete, Grain, Thunderstorm, WbSunny} from "@mui/icons-material";
+import {
+    Box,
+    Card,
+    CardContent,
+    CircularProgress,
+    GlobalStyles,
+    Grid,
+    IconButton,
+    Tooltip,
+    Typography
+} from "@mui/material";
+import {Delete} from "@mui/icons-material";
 import {getByLatLong} from "../server/api/weatherApi";
 import {GetByLatLongResponse} from "../server/api/responses";
+import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
+import {getWeatherIcon} from "../utils/sharedLogic.tsx";
 
 interface WeatherCardProps {
     id: number;
     longitude: string;
     latitude: string;
     onDelete: (id: number) => void;
+    onShowExtendedView: (getByLatLongResponse: GetByLatLongResponse) => void;
 }
 
-const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDelete}) => {
+const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDelete, onShowExtendedView}) => {
     const [getByLatLongResponse, setGetByLatLongResponse] = useState<GetByLatLongResponse | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [hasError, setHasError] = useState<boolean>(false);
     const [localTime, setLocalTime] = useState<string>("");
 
     const cardWidth = {
-        xs: "100%",
-        sm: "70%",
-        md: "60%",
-        lg: "100%",
-    };
-
-    const cardHeight = {
         xs: "100%",
         sm: "70%",
         md: "60%",
@@ -43,7 +49,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
             hour12: true,
         });
     };
-
 
     useEffect(() => {
         setIsLoading(true);
@@ -66,29 +71,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
             });
     }, [latitude, longitude]);
 
-    const getWeatherIcon = (main: string) => {
-        switch (main) {
-            case "Clear":
-                return <WbSunny fontSize="large"/>;
-            case "Clouds":
-                return <Cloud fontSize="large"/>;
-            case "Rain":
-                return <Grain fontSize="large"/>;
-            case "Thunderstorm":
-                return <Thunderstorm fontSize="large"/>;
-            default:
-                return <WbSunny fontSize="large"/>;
-        }
-    };
-
     if (isLoading) {
         return (
             <Card
                 sx={{
                     minWidth: cardWidth,
-                    minHeight: cardHeight,
-                    maxWidth: cardWidth,
-                    maxHeight: cardHeight,
                     borderRadius: borderRadius,
                     margin: "auto",
                     textAlign: "center",
@@ -107,9 +94,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
             <Card
                 sx={{
                     minWidth: cardWidth,
-                    minHeight: cardHeight,
-                    maxWidth: cardWidth,
-                    maxHeight: cardHeight,
                     borderRadius: borderRadius,
                     margin: "auto",
                     textAlign: "center",
@@ -125,99 +109,105 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
     if (!getByLatLongResponse) return null;
 
     return (
-        <Card
-            sx={{
-                minWidth: cardWidth,
-                minHeight: cardHeight,
-                maxWidth: cardWidth,
-                maxHeight: cardHeight,
-                borderRadius: borderRadius,
-                margin: "auto",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                position: "relative",
-            }}
-        >
-
-            <IconButton
-                sx={{
-                    position: "absolute",
-                    top: "8px",
-                    right: "8px",
-                    zIndex: 10,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
+        <>
+            <GlobalStyles
+                styles={{
+                    "*": {
+                        fontFamily: COMIC_NEUE_FONT,
+                    },
                 }}
-                onClick={() => onDelete(id)}
+            />
+            <Card
+                sx={{
+                    minWidth: cardWidth,
+                    borderRadius: borderRadius,
+                    margin: "auto",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    position: "relative",
+                    padding: "16px",
+                }}
             >
-                <Delete/>
-            </IconButton>
+                <IconButton
+                    sx={{
+                        position: "absolute",
+                        top: "8px",
+                        right: "8px",
+                        zIndex: 10,
+                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                    }}
+                    onClick={() => onDelete(id)}
+                >
+                    <Delete/>
+                </IconButton>
 
-            <CardContent sx={{flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between"}}>
-                {/* Top Section */}
-                <Box>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={2}>
-                            {getWeatherIcon(getByLatLongResponse.weather[0].main)}
-                        </Grid>
-                        <Grid item xs={10}>
-                            <Tooltip title={`${getByLatLongResponse.name}, ${getByLatLongResponse.sys.country}`}>
-                                <Typography variant="h5">
-                                    {getByLatLongResponse.name}, {getByLatLongResponse.sys.country}
+                <CardContent
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        gap: "16px",
+                    }}
+                >
+                    {/* Header Section */}
+                    <Box>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={2}>
+                                {getWeatherIcon(getByLatLongResponse.weather[0].main)}
+                            </Grid>
+                            <Grid item xs={10}>
+                                <Tooltip title={`${getByLatLongResponse.name}, ${getByLatLongResponse.sys.country}`}>
+                                    <Typography paddingLeft={"1vw"} variant="h5" noWrap>
+                                        {getByLatLongResponse.name}
+                                    </Typography>
+                                </Tooltip>
+                                <Typography paddingLeft={"1vw"}
+                                            variant="h6">{Math.floor(getByLatLongResponse.main.temp)}°C</Typography>
+                                <Typography paddingLeft={"1vw"} variant="body1" noWrap>
+                                    {getByLatLongResponse.weather[0].description}
                                 </Typography>
-                            </Tooltip>
-                            <Typography variant="h6">{getByLatLongResponse.main.temp}°C</Typography>
-                            <Typography variant="body1">
-                                {getByLatLongResponse.weather[0].description}
-                            </Typography>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </Box>
+                    </Box>
 
-                {/* Center Section */}
-                <Box sx={{textAlign: "center"}}>
-                    <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                            <Typography variant="body2">
-                                Humidity: {getByLatLongResponse.main.humidity}%
-                            </Typography>
-                            <Typography variant="body2">
-                                Pressure: {getByLatLongResponse.main.pressure} hPa
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Typography variant="body2">
-                                Wind: {getByLatLongResponse.wind.speed} m/s
-                            </Typography>
-                            <Typography variant="body2">
-                                Visibility: {(getByLatLongResponse.visibility / 1000).toFixed(1)} km
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                </Box>
+                    {/* Middle Section */}
+                    <Box sx={{textAlign: "center"}}>
+                        <Typography variant="h6" sx={{fontWeight: "bold"}}>
+                            Local Time:
+                        </Typography>
+                        <Typography variant="h5">
+                            {localTime || "Loading..."}
+                        </Typography>
+                        <Typography paddingTop={"1vw"} textAlign={"left"} variant="body1">
+                            Sunrise: {new Date(getByLatLongResponse.sys.sunrise * 1000).toLocaleTimeString()}
+                        </Typography>
+                        <Typography textAlign={"left"} variant="body1">
+                            Sunset: {new Date(getByLatLongResponse.sys.sunset * 1000).toLocaleTimeString()}
+                        </Typography>
+                    </Box>
 
-                {/* Bottom Section */}
-                <Box>
-                    <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                            <Typography variant="body2">
-                                Sunrise: {new Date(getByLatLongResponse.sys.sunrise * 1000).toLocaleTimeString()}
+                    {/* Footer Section */}
+
+                    <Box sx={{textAlign: "center", mt: "auto"}}>
+                        <Tooltip title={"Click me for further information"}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    border: "1px solid black",
+                                    padding: "4px",
+                                    borderRadius: "2vw",
+                                    cursor: "pointer",
+                                }}
+                                onClick={() => onShowExtendedView(getByLatLongResponse)}
+                            >
+                                → {getByLatLongResponse.sys.country} ←
                             </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Typography variant="body2">
-                                Sunset: {new Date(getByLatLongResponse.sys.sunset * 1000).toLocaleTimeString()}
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography variant="body2">
-                                Local Time: {localTime || "Loading..."}
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </CardContent>
-        </Card>
+                        </Tooltip>
+                    </Box>
+                </CardContent>
+            </Card>
+        </>
     );
 };
 

@@ -10,18 +10,18 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
-import {Delete} from "@mui/icons-material";
+import {AccessTime, AvTimer, Delete} from "@mui/icons-material";
 import {getByLatLong} from "../server/api/weatherApi";
 import {GetByLatLongResponse} from "../server/api/responses";
 import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
-import {getWeatherIcon} from "../utils/sharedLogic.tsx";
+import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
 
 interface WeatherCardProps {
     id: number;
     longitude: string;
     latitude: string;
     onDelete: (id: number) => void;
-    onShowExtendedView: (getByLatLongResponse: GetByLatLongResponse) => void;
+    onShowExtendedView: (getByLatLongResponse: GetByLatLongResponse, is12Hour: boolean) => void;
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDelete, onShowExtendedView}) => {
@@ -29,6 +29,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [hasError, setHasError] = useState<boolean>(false);
     const [localTime, setLocalTime] = useState<string>("");
+    const [is12Hour, setIs12Hour] = useState<boolean>(true);
+    const [sunriseTime, setSunriseTime] = useState<string>("");
+    const [sunsetTime, setSunsetTime] = useState<string>("");
 
     const cardWidth = {
         xs: "100%",
@@ -39,15 +42,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
 
     const borderRadius = "1vw";
 
-    const calculateLocalTime = (timezoneOffset: number): string => {
-        const utcTime = new Date();
-        const localTime = new Date(utcTime.getTime() + utcTime.getTimezoneOffset() * 60000 + timezoneOffset * 1000);
-        return localTime.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true,
-        });
+    const switchClockTime = () => {
+        setIs12Hour((prev) => !prev);
     };
 
     useEffect(() => {
@@ -57,19 +53,42 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
         getByLatLong({latitude, longitude})
             .then((response) => {
                 setGetByLatLongResponse(response);
+
+                const sunriseDate = convertEpochToLocalTime(response.sys.sunrise, response.timezone, is12Hour);
+                const sunsetDate = convertEpochToLocalTime(response.sys.sunset, response.timezone, is12Hour);
+
+                setSunriseTime(sunriseDate);
+                setSunsetTime(sunsetDate);
+
                 setIsLoading(false);
-
-                const intervalId = setInterval(() => {
-                    setLocalTime(calculateLocalTime(response.timezone));
-                }, 1000);
-
-                return () => clearInterval(intervalId);
             })
             .catch(() => {
                 setHasError(true);
                 setIsLoading(false);
             });
     }, [latitude, longitude]);
+
+    useEffect(() => {
+        if (!getByLatLongResponse) return;
+
+        const updateTime = () => {
+            const currentEpochTime = Math.floor(Date.now() / 1000);
+            ;
+            const localTime = convertEpochToLocalTime(currentEpochTime, getByLatLongResponse.timezone, is12Hour);
+            setLocalTime(localTime);
+        };
+
+        updateTime();
+
+        const sunriseDate = convertEpochToLocalTime(getByLatLongResponse.sys.sunrise, getByLatLongResponse.timezone, is12Hour);
+        const sunsetDate = convertEpochToLocalTime(getByLatLongResponse.sys.sunset, getByLatLongResponse.timezone, is12Hour);
+        setSunriseTime(sunriseDate);
+        setSunsetTime(sunsetDate);
+
+        const intervalId = setInterval(updateTime, 1000);
+
+        return () => clearInterval(intervalId);
+    }, [getByLatLongResponse, is12Hour]);
 
     if (isLoading) {
         return (
@@ -162,8 +181,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                                         {getByLatLongResponse.name}
                                     </Typography>
                                 </Tooltip>
-                                <Typography paddingLeft={"1vw"}
-                                            variant="h6">{Math.floor(getByLatLongResponse.main.temp)}°C</Typography>
+                                <Typography paddingLeft={"1vw"} variant="h6">
+                                    {Math.floor(getByLatLongResponse.main.temp)}°C
+                                </Typography>
                                 <Typography paddingLeft={"1vw"} variant="body1" noWrap>
                                     {getByLatLongResponse.weather[0].description}
                                 </Typography>
@@ -173,22 +193,34 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
 
                     {/* Middle Section */}
                     <Box sx={{textAlign: "center"}}>
-                        <Typography variant="h6" sx={{fontWeight: "bold"}}>
-                            Local Time:
-                        </Typography>
+                        <Grid container spacing={1} alignItems="center" justifyContent="center">
+                            <Grid item>
+                                <Tooltip title={`Click me to switch to ${is12Hour ? "24 hours" : "12 hours"} format`}>
+                                    {is12Hour ?
+                                        <AccessTime sx={{fontSize: "1.6rem"}} onClick={() => switchClockTime()}/>
+                                        : <AvTimer sx={{fontSize: "1.6rem"}} onClick={() => switchClockTime()}/>}
+                                </Tooltip>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="h6" sx={{fontWeight: "bold"}}>
+                                    Local Time:
+                                </Typography>
+                            </Grid>
+                        </Grid>
+
                         <Typography variant="h5">
                             {localTime || "Loading..."}
                         </Typography>
+
                         <Typography paddingTop={"1vw"} textAlign={"left"} variant="body1">
-                            Sunrise: {new Date(getByLatLongResponse.sys.sunrise * 1000).toLocaleTimeString()}
+                            Sunrise: {sunriseTime}
                         </Typography>
                         <Typography textAlign={"left"} variant="body1">
-                            Sunset: {new Date(getByLatLongResponse.sys.sunset * 1000).toLocaleTimeString()}
+                            Sunset: {sunsetTime}
                         </Typography>
                     </Box>
 
                     {/* Footer Section */}
-
                     <Box sx={{textAlign: "center", mt: "auto"}}>
                         <Tooltip title={"Click me for further information"}>
                             <Typography
@@ -198,8 +230,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                                     padding: "4px",
                                     borderRadius: "2vw",
                                     cursor: "pointer",
+                                    display: "inline-block",
                                 }}
-                                onClick={() => onShowExtendedView(getByLatLongResponse)}
+                                onClick={() => onShowExtendedView(getByLatLongResponse, is12Hour)}
                             >
                                 → {getByLatLongResponse.sys.country} ←
                             </Typography>

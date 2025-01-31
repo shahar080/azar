@@ -1,14 +1,25 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Button, Grid, Modal, Typography} from "@mui/material";
 import {GetByLatLongResponse} from "../server/api/responses.ts";
-import {getWeatherIcon} from "../utils/sharedLogic.tsx";
+import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
 
 interface ExtendedWeatherInfoProps {
     extendedViewData: GetByLatLongResponse;
+    is12Hour: boolean;
     onClose: () => void;
 }
 
-const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewData, onClose}) => {
+const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewData, is12Hour, onClose}) => {
+    const [sunriseTime, setSunriseTime] = useState<string>("");
+    const [sunsetTime, setSunsetTime] = useState<string>("");
+
+    useEffect(() => {
+        const sunriseDate = convertEpochToLocalTime(extendedViewData.sys.sunrise, extendedViewData.timezone, is12Hour);
+        const sunsetDate = convertEpochToLocalTime(extendedViewData.sys.sunset, extendedViewData.timezone, is12Hour);
+        setSunriseTime(sunriseDate);
+        setSunsetTime(sunsetDate);
+    }, []);
+
     return (
         <Modal open={!!extendedViewData} onClose={onClose}>
             <Box
@@ -84,11 +95,11 @@ const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewDa
                 <Box sx={{marginTop: "1.5rem"}}>
                     <Typography variant="body1">
                         <strong>Sunrise:</strong>{" "}
-                        {new Date(extendedViewData.sys.sunrise * 1000).toLocaleTimeString()}
+                        {sunriseTime}
                     </Typography>
                     <Typography variant="body1">
                         <strong>Sunset:</strong>{" "}
-                        {new Date(extendedViewData.sys.sunset * 1000).toLocaleTimeString()}
+                        {sunsetTime}
                     </Typography>
                 </Box>
 

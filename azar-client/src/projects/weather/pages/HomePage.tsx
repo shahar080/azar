@@ -14,6 +14,7 @@ import ExtendedWeatherInfo from "../components/ExtendedWeatherInfo.tsx";
 export function WeatherHomePage() {
     const [locations, setLocations] = useState<DBWeatherLocation[]>([]);
     const [extendedViewData, setExtendedViewData] = useState<GetByLatLongResponse | null>(null);
+    const [is12Hour, setIs12Hour] = useState<boolean>(true);
     const {showToast} = useToast();
 
     useEffect(() => {
@@ -130,7 +131,10 @@ export function WeatherHomePage() {
                                         latitude={location.latitude}
                                         longitude={location.longitude}
                                         onDelete={id => removeLocation(id)}
-                                        onShowExtendedView={getByLatLongResponse => setExtendedViewData(getByLatLongResponse)}
+                                        onShowExtendedView={(getByLatLongResponse, is12HourRes) => {
+                                            setExtendedViewData(getByLatLongResponse);
+                                            setIs12Hour(is12HourRes);
+                                        }}
                                     />
                                 </Grid>
                             ))}
@@ -157,6 +161,7 @@ export function WeatherHomePage() {
                 {extendedViewData !== null &&
                     <ExtendedWeatherInfo
                         extendedViewData={extendedViewData}
+                        is12Hour={is12Hour}
                         onClose={() => setExtendedViewData(null)}
                     />
                 }

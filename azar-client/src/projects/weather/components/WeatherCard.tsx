@@ -15,6 +15,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
     const [getByLatLongResponse, setGetByLatLongResponse] = useState<GetByLatLongResponse | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [hasError, setHasError] = useState<boolean>(false);
+    const [localTime, setLocalTime] = useState<string>("");
 
     const cardWidth = {
         xs: "100%",
@@ -32,6 +33,18 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
 
     const borderRadius = "1vw";
 
+    const calculateLocalTime = (timezoneOffset: number): string => {
+        const utcTime = new Date();
+        const localTime = new Date(utcTime.getTime() + utcTime.getTimezoneOffset() * 60000 + timezoneOffset * 1000);
+        return localTime.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+        });
+    };
+
+
     useEffect(() => {
         setIsLoading(true);
         setHasError(false);
@@ -40,6 +53,12 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
             .then((response) => {
                 setGetByLatLongResponse(response);
                 setIsLoading(false);
+
+                const intervalId = setInterval(() => {
+                    setLocalTime(calculateLocalTime(response.timezone));
+                }, 1000);
+
+                return () => clearInterval(intervalId);
             })
             .catch(() => {
                 setHasError(true);
@@ -188,6 +207,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                         <Grid item xs={6}>
                             <Typography variant="body2">
                                 Sunset: {new Date(getByLatLongResponse.sys.sunset * 1000).toLocaleTimeString()}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="body2">
+                                Local Time: {localTime || "Loading..."}
                             </Typography>
                         </Grid>
                     </Grid>

@@ -21,8 +21,9 @@ export function WeatherHomePage() {
         setLocations(LocalStorageManager.getItemWithDefault(WEATHER_LOCATIONS_STRING, []));
     }, []);
 
-    const addLocation = async (dbWeatherLocation: DBWeatherLocation) => {
-        if (locations.some(location => location.id === dbWeatherLocation.id)) {
+    const addLocationByObj = async (dbWeatherLocation: DBWeatherLocation) => {
+        if (locations.some(location => ((location.id === dbWeatherLocation.id))
+            || (location.longitude === dbWeatherLocation.longitude && location.latitude === dbWeatherLocation.latitude))) {
             showToast("You can't add the same location twice", "warning");
             return;
         }
@@ -147,11 +148,11 @@ export function WeatherHomePage() {
                                 lg={3}
                                 sx={{
                                     display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
+                                    alignItems: "start",
+                                    justifyContent: "start",
                                 }}
                             >
-                                <AddWeatherCard onAdd={addLocation}/>
+                                <AddWeatherCard addLocationByObj={addLocationByObj}/>
                             </Grid>
                         </Grid>
                     </Box>

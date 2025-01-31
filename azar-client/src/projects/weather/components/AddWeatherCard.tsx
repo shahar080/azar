@@ -9,13 +9,11 @@ import {
     IconButton,
     TextField,
     Typography,
-    useMediaQuery,
 } from "@mui/material";
 import {LocationOn} from "@mui/icons-material";
 import {DBWeatherLocation} from "../models/models.ts";
 import {getByLatLong, getCitiesByInput} from "../server/api/weatherApi.ts";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
-import {useTheme} from "@mui/material/styles";
 
 interface AddWeatherCardProps {
     addLocationByObj: (dbWeatherLocation: DBWeatherLocation) => Promise<void>;
@@ -27,8 +25,6 @@ const AddWeatherCard: React.FC<AddWeatherCardProps> = ({addLocationByObj}) => {
     const [selectedLocation, setSelectedLocation] = useState<DBWeatherLocation | null>(null);
     const [isLocating, setIsLocating] = useState(false);
     const {showToast} = useToast();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const handleAdd = () => {
         if (selectedLocation) {
@@ -101,7 +97,9 @@ const AddWeatherCard: React.FC<AddWeatherCardProps> = ({addLocationByObj}) => {
                 alignItems: "center",
                 textAlign: "center",
                 padding: "16px",
-                height: isMobile ? "100%" : "75%",
+                height: "100%",
+                boxShadow: 3,
+
             }}
         >
             <CardContent>
@@ -125,7 +123,7 @@ const AddWeatherCard: React.FC<AddWeatherCardProps> = ({addLocationByObj}) => {
                             setSelectedLocation(newValue);
                         }}
                         loading={loading}
-                        sx={{width: "100%"}}
+                        sx={{width: "150%"}}
                         renderInput={(params) => (
                             <TextField
                                 {...params}

@@ -10,7 +10,7 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
-import {AccessTime, AvTimer, Delete} from "@mui/icons-material";
+import {AccessTime, AvTimer, Delete, Refresh} from "@mui/icons-material";
 import {getByLatLong} from "../server/api/weatherApi";
 import {GetByLatLongResponse} from "../server/api/responses";
 import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
@@ -32,6 +32,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
     const [is12Hour, setIs12Hour] = useState<boolean>(true);
     const [sunriseTime, setSunriseTime] = useState<string>("");
     const [sunsetTime, setSunsetTime] = useState<string>("");
+    const [retry, setRetry] = useState<boolean>(false);
 
     const cardWidth = {
         xs: "100%",
@@ -66,7 +67,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                 setHasError(true);
                 setIsLoading(false);
             });
-    }, [latitude, longitude]);
+    }, [latitude, longitude, retry]);
 
     useEffect(() => {
         if (!getByLatLongResponse) return;
@@ -115,12 +116,50 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                     minWidth: cardWidth,
                     borderRadius: borderRadius,
                     margin: "auto",
-                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    position: "relative",
+                    padding: "16px",
                 }}
             >
-                <Typography variant="body1" color="error">
+                <IconButton
+                    sx={{
+                        position: "absolute",
+                        top: "8px",
+                        left: "8px",
+                        zIndex: 10,
+                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                    }}
+                    onClick={() => setRetry(prev => !prev)}
+                >
+                    <Refresh/>
+                </IconButton>
+
+                <Typography
+                    variant="body1"
+                    color="error"
+                    sx={{
+                        textAlign: "center",
+                        paddingX: "48px",
+                    }}
+                >
                     Couldn't load weather data...
                 </Typography>
+
+                <IconButton
+                    sx={{
+                        position: "absolute",
+                        top: "8px",
+                        right: "8px",
+                        zIndex: 10,
+                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                    }}
+                    onClick={() => onDelete(id)}
+                >
+                    <Delete/>
+                </IconButton>
             </Card>
         );
     }

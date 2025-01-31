@@ -112,7 +112,7 @@ export function WeatherHomePage() {
                             width: "100%",
                         }}
                     >
-                        <Grid container spacing={3} justifyContent="center">
+                        <Grid container spacing={3} justifyContent="flex-start">
                             {locations.map((location, index) => (
                                 <Grid
                                     item

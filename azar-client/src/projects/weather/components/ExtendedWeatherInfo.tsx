@@ -1,7 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Box, Button, Grid, Modal, Typography} from "@mui/material";
 import {GetByLatLongResponse} from "../server/api/responses.ts";
 import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
+import {getCardStyles} from "../utils/weatherStyles.ts";
+import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 
 interface ExtendedWeatherInfoProps {
     extendedViewData: GetByLatLongResponse;
@@ -12,6 +14,7 @@ interface ExtendedWeatherInfoProps {
 const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewData, is12Hour, onClose}) => {
     const [sunriseTime, setSunriseTime] = useState<string>("");
     const [sunsetTime, setSunsetTime] = useState<string>("");
+    const {mode} = useContext(ThemeModeContext);
 
     useEffect(() => {
         const sunriseDate = convertEpochToLocalTime(extendedViewData.sys.sunrise, extendedViewData.timezone, is12Hour);
@@ -19,6 +22,8 @@ const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewDa
         setSunriseTime(sunriseDate);
         setSunsetTime(sunsetDate);
     }, []);
+
+    const dynamicStyles = getCardStyles(extendedViewData.weather[0].main, mode);
 
     return (
         <Modal open={!!extendedViewData} onClose={onClose}>
@@ -31,7 +36,8 @@ const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewDa
                     padding: "2rem",
                     borderRadius: "12px",
                     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)",
-                    backgroundColor: "white",
+                    backgroundColor: dynamicStyles.backgroundColor,
+                    color: dynamicStyles.color,
                     maxWidth: "600px",
                     width: "90%",
                     textAlign: "center",

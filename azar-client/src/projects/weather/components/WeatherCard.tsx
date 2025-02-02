@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {
     Box,
     Card,
@@ -15,7 +15,8 @@ import {getByLatLong} from "../server/api/weatherApi";
 import {GetByLatLongResponse} from "../server/api/responses";
 import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
 import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
-import {getCardStyles} from "../utils/weatherStyles";
+import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
+import {getCardStyles} from "../utils/weatherStyles.ts";
 
 interface WeatherCardProps {
     id: number;
@@ -44,6 +45,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
     const [sunriseTime, setSunriseTime] = useState<string>("");
     const [sunsetTime, setSunsetTime] = useState<string>("");
     const [retry, setRetry] = useState<boolean>(false);
+
+    const {mode} = useContext(ThemeModeContext);
 
     const cardWidth = {
         xs: "100%",
@@ -160,7 +163,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                         top: "8px",
                         left: "8px",
                         zIndex: 10,
-                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                        backgroundColor: 'transparent',
                     }}
                     onClick={() => setRetry((prev) => !prev)}
                 >
@@ -179,12 +182,13 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                 </Typography>
 
                 <IconButton
+                    disableRipple  // Disable the ripple effect
                     sx={{
                         position: "absolute",
                         top: "8px",
                         right: "8px",
                         zIndex: 10,
-                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                        backgroundColor: 'transparent',
                     }}
                     onClick={() => onDelete(id)}
                 >
@@ -196,7 +200,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
 
     if (!getByLatLongResponse) return null;
 
-    const dynamicStyles = getCardStyles(getByLatLongResponse.weather[0].main);
+    const dynamicStyles = getCardStyles(getByLatLongResponse.weather[0].main, mode);
 
     return (
         <>
@@ -227,7 +231,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                         top: "8px",
                         right: "8px",
                         zIndex: 10,
-                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                        backgroundColor: 'transparent',
                     }}
                     onClick={() => onDelete(id)}
                 >

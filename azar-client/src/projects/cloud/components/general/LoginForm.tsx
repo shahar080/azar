@@ -58,13 +58,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <>
             <GlobalStyles
                 styles={{
+                    "input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active": {
+                        WebkitBoxShadow: "0 0 0 30px transparent inset !important",
+                    },
                     "input:-webkit-autofill": {
-                        WebkitBoxShadow: "none",
                         WebkitTextFillColor: "#000",
                         transition: "background-color 5000s ease-in-out 0s",
                     },
                 }}
             />
+
             <Box
                 component="form"
                 onSubmit={handleLogin}
@@ -73,7 +76,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                     flexDirection: "column",
                     alignItems: "center",
                     gap: 2,
-                    width: "300px",
                     margin: "0 auto",
                     marginTop: "5rem",
                     padding: "2rem",

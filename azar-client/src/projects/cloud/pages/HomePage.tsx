@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {Box, CssBaseline, Grid, Paper, Toolbar, useMediaQuery} from "@mui/material";
 import AppBarHeader from "../../shared/components/AppBarHeader.tsx";
 import CloudDrawerMenu from "../components/general/DrawerMenu.tsx";
@@ -49,12 +49,30 @@ const CloudHomePage: React.FC = () => {
     const userName = getUserName();
     const navigate = useNavigate();
 
+    const loadingRef = useRef(loading);
+    const hasMoreRef = useRef(hasMore);
+    const pageRef = useRef(page);
+
+    useEffect(() => {
+        loadingRef.current = loading;
+    }, [loading]);
+
+    useEffect(() => {
+        hasMoreRef.current = hasMore;
+    }, [hasMore]);
+
+    useEffect(() => {
+        pageRef.current = page;
+    }, [page]);
+
     const loadPdfs = useCallback(
         (forceLoad: boolean = false) => {
-            if (!forceLoad && (loading || !hasMore)) return;
+
+            if (!forceLoad && (loadingRef.current || !hasMoreRef.current)) return;
+
             setLoading(true);
             setLoadingAnimation(true);
-            const currentPage = forceLoad ? 1 : page;
+            const currentPage = forceLoad ? 1 : pageRef.current;
 
             getAllPdfs({currentUser: userName}, currentPage, 20)
                 .then((newPdfs) => {
@@ -62,24 +80,21 @@ const CloudHomePage: React.FC = () => {
                         setHasMore(false);
                     }
 
-                    setPdfs((prevPdfs) =>
-                        forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]
-                    );
-                    setFilteredPdfs((prevPdfs) =>
-                        forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]
-                    );
+                    setPdfs((prevPdfs) => (forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]));
+                    setFilteredPdfs((prevPdfs) => (forceLoad ? newPdfs : [...prevPdfs, ...newPdfs]));
 
                     if (!forceLoad) {
                         setPage((prev) => prev + 1);
                     }
                 })
-                .catch((err) => console.error('Failed to load PDFs:', err))
+                .catch((err) => console.error("Failed to load PDFs:", err))
                 .finally(() => {
                     setLoading(false);
                     setLoadingAnimation(false);
                 });
         },
-        [hasMore, loading, page, setLoadingAnimation, userName]
+
+        [setLoadingAnimation, userName]
     );
 
     useEffect(() => {
@@ -95,11 +110,10 @@ const CloudHomePage: React.FC = () => {
     }, [loadPdfs]);
 
     useEffect(() => {
-        loadPreferences(getUserName(), getUserId())
-            .then(() => {
-                setDrawerPinned(isDesktop && getDrawerPinnedState());
-                setDrawerOpen(isDesktop && getDrawerPinnedState());
-            });
+        loadPreferences(getUserName(), getUserId()).then(() => {
+            setDrawerPinned(isDesktop && getDrawerPinnedState());
+            setDrawerOpen(isDesktop && getDrawerPinnedState());
+        });
     }, [isDesktop]);
 
     useEffect(() => {
@@ -117,9 +131,7 @@ const CloudHomePage: React.FC = () => {
                 formatDate(pdf.uploadedAt).toLowerCase().includes(query.toLowerCase()) ||
                 pdf.description?.toLowerCase().includes(query.toLowerCase()) ||
                 pdf.uploadedBy.toLowerCase().includes(query.toLowerCase()) ||
-                pdf.labels.some((label) =>
-                    label.toLowerCase().includes(query.toLowerCase())
-                );
+                pdf.labels.some((label) => label.toLowerCase().includes(query.toLowerCase()));
             const matchesLabels =
                 labels.length === 0 ||
                 labels.every((selectedLabel) => pdf.labels.includes(selectedLabel));
@@ -136,17 +148,19 @@ const CloudHomePage: React.FC = () => {
             showToast("Error uploading PDF \"" + file.name + "\"", "error");
             return;
         }
-        uploadPdf(file, userName).then((newPdf) => {
-            if (newPdf !== undefined) {
-                resetPaginationAndReload();
-                showToast("Successfully uploaded PDF \"" + newPdf.fileName + "\"", "success");
-            } else {
-                showToast("Error uploading PDF \"" + file.name + "\"", "error");
-            }
-        }).finally(() => {
-            setLoading(false);
-            setLoadingAnimation(false);
-        });
+        uploadPdf(file, userName)
+            .then((newPdf) => {
+                if (newPdf !== undefined) {
+                    resetPaginationAndReload();
+                    showToast("Successfully uploaded PDF \"" + newPdf.fileName + "\"", "success");
+                } else {
+                    showToast("Error uploading PDF \"" + file.name + "\"", "error");
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+                setLoadingAnimation(false);
+            });
     };
 
     const handleDeletePdf = (pdf: PdfFile) => {
@@ -160,23 +174,24 @@ const CloudHomePage: React.FC = () => {
                 if (res === 200) {
                     showToast("PDF \"" + pdf.fileName + "\" deleted successfully.", "success");
                 } else if (res === 401) {
-                    showToast("Current user can't delete PDF \"" + pdf.fileName + "\"", "error")
+                    showToast("Current user can't delete PDF \"" + pdf.fileName + "\"", "error");
                 } else {
-                    showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error")
+                    showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
                 }
                 resetPaginationAndReload();
                 setSelectedPdf(null);
             })
             .catch(() => {
                 showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
-            }).finally(() => setLoadingAnimation(false));
+            })
+            .finally(() => setLoadingAnimation(false));
     };
 
     const resetPaginationAndReload = () => {
         setPage(1);
         setHasMore(true);
         setPdfs([]);
-        setFilteredPdfs([])
+        setFilteredPdfs([]);
         loadPdfs(true);
     };
 
@@ -185,12 +200,12 @@ const CloudHomePage: React.FC = () => {
     };
 
     const handleRegisterUser = () => {
-        navigate(CLOUD_MANAGE_USERS_ROUTE)
+        navigate(CLOUD_MANAGE_USERS_ROUTE);
     };
 
     const handleMangePreferences = () => {
-        navigate(CLOUD_MANAGE_PREFERENCES_ROUTE)
-    }
+        navigate(CLOUD_MANAGE_PREFERENCES_ROUTE);
+    };
 
     const handleEditPdf = (pdf: PdfFile) => {
         setSelectedPdfForEdit(pdf);
@@ -199,40 +214,44 @@ const CloudHomePage: React.FC = () => {
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
         setLoadingAnimation(true);
-        updatePdf({currentUser: userName, pdfFile: updatedPdf}).then((res) => {
-            if (res && res.id === updatedPdf.id) {
-                setSelectedPdf(res);
-                const updatedPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
-                setPdfs(updatedPdfs);
-                setFilteredPdfs((prev) =>
-                    prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
-                );
-                updateLabels(updatedPdfs)
-                showToast("PDF \"" + res.fileName + "\" updated successfully.", "success");
-            } else {
-                showToast("Error updating PDF \"" + updatedPdf.fileName + "\"", "error");
-            }
-        }).finally(() => {
-            setLoading(false);
-            setLoadingAnimation(false);
-        });
+        updatePdf({currentUser: userName, pdfFile: updatedPdf})
+            .then((res) => {
+                if (res && res.id === updatedPdf.id) {
+                    setSelectedPdf(res);
+                    const updatedPdfs = pdfs.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf));
+                    setPdfs(updatedPdfs);
+                    setFilteredPdfs((prev) =>
+                        prev.map((pdf) => (pdf.id === updatedPdf.id ? updatedPdf : pdf))
+                    );
+                    updateLabels(updatedPdfs);
+                    showToast("PDF \"" + res.fileName + "\" updated successfully.", "success");
+                } else {
+                    showToast("Error updating PDF \"" + updatedPdf.fileName + "\"", "error");
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+                setLoadingAnimation(false);
+            });
     };
 
     const updateLabels = (pdfs: PdfFile[]) => {
         const labels = Array.from(new Set(pdfs.flatMap((pdf) => pdf.labels || [])));
         setAllLabels(labels);
-    }
+    };
 
-    const handleViewToggle = (_event: React.MouseEvent<HTMLElement>, newView: 'list' | 'gallery') => {
+    const handleViewToggle = (_event: React.MouseEvent<HTMLElement>, newView: "list" | "gallery") => {
         if (newView !== null) setViewMode(newView);
     };
 
     return (
-        <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
+        <Box sx={{display: "flex", height: "100vh", width: "100vw"}}>
             <CssBaseline/>
 
-            <AppBarHeader onMenuToggle={() => toggleDrawer(drawerPinned, setDrawerOpen, drawerOpen)}
-                          onLogoClick={() => navigate(CLOUD_ROUTE)}/>
+            <AppBarHeader
+                onMenuToggle={() => toggleDrawer(drawerPinned, setDrawerOpen, drawerOpen)}
+                onLogoClick={() => navigate(CLOUD_ROUTE)}
+            />
 
             <CloudDrawerMenu
                 open={drawerOpen}
@@ -259,7 +278,12 @@ const CloudHomePage: React.FC = () => {
                 <Toolbar/>
 
                 <Grid container spacing={2} sx={{height: "100%"}}>
-                    <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
+                    <Grid
+                        item
+                        xs={12}
+                        md={8}
+                        sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}
+                    >
                         <PDFSearchBar
                             onSearch={handleSearch}
                             onFileUpload={handleFileUpload}

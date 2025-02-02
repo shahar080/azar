@@ -2,7 +2,6 @@ import {Box, Button, ButtonBase, Container, Grid, Modal, Typography, useMediaQue
 import {GeneralMenu} from "../../shared/components/GeneralMenu.tsx";
 import {useEffect, useState} from "react";
 import PdfModal from "../components/PdfModal.tsx";
-import {useTheme} from "@mui/material/styles";
 import {LoginForm} from "../components/LoginForm.tsx";
 import {login} from "../../shared/store/authSlice.ts";
 import {useDispatch} from "react-redux";
@@ -12,6 +11,7 @@ import {WhoAmIData} from "../models/models.ts";
 import {useNavigate} from "react-router-dom";
 import {WHOAMI_MANAGE_CV_ROUTE} from "../../shared/utils/reactRoutes.ts";
 import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
+import {useTheme} from "@mui/material/styles";
 
 export function WhoAmIHomePage() {
     const [isShowPDF, setShowPDF] = useState(false);
@@ -74,7 +74,7 @@ export function WhoAmIHomePage() {
     return (
         <Box
             sx={{
-                backgroundColor: "#f7f7f7",
+                backgroundColor: "primary",
                 minHeight: "100vh",
                 overflow: "hidden",
                 width: "100vw",
@@ -157,8 +157,9 @@ export function WhoAmIHomePage() {
                                     variant="h6"
                                     gutterBottom
                                     sx={{
-                                        color: "#333",
+                                        color: "primary",
                                         fontSize: {xs: "1rem", sm: "1.25rem"},
+                                        fontWeight: "bold"
                                     }}
                                 >
                                     {whoAmIData?.mainContentFirstTitle}
@@ -167,7 +168,7 @@ export function WhoAmIHomePage() {
                                     <Typography
                                         paragraph
                                         sx={{
-                                            color: "#555",
+                                            color: "secondary",
                                             fontSize: {xs: "0.9rem", sm: "1rem"},
                                         }}
                                         key={line}
@@ -179,8 +180,9 @@ export function WhoAmIHomePage() {
                                     variant="h6"
                                     gutterBottom
                                     sx={{
-                                        color: "#333",
+                                        color: "primary",
                                         fontSize: {xs: "1rem", sm: "1.25rem"},
+                                        fontWeight: "bold",
                                     }}
                                 >
                                     {whoAmIData?.mainContentSecondTitle}
@@ -189,7 +191,7 @@ export function WhoAmIHomePage() {
                                     <Typography
                                         paragraph
                                         sx={{
-                                            color: "#555",
+                                            color: "secondary",
                                             fontSize: {xs: "0.9rem", sm: "1rem"},
                                         }}
                                         key={line}
@@ -211,6 +213,7 @@ export function WhoAmIHomePage() {
                                         },
                                         fontSize: {xs: "0.8rem", sm: "1rem"},
                                         padding: {xs: "6px 12px", sm: "8px 16px"},
+                                        fontWeight: "bold"
                                     }}
                                 >
                                     {whoAmIData?.cvButton}

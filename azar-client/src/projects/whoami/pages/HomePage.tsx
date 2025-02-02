@@ -16,6 +16,7 @@ import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
 export function WhoAmIHomePage() {
     const [isShowPDF, setShowPDF] = useState(false);
     const [showLoginForm, setShowLoginForm] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -48,14 +49,26 @@ export function WhoAmIHomePage() {
         return {top, left};
     }
 
-    useEffect(() => {
+    const fetchData = () => {
         setIsLoading(true);
+        setError(null);
+
         getWhoAmIData()
             .then(whoAmIDataRes => {
+                if (!whoAmIDataRes) {
+                    throw new Error("No data received.");
+                }
                 setWhoAmIData(whoAmIDataRes);
-                setIsLoading(false);
             })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+                setError("Failed to load data. Please try again.");
+            })
+            .finally(() => setIsLoading(false));
+    };
 
+    useEffect(() => {
+        fetchData();
     }, []);
 
     return (
@@ -108,128 +121,140 @@ export function WhoAmIHomePage() {
                 </Typography>
             </Box>
 
-            <Container sx={{mt: {xs: 2, sm: 4, md: 5}}}>
-                <Typography
-                    variant="h4"
-                    component="h2"
-                    align="center"
-                    gutterBottom
-                    sx={{
-                        color: "#28b485",
-                        fontWeight: "bold",
-                        fontSize: {xs: "1.5rem", sm: "2rem", md: "2.5rem"},
-                    }}
-                >
-                    {isLoading ? "Loading content..." : whoAmIData?.mainContentQuestion}
-                </Typography>
+            {error ?
+                <Box textAlign="center">
+                    <Typography color="error" variant="h6">
+                        {error}
+                    </Typography>
+                    <Button variant="contained" color="primary" onClick={fetchData} sx={{mt: 2}}>
+                        Retry
+                    </Button>
+                </Box>
+                :
 
-                {isLoading ?
-                    (
-                        <Typography color="textSecondary">Loading details...</Typography>
-                    ) :
-                    <Grid container spacing={4} alignItems="center">
-                        <Grid item xs={12} md={6}>
-                            <Typography
-                                variant="h6"
-                                gutterBottom
-                                sx={{
-                                    color: "#333",
-                                    fontSize: {xs: "1rem", sm: "1.25rem"},
-                                }}
-                            >
-                                {whoAmIData?.mainContentFirstTitle}
-                            </Typography>
-                            {whoAmIData?.mainContentFirstData.map((line) => (
-                                <Typography
-                                    paragraph
-                                    sx={{
-                                        color: "#555",
-                                        fontSize: {xs: "0.9rem", sm: "1rem"},
-                                    }}
-                                    key={line}
-                                >
-                                    {line}
-                                </Typography>
-                            ))}
-                            <Typography
-                                variant="h6"
-                                gutterBottom
-                                sx={{
-                                    color: "#333",
-                                    fontSize: {xs: "1rem", sm: "1.25rem"},
-                                }}
-                            >
-                                {whoAmIData?.mainContentSecondTitle}
-                            </Typography>
-                            {whoAmIData?.mainContentSecondData.map((line) => (
-                                <Typography
-                                    paragraph
-                                    sx={{
-                                        color: "#555",
-                                        fontSize: {xs: "0.9rem", sm: "1rem"},
-                                    }}
-                                    key={line}
-                                >
-                                    {line}
-                                </Typography>
-                            ))}
-                            <Button
-                                component={ButtonBase}
-                                variant="outlined"
-                                onClick={() => setShowPDF(true)}
-                                sx={{
-                                    mt: 2,
-                                    borderColor: "#28b485",
-                                    color: "#28b485",
-                                    "&:hover": {
-                                        backgroundColor: "#28b485",
-                                        color: "white",
-                                    },
-                                    fontSize: {xs: "0.8rem", sm: "1rem"},
-                                    padding: {xs: "6px 12px", sm: "8px 16px"},
-                                }}
-                            >
-                                {whoAmIData?.cvButton}
-                            </Button>
-                        </Grid>
+                <Container sx={{mt: {xs: 2, sm: 4, md: 5}}}>
+                    <Typography
+                        variant="h4"
+                        component="h2"
+                        align="center"
+                        gutterBottom
+                        sx={{
+                            color: "#28b485",
+                            fontWeight: "bold",
+                            fontSize: {xs: "1.5rem", sm: "2rem", md: "2.5rem"},
+                        }}
+                    >
+                        {isLoading ? "Loading content..." : whoAmIData?.mainContentQuestion}
+                    </Typography>
 
-                        <Grid item xs={12} md={6}>
-                            <Box
-                                sx={{
-                                    position: "relative",
-                                    width: "100%",
-                                    height: "300px",
-                                }}
-                            >
-                                {whoAmIData?.photos.map((photo, index) => {
-                                    const position = calculateDynamicPosition(index, whoAmIData.photos.length);
-                                    return (
-                                        <Box
-                                            key={index}
-                                            component="img"
-                                            src={`data:image/jpeg;base64,${photo}`}
-                                            alt={"photo"}
-                                            sx={{
-                                                position: "absolute",
-                                                ...position,
-                                                width: "45%",
-                                                boxShadow: 3,
-                                                borderRadius: 2,
-                                                transition: "all 0.2s",
-                                                zIndex: 1,
-                                                "&:hover": {
-                                                    transform: "scale(1.1)",
-                                                    zIndex: 10,
-                                                    boxShadow: 6,
-                                                },
-                                            }}
-                                        />
-                                    );
-                                })}
-                            </Box>
-                        </Grid>
-                    </Grid>}
-            </Container>
+                    {isLoading ?
+                        (
+                            <Typography color="textSecondary">Loading details...</Typography>
+                        ) :
+                        <Grid container spacing={4} alignItems="center">
+                            <Grid item xs={12} md={6}>
+                                <Typography
+                                    variant="h6"
+                                    gutterBottom
+                                    sx={{
+                                        color: "#333",
+                                        fontSize: {xs: "1rem", sm: "1.25rem"},
+                                    }}
+                                >
+                                    {whoAmIData?.mainContentFirstTitle}
+                                </Typography>
+                                {whoAmIData?.mainContentFirstData.map((line) => (
+                                    <Typography
+                                        paragraph
+                                        sx={{
+                                            color: "#555",
+                                            fontSize: {xs: "0.9rem", sm: "1rem"},
+                                        }}
+                                        key={line}
+                                    >
+                                        {line}
+                                    </Typography>
+                                ))}
+                                <Typography
+                                    variant="h6"
+                                    gutterBottom
+                                    sx={{
+                                        color: "#333",
+                                        fontSize: {xs: "1rem", sm: "1.25rem"},
+                                    }}
+                                >
+                                    {whoAmIData?.mainContentSecondTitle}
+                                </Typography>
+                                {whoAmIData?.mainContentSecondData.map((line) => (
+                                    <Typography
+                                        paragraph
+                                        sx={{
+                                            color: "#555",
+                                            fontSize: {xs: "0.9rem", sm: "1rem"},
+                                        }}
+                                        key={line}
+                                    >
+                                        {line}
+                                    </Typography>
+                                ))}
+                                <Button
+                                    component={ButtonBase}
+                                    variant="outlined"
+                                    onClick={() => setShowPDF(true)}
+                                    sx={{
+                                        mt: 2,
+                                        borderColor: "#28b485",
+                                        color: "#28b485",
+                                        "&:hover": {
+                                            backgroundColor: "#28b485",
+                                            color: "white",
+                                        },
+                                        fontSize: {xs: "0.8rem", sm: "1rem"},
+                                        padding: {xs: "6px 12px", sm: "8px 16px"},
+                                    }}
+                                >
+                                    {whoAmIData?.cvButton}
+                                </Button>
+                            </Grid>
+
+                            <Grid item xs={12} md={6}>
+                                <Box
+                                    sx={{
+                                        position: "relative",
+                                        width: "100%",
+                                        height: "300px",
+                                    }}
+                                >
+                                    {whoAmIData?.photos.map((photo, index) => {
+                                        const position = calculateDynamicPosition(index, whoAmIData.photos.length);
+                                        return (
+                                            <Box
+                                                key={index}
+                                                component="img"
+                                                src={`data:image/jpeg;base64,${photo}`}
+                                                alt={"photo"}
+                                                sx={{
+                                                    position: "absolute",
+                                                    ...position,
+                                                    width: "45%",
+                                                    boxShadow: 3,
+                                                    borderRadius: 2,
+                                                    transition: "all 0.2s",
+                                                    zIndex: 1,
+                                                    "&:hover": {
+                                                        transform: "scale(1.1)",
+                                                        zIndex: 10,
+                                                        boxShadow: 6,
+                                                    },
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                </Box>
+                            </Grid>
+                        </Grid>}
+                </Container>
+            }
             <Box
                 sx={{
                     display: "flex",

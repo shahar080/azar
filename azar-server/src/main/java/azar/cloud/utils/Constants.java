@@ -6,7 +6,6 @@ package azar.cloud.utils;
  **/
 public class Constants {
     /* General */
-    public static final String THUMBNAIL = "thumbnail:";
     public static final String OPS_PREFIX_STRING = "/ops";
 
     /* Preferences  */

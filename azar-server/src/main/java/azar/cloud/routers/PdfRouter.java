@@ -3,13 +3,14 @@ package azar.cloud.routers;
 import azar.cloud.dal.service.PdfFileService;
 import azar.cloud.entities.db.PdfFile;
 import azar.cloud.entities.requests.pdf.PdfUpdateRequest;
-import azar.cloud.utils.Constants;
+import azar.shared.cache.CacheKeys;
+import azar.shared.cache.CacheManager;
 import azar.shared.dal.service.UserService;
 import azar.shared.entities.requests.BaseRequest;
 import azar.shared.routers.BaseRouter;
-import azar.shared.utils.CacheManager;
 import azar.shared.utils.JsonManager;
 import azar.shared.utils.Utilities;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -20,6 +21,7 @@ import io.vertx.ext.web.handler.JWTAuthHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -95,7 +97,7 @@ public class PdfRouter extends BaseRouter {
                                                 savedPdfFile.setData(new byte[0]);
                                                 sendCreatedResponse(routingContext, jsonManager.toJson(savedPdfFile),
                                                         "File %s uploaded successfully by %s".formatted(savedPdfFile.getFileName(), userName));
-                                                cacheManager.put(Constants.THUMBNAIL + savedPdfFile.getId(), thumbnail);
+                                                cacheManager.put(CacheKeys.THUMBNAIL.formatted(savedPdfFile.getId()), jsonManager.toJson(thumbnail));
                                             })
                                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error saving %s, error: %s".formatted(fileUpload.fileName(), err.getMessage())));
                                 })
@@ -199,7 +201,9 @@ public class PdfRouter extends BaseRouter {
         if (isInvalidUsername(routingContext, currentUser)) return;
 
         String pdfId = routingContext.pathParam("id");
-        byte[] cachedThumbnail = cacheManager.get(Constants.THUMBNAIL + pdfId);
+
+        Type arrType = new TypeToken<byte[]>(){}.getType();
+        byte[] cachedThumbnail = jsonManager.fromJson(cacheManager.get(CacheKeys.THUMBNAIL.formatted(pdfId)), arrType);
 
         if (cachedThumbnail != null) {
             logger.info("Sending cached thumbnail for {}", pdfId);
@@ -208,7 +212,7 @@ public class PdfRouter extends BaseRouter {
             logger.info("Calculating thumbnail for {}", pdfId);
             pdfFileService.getThumbnailById(Integer.valueOf(pdfId))
                     .onSuccess(dbThumbnail -> {
-                        cacheManager.put(Constants.THUMBNAIL + pdfId, dbThumbnail);
+                        cacheManager.put(CacheKeys.THUMBNAIL.formatted(pdfId), jsonManager.toJson(dbThumbnail));
                         logger.info("Sending thumbnail for {}", pdfId);
                         sendOKImageResponse(routingContext, "Send thumbnail back to client", dbThumbnail);
                     })

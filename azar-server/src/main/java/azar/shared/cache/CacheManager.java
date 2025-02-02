@@ -1,4 +1,4 @@
-package azar.shared.utils;
+package azar.shared.cache;
 
 
 import com.google.common.cache.Cache;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class CacheManager {
 
-    private final Cache<String, byte[]> cache;
+    private final Cache<String, String> cache;
 
     @Inject
     public CacheManager() {
@@ -24,15 +24,16 @@ public class CacheManager {
                 .build();
     }
 
-    public void put(String key, byte[] value) {
+    public void put(String key, String value) {
         cache.put(key, value);
     }
 
-    public byte[] get(String key) {
+    public String get(String key) {
         return cache.getIfPresent(key);
     }
 
     public void remove(String key) {
         cache.invalidate(key);
     }
+
 }

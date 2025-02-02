@@ -8,24 +8,35 @@ import {
     Grid,
     IconButton,
     Tooltip,
-    Typography
+    Typography,
 } from "@mui/material";
 import {AccessTime, AvTimer, Delete, Refresh} from "@mui/icons-material";
 import {getByLatLong} from "../server/api/weatherApi";
 import {GetByLatLongResponse} from "../server/api/responses";
 import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
 import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
+import {getCardStyles} from "../utils/weatherStyles";
 
 interface WeatherCardProps {
     id: number;
     longitude: string;
     latitude: string;
     onDelete: (id: number) => void;
-    onShowExtendedView: (getByLatLongResponse: GetByLatLongResponse, is12Hour: boolean) => void;
+    onShowExtendedView: (
+        getByLatLongResponse: GetByLatLongResponse,
+        is12Hour: boolean
+    ) => void;
 }
 
-const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDelete, onShowExtendedView}) => {
-    const [getByLatLongResponse, setGetByLatLongResponse] = useState<GetByLatLongResponse | null>(null);
+const WeatherCard: React.FC<WeatherCardProps> = ({
+                                                     id,
+                                                     longitude,
+                                                     latitude,
+                                                     onDelete,
+                                                     onShowExtendedView,
+                                                 }) => {
+    const [getByLatLongResponse, setGetByLatLongResponse] =
+        useState<GetByLatLongResponse | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [hasError, setHasError] = useState<boolean>(false);
     const [localTime, setLocalTime] = useState<string>("");
@@ -55,8 +66,16 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
             .then((response) => {
                 setGetByLatLongResponse(response);
 
-                const sunriseDate = convertEpochToLocalTime(response.sys.sunrise, response.timezone, is12Hour);
-                const sunsetDate = convertEpochToLocalTime(response.sys.sunset, response.timezone, is12Hour);
+                const sunriseDate = convertEpochToLocalTime(
+                    response.sys.sunrise,
+                    response.timezone,
+                    is12Hour
+                );
+                const sunsetDate = convertEpochToLocalTime(
+                    response.sys.sunset,
+                    response.timezone,
+                    is12Hour
+                );
 
                 setSunriseTime(sunriseDate);
                 setSunsetTime(sunsetDate);
@@ -74,15 +93,26 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
 
         const updateTime = () => {
             const currentEpochTime = Math.floor(Date.now() / 1000);
-            ;
-            const localTime = convertEpochToLocalTime(currentEpochTime, getByLatLongResponse.timezone, is12Hour);
+            const localTime = convertEpochToLocalTime(
+                currentEpochTime,
+                getByLatLongResponse.timezone,
+                is12Hour
+            );
             setLocalTime(localTime);
         };
 
         updateTime();
 
-        const sunriseDate = convertEpochToLocalTime(getByLatLongResponse.sys.sunrise, getByLatLongResponse.timezone, is12Hour);
-        const sunsetDate = convertEpochToLocalTime(getByLatLongResponse.sys.sunset, getByLatLongResponse.timezone, is12Hour);
+        const sunriseDate = convertEpochToLocalTime(
+            getByLatLongResponse.sys.sunrise,
+            getByLatLongResponse.timezone,
+            is12Hour
+        );
+        const sunsetDate = convertEpochToLocalTime(
+            getByLatLongResponse.sys.sunset,
+            getByLatLongResponse.timezone,
+            is12Hour
+        );
         setSunriseTime(sunriseDate);
         setSunsetTime(sunsetDate);
 
@@ -132,7 +162,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                         zIndex: 10,
                         backgroundColor: "rgba(255, 255, 255, 0.7)",
                     }}
-                    onClick={() => setRetry(prev => !prev)}
+                    onClick={() => setRetry((prev) => !prev)}
                 >
                     <Refresh/>
                 </IconButton>
@@ -166,6 +196,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
 
     if (!getByLatLongResponse) return null;
 
+    const dynamicStyles = getCardStyles(getByLatLongResponse.weather[0].main);
+
     return (
         <>
             <GlobalStyles
@@ -185,6 +217,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                     justifyContent: "space-between",
                     position: "relative",
                     padding: "16px",
+                    backgroundColor: dynamicStyles.backgroundColor,
+                    color: dynamicStyles.color,
                 }}
             >
                 <IconButton
@@ -215,7 +249,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                                 {getWeatherIcon(getByLatLongResponse.weather[0].main)}
                             </Grid>
                             <Grid item xs={10}>
-                                <Tooltip title={`${getByLatLongResponse.name}, ${getByLatLongResponse.sys.country}`}>
+                                <Tooltip
+                                    title={`${getByLatLongResponse.name}, ${getByLatLongResponse.sys.country}`}
+                                >
                                     <Typography paddingLeft={"1vw"} variant="h5" noWrap>
                                         {getByLatLongResponse.name}
                                     </Typography>
@@ -234,10 +270,16 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                     <Box sx={{textAlign: "center"}}>
                         <Grid container spacing={1} alignItems="center" justifyContent="center">
                             <Grid item>
-                                <Tooltip title={`Click me to switch to ${is12Hour ? "24 hours" : "12 hours"} format`}>
-                                    {is12Hour ?
-                                        <AccessTime sx={{fontSize: "1.6rem"}} onClick={() => switchClockTime()}/>
-                                        : <AvTimer sx={{fontSize: "1.6rem"}} onClick={() => switchClockTime()}/>}
+                                <Tooltip
+                                    title={`Click me to switch to ${
+                                        is12Hour ? "24 hours" : "12 hours"
+                                    } format`}
+                                >
+                                    {is12Hour ? (
+                                        <AccessTime sx={{fontSize: "1.6rem"}} onClick={switchClockTime}/>
+                                    ) : (
+                                        <AvTimer sx={{fontSize: "1.6rem"}} onClick={switchClockTime}/>
+                                    )}
                                 </Tooltip>
                             </Grid>
                             <Grid item>
@@ -247,9 +289,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({id, longitude, latitude, onDel
                             </Grid>
                         </Grid>
 
-                        <Typography variant="h5">
-                            {localTime || "Loading..."}
-                        </Typography>
+                        <Typography variant="h5">{localTime || "Loading..."}</Typography>
 
                         <Typography paddingTop={"1vw"} textAlign={"left"} variant="body1">
                             Sunrise: {sunriseTime}

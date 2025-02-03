@@ -44,3 +44,31 @@ export interface DBWeatherLocation {
     latitude: string;
     longitude: string;
 }
+
+export interface ForecastCity {
+    id: number;
+    name: string;
+    coord: LatLongCoord;
+    country: string;
+    population: number;
+    timezone: number;
+    sunrise: number;
+    sunset: number;
+}
+
+export interface Coordinates {
+    latitude: string;
+    longitude: string;
+}
+
+export enum Locale {
+    LITTLE_ENDIAN = "en-GB", // Day/Month/Year
+    MIDDLE_ENDIAN = "en-US", // Month/Day/Year
+    BIG_ENDIAN = "ja-JP", // Year/Month/Day
+}
+
+export enum Endian {
+    LITTLE = "Little endian",
+    MIDDLE = "Middle endian",
+    BIG = "Big endian",
+}

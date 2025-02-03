@@ -13,9 +13,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LatLongWeatherObject {
-    private Integer id;
-    private String main;
-    private String description;
-    private String icon;
+public class OWMLatLongSys {
+    private String country;
+    private Long sunrise;
+    private Long sunset;
 }

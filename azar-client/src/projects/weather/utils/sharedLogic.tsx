@@ -1,4 +1,5 @@
 import {Cloud, Grain, Thunderstorm, WbSunny} from "@mui/icons-material";
+import {Endian, Locale} from "../models/models.ts";
 
 export const getWeatherIcon = (main: string) => {
     switch (main) {
@@ -17,17 +18,41 @@ export const getWeatherIcon = (main: string) => {
 
 export const convertEpochToLocalTime = (epoch: number, timezoneOffset: number, to12Hour: boolean): string => {
     const utcDate = new Date(epoch * 1000);
+    const localDate = new Date(utcDate.getTime() + timezoneOffset * 1000);
 
-    // Manually apply timezone offset
-    const localHours = (utcDate.getUTCHours() + timezoneOffset / 3600) % 24;
-    const minutes = utcDate.getUTCMinutes();
-    const seconds = utcDate.getUTCSeconds();
+    const hours = localDate.getHours();
+    const minutes = localDate.getMinutes();
+    const seconds = localDate.getSeconds();
 
     if (to12Hour) {
-        const amPm = localHours >= 12 ? "PM" : "AM";
-        const formattedHours = localHours % 12 || 12;
+        const amPm = hours >= 12 ? "PM" : "AM";
+        const formattedHours = hours % 12 || 12;
         return `${formattedHours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")} ${amPm}`;
     } else {
-        return `${localHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
     }
 };
+
+
+export const convertEpochToLocalDate = (epoch: number, timezoneOffset: number, locale: Locale | undefined): string => {
+    const date = new Date((epoch + timezoneOffset) * 1000);
+
+    return new Intl.DateTimeFormat(locale?.toString() || "he-IL", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).format(date);
+};
+
+export function getEndianFromLocale(locale: Locale): Endian {
+    switch (locale) {
+        case Locale.LITTLE_ENDIAN:
+            return Endian.LITTLE;
+        case Locale.MIDDLE_ENDIAN:
+            return Endian.MIDDLE;
+        case Locale.BIG_ENDIAN:
+            return Endian.BIG;
+        default:
+            return Endian.LITTLE;
+    }
+}

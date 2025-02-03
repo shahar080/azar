@@ -3,17 +3,19 @@ import {Box, GlobalStyles, Grid, Typography} from "@mui/material";
 import WeatherCard from "../components/WeatherCard";
 import {GeneralMenu} from "../../shared/components/GeneralMenu.tsx";
 import {WEATHER_LOCATIONS_STRING} from "../utils/constants.ts";
-import {DBWeatherLocation} from "../models/models.ts";
+import {Coordinates, DBWeatherLocation} from "../models/models.ts";
 import LocalStorageManager from "../../shared/utils/LocalStorageManager.ts";
 import AddWeatherCard from "../components/AddWeatherCard.tsx";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
-import {GetByLatLongResponse} from "../server/api/responses.ts";
+import {WeatherLatLongResponse} from "../server/api/responses.ts";
 import ExtendedWeatherInfo from "../components/ExtendedWeatherInfo.tsx";
+import ForecastInfo from "../components/ForecastInfo.tsx";
 
 export function WeatherHomePage() {
     const [locations, setLocations] = useState<DBWeatherLocation[]>([]);
-    const [extendedViewData, setExtendedViewData] = useState<GetByLatLongResponse | null>(null);
+    const [extendedViewData, setExtendedViewData] = useState<WeatherLatLongResponse | null>(null);
+    const [forecastData, setForecastData] = useState<Coordinates | null>(null);
     const [is12Hour, setIs12Hour] = useState<boolean>(true);
     const {showToast} = useToast();
 
@@ -136,6 +138,10 @@ export function WeatherHomePage() {
                                             setExtendedViewData(getByLatLongResponse);
                                             setIs12Hour(is12HourRes);
                                         }}
+                                        onShowForecast={(latitude, longitude, is12HourRes) => {
+                                            setForecastData({latitude: latitude, longitude: longitude});
+                                            setIs12Hour(is12HourRes);
+                                        }}
                                     />
                                 </Grid>
                             ))}
@@ -164,6 +170,14 @@ export function WeatherHomePage() {
                         extendedViewData={extendedViewData}
                         is12Hour={is12Hour}
                         onClose={() => setExtendedViewData(null)}
+                    />
+                }
+                {forecastData !== null &&
+                    <ForecastInfo
+                        latitude={forecastData.latitude}
+                        longitude={forecastData.longitude}
+                        is12Hour={is12Hour}
+                        onClose={() => setForecastData(null)}
                     />
                 }
             </Box>

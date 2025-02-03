@@ -47,7 +47,7 @@ public class WeatherCityService extends GenericService<WeatherCity> {
         return weatherCityDao.removeById(id);
     }
 
-    public Future<List<WeatherCity>> getByUserInput(String userInput) {
+    public Future<List<WeatherCity>> citiesByUserInput(String userInput) {
         return weatherCityDao.getByUserInput(userInput);
     }
 

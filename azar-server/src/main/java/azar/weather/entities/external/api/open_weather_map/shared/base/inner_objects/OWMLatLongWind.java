@@ -1,4 +1,4 @@
-package azar.weather.entities.requests;
+package azar.weather.entities.external.api.open_weather_map.shared.base.inner_objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetByLatLongRequest {
-    private double latitude;
-    private double longitude;
+public class OWMLatLongWind {
+    private Double speed;
+    private Integer deg;
+    private Double gust;
 }

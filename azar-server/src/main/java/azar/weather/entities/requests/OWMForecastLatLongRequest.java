@@ -7,12 +7,13 @@ import lombok.Setter;
 
 /**
  * Author: Shahar Azar
- * Date:   29/01/2025
+ * Date:   03/02/2025
  **/
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetCitiesByInputRequest {
-    private String input;
+public class OWMForecastLatLongRequest {
+    private double latitude;
+    private double longitude;
 }

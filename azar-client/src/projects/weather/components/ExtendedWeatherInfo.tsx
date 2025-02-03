@@ -1,12 +1,12 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Box, Button, Grid, Modal, Typography} from "@mui/material";
-import {GetByLatLongResponse} from "../server/api/responses.ts";
+import {WeatherLatLongResponse} from "../server/api/responses.ts";
 import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
 import {getCardStyles} from "../utils/weatherStyles.ts";
 import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 
 interface ExtendedWeatherInfoProps {
-    extendedViewData: GetByLatLongResponse;
+    extendedViewData: WeatherLatLongResponse;
     is12Hour: boolean;
     onClose: () => void;
 }

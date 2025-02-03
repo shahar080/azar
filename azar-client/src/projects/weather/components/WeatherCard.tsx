@@ -10,9 +10,9 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import {AccessTime, AvTimer, Delete, Refresh} from "@mui/icons-material";
-import {getByLatLong} from "../server/api/weatherApi";
-import {GetByLatLongResponse} from "../server/api/responses";
+import {AccessTime, AvTimer, CalendarMonth, Delete, Refresh} from "@mui/icons-material";
+import {getWeatherByLatLong} from "../server/api/weatherApi";
+import {WeatherLatLongResponse} from "../server/api/responses";
 import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
 import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
 import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
@@ -24,9 +24,10 @@ interface WeatherCardProps {
     latitude: string;
     onDelete: (id: number) => void;
     onShowExtendedView: (
-        getByLatLongResponse: GetByLatLongResponse,
+        getByLatLongResponse: WeatherLatLongResponse,
         is12Hour: boolean
     ) => void;
+    onShowForecast: (latitude: string, longitude: string, is12Hour: boolean) => void;
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({
@@ -35,9 +36,10 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                                                      latitude,
                                                      onDelete,
                                                      onShowExtendedView,
+                                                     onShowForecast
                                                  }) => {
     const [getByLatLongResponse, setGetByLatLongResponse] =
-        useState<GetByLatLongResponse | null>(null);
+        useState<WeatherLatLongResponse | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [hasError, setHasError] = useState<boolean>(false);
     const [localTime, setLocalTime] = useState<string>("");
@@ -65,7 +67,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
         setIsLoading(true);
         setHasError(false);
 
-        getByLatLong({latitude, longitude})
+        getWeatherByLatLong({latitude, longitude})
             .then((response) => {
                 setGetByLatLongResponse(response);
 
@@ -255,6 +257,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                             <Grid item xs={10}>
                                 <Tooltip
                                     title={`${getByLatLongResponse.name}, ${getByLatLongResponse.sys.country}`}
+                                    componentsProps={{
+                                        tooltip: {
+                                            sx: {
+                                                bgcolor: 'primary.main',
+                                                fontSize: '1rem',
+                                            },
+                                        },
+                                    }}
                                 >
                                     <Typography paddingLeft={"1vw"} variant="h5" noWrap>
                                         {getByLatLongResponse.name}
@@ -278,6 +288,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                                     title={`Click me to switch to ${
                                         is12Hour ? "24 hours" : "12 hours"
                                     } format`}
+                                    componentsProps={{
+                                        tooltip: {
+                                            sx: {
+                                                bgcolor: 'primary.main',
+                                                fontSize: '1rem',
+                                            },
+                                        },
+                                    }}
                                 >
                                     {is12Hour ? (
                                         <AccessTime sx={{fontSize: "1.6rem"}} onClick={switchClockTime}/>
@@ -305,7 +323,16 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
 
                     {/* Footer Section */}
                     <Box sx={{textAlign: "center", mt: "auto"}}>
-                        <Tooltip title={"Click me for further information"}>
+                        <Tooltip title={"Click me for further information"}
+                                 componentsProps={{
+                                     tooltip: {
+                                         sx: {
+                                             bgcolor: 'primary.main',
+                                             fontSize: '1rem',
+                                         },
+                                     },
+                                 }}
+                        >
                             <Typography
                                 variant="h6"
                                 sx={{
@@ -319,6 +346,29 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                             >
                                 → {getByLatLongResponse.sys.country} ←
                             </Typography>
+                        </Tooltip>
+                        <Tooltip title={"Click me for forecast"}
+                                 componentsProps={{
+                                     tooltip: {
+                                         sx: {
+                                             bgcolor: 'primary.main',
+                                             fontSize: '1rem',
+                                         },
+                                     },
+                                 }}
+                        >
+                            <IconButton
+                                sx={{
+                                    position: "absolute",
+                                    top: "8px",
+                                    left: "8px",
+                                    zIndex: 10,
+                                    backgroundColor: 'transparent',
+                                }}
+                                onClick={() => onShowForecast(latitude, longitude, is12Hour)}
+                            >
+                                <CalendarMonth/>
+                            </IconButton>
                         </Tooltip>
                     </Box>
                 </CardContent>

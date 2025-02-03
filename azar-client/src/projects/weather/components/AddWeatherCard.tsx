@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import {LocationOn} from "@mui/icons-material";
 import {DBWeatherLocation} from "../models/models.ts";
-import {getByLatLong, getCitiesByInput} from "../server/api/weatherApi.ts";
+import {getCitiesByInput, getWeatherByLatLong} from "../server/api/weatherApi.ts";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
 
 interface AddWeatherCardProps {
@@ -67,7 +67,7 @@ const AddWeatherCard: React.FC<AddWeatherCardProps> = ({addLocationByObj}) => {
     };
 
     const addLocationByLatLong = async (latitude: string, longitude: string) => {
-        getByLatLong({latitude: latitude, longitude: longitude})
+        getWeatherByLatLong({latitude: latitude, longitude: longitude})
             .then(getByLatLongResponse => {
                 const dbWeatherLocation: DBWeatherLocation = {
                     id: Date.now(),

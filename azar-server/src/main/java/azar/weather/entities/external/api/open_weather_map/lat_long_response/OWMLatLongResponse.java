@@ -1,12 +1,12 @@
 package azar.weather.entities.external.api.open_weather_map.lat_long_response;
 
+import azar.weather.entities.external.api.open_weather_map.shared.base.OWMBaseResponse;
 import azar.weather.entities.external.api.open_weather_map.lat_long_response.inner_objects.*;
+import azar.weather.entities.external.api.open_weather_map.shared.base.OWMLatLongCoord;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * Author: Shahar Azar
@@ -16,16 +16,10 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LatLongResponse {
-    private LatLongCoord coord;
-    private List<LatLongWeatherObject> weather;
+public class OWMLatLongResponse extends OWMBaseResponse {
+    private OWMLatLongCoord coord;
     private String base;
-    private LatLongMain main;
-    private Integer visibility;
-    private LatLongWind wind;
-    private LatLongClouds clouds;
-    private Long dt;
-    private LatLongSys sys;
+    private OWMLatLongSys sys;
     private Integer timezone;
     private Integer id;
     private String name;

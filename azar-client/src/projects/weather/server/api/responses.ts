@@ -1,4 +1,5 @@
 import {
+    ForecastCity,
     LatLongClouds,
     LatLongCoord,
     LatLongMain,
@@ -7,18 +8,29 @@ import {
     LatLongWind
 } from "../../models/models.ts";
 
-export interface GetByLatLongResponse {
-    coord: LatLongCoord;
+interface BaseResponse {
     weather: LatLongWeatherObject[];
-    base: string;
     main: LatLongMain;
     visibility: number;
     wind: LatLongWind;
     clouds: LatLongClouds;
     dt: number;
+}
+
+export interface WeatherLatLongResponse extends BaseResponse {
+    coord: LatLongCoord;
+    base: string;
     sys: LatLongSys;
     timezone: number;
     id: number;
     name: string;
     cod: number;
+}
+
+export interface ForecastLatLongResponse {
+    cod: number;
+    message: string;
+    cnt: number;
+    list: BaseResponse[];
+    city: ForecastCity;
 }

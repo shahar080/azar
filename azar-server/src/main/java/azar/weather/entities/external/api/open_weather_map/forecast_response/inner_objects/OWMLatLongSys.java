@@ -1,4 +1,4 @@
-package azar.weather.entities.external.api.open_weather_map.lat_long_response.inner_objects;
+package azar.weather.entities.external.api.open_weather_map.forecast_response.inner_objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,8 +13,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LatLongWind {
-    private Double speed;
-    private Integer deg;
-    private Double gust;
+public class OWMLatLongSys {
+    private String country;
+    private Long sunrise;
+    private Long sunset;
 }

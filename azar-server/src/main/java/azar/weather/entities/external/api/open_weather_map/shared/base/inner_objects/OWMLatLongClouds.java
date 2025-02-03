@@ -1,4 +1,4 @@
-package azar.weather.entities.external.api.open_weather_map.lat_long_response.inner_objects;
+package azar.weather.entities.external.api.open_weather_map.shared.base.inner_objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +13,6 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LatLongClouds {
+public class OWMLatLongClouds {
     private Integer all;
 }

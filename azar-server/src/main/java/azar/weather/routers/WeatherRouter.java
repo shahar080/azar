@@ -3,8 +3,9 @@ package azar.weather.routers;
 import azar.shared.routers.BaseRouter;
 import azar.shared.utils.JsonManager;
 import azar.weather.dal.service.WeatherCityService;
-import azar.weather.entities.requests.GetByLatLongRequest;
-import azar.weather.entities.requests.GetCitiesByInputRequest;
+import azar.weather.entities.requests.OWMForecastLatLongRequest;
+import azar.weather.entities.requests.OWMCitiesByInputRequest;
+import azar.weather.entities.requests.OWMWeatherLatLongRequest;
 import azar.weather.managers.WeatherManager;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
@@ -35,28 +36,40 @@ public class WeatherRouter extends BaseRouter {
     public Router create(Vertx vertx) {
         Router weatherRouter = Router.router(vertx);
 
-        weatherRouter.post("/getByLatLong").handler(this::handleGet);
-        weatherRouter.post("/getCitiesByInput").handler(this::getCitiesByInput);
+        weatherRouter.post("/weatherByLatLong").handler(this::weatherByLatLong);
+        weatherRouter.post("/getCitiesByInput").handler(this::citiesByInput);
+        weatherRouter.post("/forecastByLatLong").handler(this::forecastByLatLong);
 
         return weatherRouter;
     }
 
-    private void handleGet(RoutingContext routingContext) {
-        GetByLatLongRequest getByLatLongRequest = jsonManager.fromJson(routingContext.body().asString(), GetByLatLongRequest.class);
-        double latitude = getByLatLongRequest.getLatitude();
-        double longitude = getByLatLongRequest.getLongitude();
+    private void weatherByLatLong(RoutingContext routingContext) {
+        OWMWeatherLatLongRequest OWMWeatherLatLongRequest = jsonManager.fromJson(routingContext.body().asString(), OWMWeatherLatLongRequest.class);
+        double latitude = OWMWeatherLatLongRequest.getLatitude();
+        double longitude = OWMWeatherLatLongRequest.getLongitude();
 
-        weatherManager.getUsingLatLong(latitude, longitude)
+        weatherManager.weatherUsingLatLong(latitude, longitude)
                 .onSuccess(latLongResponse -> sendOKResponse(routingContext, jsonManager.toJson(latLongResponse), "Send Weather back to user for lat(%s), long(%s)".formatted(latitude, longitude)))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting weather data, error: %s".formatted(err.getMessage())));
     }
 
-    private void getCitiesByInput(RoutingContext routingContext) {
-        GetCitiesByInputRequest getCitiesByInputRequest = jsonManager.fromJson(routingContext.body().asString(), GetCitiesByInputRequest.class);
-        String input = getCitiesByInputRequest.getInput();
-        weatherCityService.getByUserInput(input)
+    private void citiesByInput(RoutingContext routingContext) {
+        OWMCitiesByInputRequest OWMCitiesByInputRequest = jsonManager.fromJson(routingContext.body().asString(), OWMCitiesByInputRequest.class);
+        String input = OWMCitiesByInputRequest.getInput();
+        weatherCityService.citiesByUserInput(input)
                 .onSuccess(weatherCities -> sendOKResponse(routingContext, jsonManager.toJson(weatherCities), "Send Weather cities to user for userInput(%s)".formatted(input)))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting weather cities, error: %s".formatted(err.getMessage())));
+    }
+
+    private void forecastByLatLong(RoutingContext routingContext) {
+        OWMForecastLatLongRequest owmForecastLatLongRequest = jsonManager.fromJson(routingContext.body().asString(), OWMForecastLatLongRequest.class);
+        double latitude = owmForecastLatLongRequest.getLatitude();
+        double longitude = owmForecastLatLongRequest.getLongitude();
+
+        weatherManager.forecastUsingLatLong(latitude, longitude)
+                .onSuccess(forecastResponse -> sendOKResponse(routingContext, jsonManager.toJson(forecastResponse), "Send Forecast back to user for lat(%s), long(%s)".formatted(latitude, longitude)))
+                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting forecast data, error: %s".formatted(err.getMessage())));
+
     }
 
 }

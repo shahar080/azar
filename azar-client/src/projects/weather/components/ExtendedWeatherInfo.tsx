@@ -34,13 +34,14 @@ const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewDa
                     left: "50%",
                     transform: "translate(-50%, -50%)",
                     padding: "2rem",
-                    borderRadius: "12px",
+                    borderRadius: "2vw",
                     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)",
                     backgroundColor: dynamicStyles.backgroundColor,
                     color: dynamicStyles.color,
                     maxWidth: "600px",
                     width: "90%",
                     textAlign: "center",
+                    outline: "none",
                 }}
             >
                 <Typography variant="h4" sx={{marginBottom: "1rem", fontWeight: "bold"}}>

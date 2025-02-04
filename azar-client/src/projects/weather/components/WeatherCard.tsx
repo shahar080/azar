@@ -47,6 +47,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
     const [sunriseTime, setSunriseTime] = useState<string>("");
     const [sunsetTime, setSunsetTime] = useState<string>("");
     const [retry, setRetry] = useState<boolean>(false);
+    const systemOffsetSeconds = new Date().getTimezoneOffset() * 60;
 
     const {mode} = useContext(ThemeModeContext);
 
@@ -100,7 +101,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
             const currentEpochTime = Math.floor(Date.now() / 1000);
             const localTime = convertEpochToLocalTime(
                 currentEpochTime,
-                getByLatLongResponse.timezone,
+                getByLatLongResponse.timezone + systemOffsetSeconds,
                 is12Hour
             );
             setLocalTime(localTime);
@@ -183,19 +184,29 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                     Couldn't load weather data...
                 </Typography>
 
-                <IconButton
-                    disableRipple  // Disable the ripple effect
-                    sx={{
-                        position: "absolute",
-                        top: "8px",
-                        right: "8px",
-                        zIndex: 10,
-                        backgroundColor: 'transparent',
-                    }}
-                    onClick={() => onDelete(id)}
+                <Tooltip title={"Click me to remove this card"}
+                         componentsProps={{
+                             tooltip: {
+                                 sx: {
+                                     bgcolor: 'primary.main',
+                                     fontSize: '1rem',
+                                 },
+                             },
+                         }}
                 >
-                    <Delete/>
-                </IconButton>
+                    <IconButton
+                        sx={{
+                            position: "absolute",
+                            top: "8px",
+                            right: "8px",
+                            zIndex: 10,
+                            backgroundColor: 'transparent',
+                        }}
+                        onClick={() => onDelete(id)}
+                    >
+                        <Delete/>
+                    </IconButton>
+                </Tooltip>
             </Card>
         );
     }
@@ -227,18 +238,29 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                     color: dynamicStyles.color,
                 }}
             >
-                <IconButton
-                    sx={{
-                        position: "absolute",
-                        top: "8px",
-                        right: "8px",
-                        zIndex: 10,
-                        backgroundColor: 'transparent',
-                    }}
-                    onClick={() => onDelete(id)}
+                <Tooltip title={"Click me to remove this card"}
+                         componentsProps={{
+                             tooltip: {
+                                 sx: {
+                                     bgcolor: 'primary.main',
+                                     fontSize: '1rem',
+                                 },
+                             },
+                         }}
                 >
-                    <Delete/>
-                </IconButton>
+                    <IconButton
+                        sx={{
+                            position: "absolute",
+                            top: "8px",
+                            right: "8px",
+                            zIndex: 10,
+                            backgroundColor: 'transparent',
+                        }}
+                        onClick={() => onDelete(id)}
+                    >
+                        <Delete/>
+                    </IconButton>
+                </Tooltip>
 
                 <CardContent
                     sx={{

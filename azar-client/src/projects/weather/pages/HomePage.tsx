@@ -10,7 +10,7 @@ import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
 import {WeatherLatLongResponse} from "../server/api/responses.ts";
 import ExtendedWeatherInfo from "../components/ExtendedWeatherInfo.tsx";
-import ForecastInfo from "../components/ForecastInfo.tsx";
+import ForecastInfo from "../components/forecast/ForecastInfo.tsx";
 
 export function WeatherHomePage() {
     const [locations, setLocations] = useState<DBWeatherLocation[]>([]);

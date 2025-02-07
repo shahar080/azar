@@ -37,12 +37,20 @@ export const convertEpochToLocalTime = (epoch: number, timezoneOffset: number, t
 export const convertEpochToLocalDate = (epoch: number, timezoneOffset: number, locale: Locale | undefined): string => {
     const date = new Date((epoch + timezoneOffset) * 1000);
 
-    return new Intl.DateTimeFormat(locale?.toString() || "he-IL", {
+    return new Intl.DateTimeFormat(locale?.toString() || "en-GB", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit"
     }).format(date);
 };
+
+export const formatEpoch = (dt: number, is12Hour: boolean): string =>
+    new Date(dt * 1000)
+        .toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: is12Hour,
+        })
 
 export function getEndianFromLocale(locale: Locale): Endian {
     switch (locale) {
@@ -56,3 +64,14 @@ export function getEndianFromLocale(locale: Locale): Endian {
             return Endian.LITTLE;
     }
 }
+
+export const isEpochToday = (epoch: number): boolean => {
+    const date = new Date(epoch * 1000);
+    const today = new Date();
+
+    return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+    );
+};

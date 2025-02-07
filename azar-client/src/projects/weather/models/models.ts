@@ -72,3 +72,18 @@ export enum Endian {
     MIDDLE = "Middle endian",
     BIG = "Big endian",
 }
+
+export enum AvailableCharts {
+    TEMPERATURE_CHART = "Temperature",
+    HUMIDITY_CHART = "Humidity",
+    WIND_CHART = "Wind",
+    CLOUD_COVER_CHART = "Cloud Cover",
+    PRESSURE_CHART = "Pressure",
+    LEVELS_CHART = "Levels",
+}
+
+export interface Series {
+    label: string;
+    data: (number | null)[];
+    color: string;
+}

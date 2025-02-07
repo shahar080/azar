@@ -8,7 +8,7 @@ import {
     LatLongWind
 } from "../../models/models.ts";
 
-interface BaseResponse {
+export interface BaseResponse {
     weather: LatLongWeatherObject[];
     main: LatLongMain;
     visibility: number;

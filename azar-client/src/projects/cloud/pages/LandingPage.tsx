@@ -39,10 +39,12 @@ const CloudLandingPage: React.FC = () => {
                 width: "100vw",
                 textAlign: "center",
                 color: "#fff",
-                backgroundImage: `
-            linear-gradient(rgba(40, 180, 133, 0.1), rgba(28, 145, 74, 0.3)),
-            url(${bgImage})
-        `,
+                background: (theme) => `
+                        ${theme.palette.mode === "dark" ?
+                    "linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 70%, black)" :
+                    "linear-gradient(rgba(40, 180, 133, 0.1), rgba(28, 145, 74, 0.3))"},
+                    url(${bgImage})
+                    `,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",

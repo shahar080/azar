@@ -61,13 +61,14 @@ export function WeatherHomePage() {
                 }}
             >
                 <GeneralMenu zIndex={5}/>
-                {/* Top */}
                 <Box
                     sx={{
                         height: "82vh",
                         width: "100%",
-                        background: `
-                        linear-gradient(to bottom, rgba(255, 255, 255, 0) 70%, white),
+                        background: (theme) => `
+                        ${theme.palette.mode === "dark" ?
+                            "linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 70%, black)" :
+                            "linear-gradient(to bottom, rgba(255, 255, 255, 0) 70%, white)"},
                         url('/weather_bg.webp')
                     `,
                         backgroundSize: "cover",
@@ -101,10 +102,12 @@ export function WeatherHomePage() {
                 <Box
                     sx={{
                         width: "100%",
-                        backgroundColor: "white",
+                        backgroundColor: (theme) =>
+                            theme.palette.mode === "dark" ? "rgba(0, 0, 0, 0.7)" : "white",
                         position: "relative",
                         zIndex: 2,
                         minHeight: "18vh",
+                        transition: "background-color 0.3s ease",
                     }}
                 >
                     <Box

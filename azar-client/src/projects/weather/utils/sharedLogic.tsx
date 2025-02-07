@@ -75,3 +75,18 @@ export const isEpochToday = (epoch: number): boolean => {
         date.getFullYear() === today.getFullYear()
     );
 };
+
+export const getTemperatureAsString = (temp: number, isCelsius: boolean) => {
+    if (isCelsius) {
+        return `${Math.floor(temp)}°C`;
+    }
+    const asFahrenheit = (temp * 1.8) + 32;
+    return `${Math.floor(asFahrenheit)}°F`;
+}
+
+export const getTemperature = (temp: number, isCelsius: boolean) => {
+    if (isCelsius) {
+        return temp;
+    }
+    return (temp * 1.8) + 32;
+}

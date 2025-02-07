@@ -1,9 +1,10 @@
 import {Box, Button, Grid, IconButton, Tooltip, Typography} from "@mui/material";
-import {Language} from "@mui/icons-material";
+import {DeviceThermostat, Language} from "@mui/icons-material";
 import {
     convertEpochToLocalDate,
     convertEpochToLocalTime,
     getEndianFromLocale,
+    getTemperatureAsString,
     getWeatherIcon
 } from "../../utils/sharedLogic.tsx";
 import React, {forwardRef, useContext, useEffect, useImperativeHandle, useState} from "react";
@@ -16,14 +17,15 @@ import {BaseForecastInfoChildProps} from "./ForecastInfo.tsx";
 const ForecastDashboard = forwardRef<ForecastChildComponentHandle, BaseForecastInfoChildProps>
 ((props, ref) => {
     const {
-        forecastLatLongResponse, onClose, is12HourInitial, setIsLeftArrowDisabled, setIsRightArrowDisabled,
-        setLeftArrowTooltip, setRightArrowTooltip
+        forecastLatLongResponse, onClose, is12HourInitial, isCelsiusInitial, setIsLeftArrowDisabled,
+        setIsRightArrowDisabled, setLeftArrowTooltip, setRightArrowTooltip
     } = props;
 
         const [index, setIndex] = useState(0);
         const [dt, setDT] = useState<string>("");
         const [locale, setLocale] = useState<Locale>(Locale.LITTLE_ENDIAN);
         const [localeTooltip, setLocaleTooltip] = useState<string>(`Click me to switch to ${Endian.MIDDLE} format`);
+    const [isCelsius, setIsCelsius] = useState<boolean>(isCelsiusInitial);
         const {mode} = useContext(ThemeModeContext);
 
         const updateTime = (updatedIndex: number) => {
@@ -123,6 +125,19 @@ const ForecastDashboard = forwardRef<ForecastChildComponentHandle, BaseForecastI
 
                 <Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
                     <Tooltip
+                        title={`${isCelsius ? "Click me to switch to Fahrenheit" : "Click me to switch to Celsius"}`}
+                        disableInteractive
+                        componentsProps={{
+                            tooltip: {
+                                sx: {bgcolor: "primary.main", fontSize: "1rem"},
+                            },
+                        }}
+                    >
+                        <IconButton onClick={() => setIsCelsius(prev => !prev)} sx={{color: dynamicStyles.color}}>
+                            <DeviceThermostat fontSize="medium"/>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip
                         title={localeTooltip}
                         disableInteractive
                         componentsProps={{
@@ -153,19 +168,19 @@ const ForecastDashboard = forwardRef<ForecastChildComponentHandle, BaseForecastI
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <Typography variant="body1">
-                            <strong>Temperature:</strong> {Math.floor(forecastLatLongResponse.list[index].main.temp)}°C
+                            <strong>Temperature:</strong> {getTemperatureAsString(forecastLatLongResponse.list[index].main.temp, isCelsius)}
                         </Typography>
                         <Typography variant="body1">
                             <strong>Feels
-                                Like:</strong> {Math.floor(forecastLatLongResponse.list[index].main.feels_like)}°C
+                                Like:</strong> {getTemperatureAsString(forecastLatLongResponse.list[index].main.feels_like, isCelsius)}
                         </Typography>
                         <Typography variant="body1">
                             <strong>Min
-                                Temp:</strong> {Math.floor(forecastLatLongResponse.list[index].main.temp_min)}°C
+                                Temp:</strong> {getTemperatureAsString(forecastLatLongResponse.list[index].main.temp_min, isCelsius)}
                         </Typography>
                         <Typography variant="body1">
                             <strong>Max
-                                Temp:</strong> {Math.floor(forecastLatLongResponse.list[index].main.temp_max)}°C
+                                Temp:</strong> {getTemperatureAsString(forecastLatLongResponse.list[index].main.temp_max, isCelsius)}
                         </Typography>
                     </Grid>
 

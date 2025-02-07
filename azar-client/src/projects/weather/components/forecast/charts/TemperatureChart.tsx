@@ -1,41 +1,43 @@
 import React, {useState} from "react";
 import {ForecastLatLongResponse} from "../../../server/api/responses.ts";
-import {formatEpoch, isEpochToday} from "../../../utils/sharedLogic.tsx";
+import {formatEpoch, getTemperature, isEpochToday} from "../../../utils/sharedLogic.tsx";
 import {Series} from "../../../models/models.ts";
 import {BaseForecastChartChildProps} from "../ForecastChart.tsx";
 import BaseChart from "./BaseChart.tsx";
 
 interface TemperatureChartProps extends BaseForecastChartChildProps {
     forecastLatLongResponse: ForecastLatLongResponse;
+    isCelsius: boolean;
 }
 
 const TemperatureChart: React.FC<TemperatureChartProps> = ({
                                                                forecastLatLongResponse,
                                                                currentDateData,
                                                                is12Hour,
+                                                               isCelsius,
                                                                shown,
                                                            }) => {
     const tempSeries: Series = {
         label: "Temperature",
-        data: currentDateData.map((item) => item.main.temp),
+        data: currentDateData.map((item) => getTemperature(item.main.temp, isCelsius)),
         color: "#8884d8",
     };
 
     const feelsLikeSeries: Series = {
         label: "Feels Like",
-        data: currentDateData.map((item) => item.main.feels_like),
+        data: currentDateData.map((item) => getTemperature(item.main.feels_like, isCelsius)),
         color: "#82ca9d",
     };
 
     const tempMinSeries: Series = {
         label: "Min Temp",
-        data: currentDateData.map((item) => item.main.temp_min),
+        data: currentDateData.map((item) => getTemperature(item.main.temp_min, isCelsius)),
         color: "#ff7300",
     };
 
     const tempMaxSeries: Series = {
         label: "Max Temp",
-        data: currentDateData.map((item) => item.main.temp_max),
+        data: currentDateData.map((item) => getTemperature(item.main.temp_max, isCelsius)),
         color: "#ff0000",
     };
 
@@ -54,7 +56,7 @@ const TemperatureChart: React.FC<TemperatureChartProps> = ({
     });
 
     const getAverageTemp = (list: { main: { temp: number } }[]): number =>
-        list.length ? list.reduce((acc, item) => acc + item.main.temp, 0) / list.length : 0;
+        list.length ? list.reduce((acc, item) => acc + getTemperature(item.main.temp, isCelsius), 0) / list.length : 0;
 
     const sunriseSeries: Series = {
         label: "Sunrise",

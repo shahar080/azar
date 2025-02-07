@@ -17,6 +17,7 @@ export function WeatherHomePage() {
     const [extendedViewData, setExtendedViewData] = useState<WeatherLatLongResponse | null>(null);
     const [forecastData, setForecastData] = useState<Coordinates | null>(null);
     const [is12Hour, setIs12Hour] = useState<boolean>(true);
+    const [isCelsius, setIsCelsius] = useState<boolean>(true);
     const {showToast} = useToast();
 
     useEffect(() => {
@@ -137,13 +138,15 @@ export function WeatherHomePage() {
                                         latitude={location.latitude}
                                         longitude={location.longitude}
                                         onDelete={id => removeLocation(id)}
-                                        onShowExtendedView={(getByLatLongResponse, is12HourRes) => {
+                                        onShowExtendedView={(getByLatLongResponse, is12HourRes, isCelsiusRes) => {
                                             setExtendedViewData(getByLatLongResponse);
                                             setIs12Hour(is12HourRes);
+                                            setIsCelsius(isCelsiusRes);
                                         }}
-                                        onShowForecast={(latitude, longitude, is12HourRes) => {
+                                        onShowForecast={(latitude, longitude, is12HourRes, isCelsiusRes) => {
                                             setForecastData({latitude: latitude, longitude: longitude});
                                             setIs12Hour(is12HourRes);
+                                            setIsCelsius(isCelsiusRes);
                                         }}
                                     />
                                 </Grid>
@@ -173,6 +176,7 @@ export function WeatherHomePage() {
                         extendedViewData={extendedViewData}
                         is12Hour={is12Hour}
                         onClose={() => setExtendedViewData(null)}
+                        isCelsius={isCelsius}
                     />
                 }
                 {forecastData !== null &&
@@ -180,6 +184,7 @@ export function WeatherHomePage() {
                         latitude={forecastData.latitude}
                         longitude={forecastData.longitude}
                         is12Hour={is12Hour}
+                        isCelsius={isCelsius}
                         onClose={() => setForecastData(null)}
                     />
                 }

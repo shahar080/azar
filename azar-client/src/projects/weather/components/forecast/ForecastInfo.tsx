@@ -13,6 +13,7 @@ interface ExtendedWeatherInfoProps {
     latitude: string;
     longitude: string;
     is12Hour: boolean;
+    isCelsius: boolean;
     onClose: () => void;
 }
 
@@ -20,6 +21,7 @@ export interface BaseForecastInfoChildProps {
     forecastLatLongResponse: ForecastLatLongResponse;
     onClose: () => void;
     is12HourInitial: boolean;
+    isCelsiusInitial: boolean;
     setIsLeftArrowDisabled: (disabled: boolean) => void;
     setIsRightArrowDisabled: (disabled: boolean) => void;
     setLeftArrowTooltip: (tooltip: string) => void;
@@ -28,7 +30,7 @@ export interface BaseForecastInfoChildProps {
 
 type ViewMode = "dashboard" | "chart";
 
-const ForecastInfo: React.FC<ExtendedWeatherInfoProps> = ({latitude, longitude, is12Hour, onClose}) => {
+const ForecastInfo: React.FC<ExtendedWeatherInfoProps> = ({latitude, longitude, is12Hour, isCelsius, onClose}) => {
     const [forecastLatLongResponse, setForecastLatLongResponse] = useState<ForecastLatLongResponse | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [retry, setRetry] = useState<boolean>(false);
@@ -214,6 +216,7 @@ const ForecastInfo: React.FC<ExtendedWeatherInfoProps> = ({latitude, longitude, 
                                     forecastLatLongResponse={forecastLatLongResponse}
                                     onClose={onClose}
                                     is12HourInitial={is12Hour}
+                                    isCelsiusInitial={isCelsius}
                                     setIsLeftArrowDisabled={setIsLeftArrowDisabled}
                                     setIsRightArrowDisabled={setIsRightArrowDisabled}
                                     setLeftArrowTooltip={setLeftArrowTooltip}
@@ -225,6 +228,7 @@ const ForecastInfo: React.FC<ExtendedWeatherInfoProps> = ({latitude, longitude, 
                                     forecastLatLongResponse={forecastLatLongResponse}
                                     onClose={onClose}
                                     is12HourInitial={is12Hour}
+                                    isCelsiusInitial={isCelsius}
                                     isLeftArrowDisabled={isLeftArrowDisabled}
                                     setIsLeftArrowDisabled={setIsLeftArrowDisabled}
                                     isRightArrowDisabled={isRightArrowDisabled}

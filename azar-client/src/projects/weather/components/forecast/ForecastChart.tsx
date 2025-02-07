@@ -1,14 +1,14 @@
 import {BaseResponse} from "../../server/api/responses.ts";
 import React, {forwardRef, useEffect, useImperativeHandle, useState,} from "react";
 import {ForecastChildComponentHandle} from "../../types/ChildComponent.types.ts";
-import {Box, Button, MenuItem, TextField, Tooltip, Typography,} from "@mui/material";
+import {Box, Button, IconButton, MenuItem, TextField, Tooltip, Typography,} from "@mui/material";
 import TemperatureChart from "./charts/TemperatureChart.tsx";
 import HumidityChart from "./charts/HumidityChart.tsx";
 import WindChart from "./charts/WindChart.tsx";
 import CloudCoverChart from "./charts/CloudCoverChart.tsx";
 import {AvailableCharts} from "../../models/models.ts";
 import {convertEpochToLocalDate} from "../../utils/sharedLogic.tsx";
-import {AccessTime, AvTimer} from "@mui/icons-material";
+import {AccessTime, AvTimer, DeviceThermostat} from "@mui/icons-material";
 import {BaseForecastInfoChildProps} from "./ForecastInfo.tsx";
 import LevelsChart from "./charts/LevelsChart.tsx";
 import PressureChart from "./charts/PressureChart.tsx";
@@ -31,6 +31,7 @@ const ForecastChart = forwardRef<ForecastChildComponentHandle, ForecastChartProp
             forecastLatLongResponse,
             onClose,
             is12HourInitial,
+            isCelsiusInitial,
             isLeftArrowDisabled,
             setIsLeftArrowDisabled,
             isRightArrowDisabled,
@@ -45,6 +46,7 @@ const ForecastChart = forwardRef<ForecastChildComponentHandle, ForecastChartProp
         const [nextDateData, setNextDateData] = useState<BaseResponse[]>();
         const [index, setIndex] = useState<number>(0);
         const [is12Hour, setIs12Hour] = useState<boolean>(is12HourInitial);
+        const [isCelsius, setIsCelsius] = useState<boolean>(isCelsiusInitial);
 
         const switchClockTime = () => {
             setIs12Hour((prev) => !prev);
@@ -102,6 +104,7 @@ const ForecastChart = forwardRef<ForecastChildComponentHandle, ForecastChartProp
                     forecastLatLongResponse={forecastLatLongResponse}
                     currentDateData={currentDateData}
                     is12Hour={is12Hour}
+                    isCelsius={isCelsius}
                     shown={true}
                 />
             ),
@@ -217,6 +220,21 @@ const ForecastChart = forwardRef<ForecastChildComponentHandle, ForecastChartProp
                             <AvTimer onClick={switchClockTime}/>
                         )}
                     </Tooltip>
+                    {currentChart === AvailableCharts.TEMPERATURE_CHART &&
+                        <Tooltip
+                            title={`${isCelsius ? "Click me to switch to Fahrenheit" : "Click me to switch to Celsius"}`}
+                            disableInteractive
+                            componentsProps={{
+                                tooltip: {
+                                    sx: {bgcolor: "primary.main", fontSize: "1rem"},
+                                },
+                            }}
+                        >
+                            <IconButton onClick={() => setIsCelsius(prev => !prev)}>
+                                <DeviceThermostat fontSize="medium"/>
+                            </IconButton>
+                        </Tooltip>
+                    }
                 </Box>
                 {chartComponents[currentChart]}
                 <Button

@@ -14,7 +14,7 @@ import {AccessTime, AvTimer, CalendarMonth, Delete, Refresh} from "@mui/icons-ma
 import {getWeatherByLatLong} from "../server/api/weatherApi";
 import {WeatherLatLongResponse} from "../server/api/responses";
 import {COMIC_NEUE_FONT} from "../../shared/utils/constants.ts";
-import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
+import {convertEpochToLocalTime, getTemperatureAsString, getWeatherIcon} from "../utils/sharedLogic.tsx";
 import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 import {getCardStyles} from "../utils/weatherStyles.ts";
 
@@ -25,9 +25,10 @@ interface WeatherCardProps {
     onDelete: (id: number) => void;
     onShowExtendedView: (
         getByLatLongResponse: WeatherLatLongResponse,
-        is12Hour: boolean
+        is12Hour: boolean,
+        isCelsius: boolean,
     ) => void;
-    onShowForecast: (latitude: string, longitude: string, is12Hour: boolean) => void;
+    onShowForecast: (latitude: string, longitude: string, is12Hour: boolean, isCelsius: boolean) => void;
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({
@@ -47,6 +48,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
     const [sunriseTime, setSunriseTime] = useState<string>("");
     const [sunsetTime, setSunsetTime] = useState<string>("");
     const [retry, setRetry] = useState<boolean>(false);
+    const [isCelsius, setIsCelsius] = useState<boolean>(true);
     const systemOffsetSeconds = new Date().getTimezoneOffset() * 60;
 
     const {mode} = useContext(ThemeModeContext);
@@ -292,9 +294,22 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                                         {getByLatLongResponse.name}
                                     </Typography>
                                 </Tooltip>
-                                <Typography paddingLeft={"1vw"} variant="h6">
-                                    {Math.floor(getByLatLongResponse.main.temp)}°C
-                                </Typography>
+                                <Tooltip
+                                    title={`${isCelsius ? "Click me to switch to Fahrenheit" : "Click me to switch to Celsius"}`}
+                                    componentsProps={{
+                                        tooltip: {
+                                            sx: {
+                                                bgcolor: 'primary.main',
+                                                fontSize: '1rem',
+                                            },
+                                        },
+                                    }}
+                                >
+                                    <Typography paddingLeft={"1vw"} variant="h6"
+                                                onClick={() => setIsCelsius(prev => !prev)}>
+                                        {getTemperatureAsString(getByLatLongResponse.main.temp, isCelsius)}
+                                    </Typography>
+                                </Tooltip>
                                 <Typography paddingLeft={"1vw"} variant="body1" noWrap>
                                     {getByLatLongResponse.weather[0].description}
                                 </Typography>
@@ -364,7 +379,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                                     cursor: "pointer",
                                     display: "inline-block",
                                 }}
-                                onClick={() => onShowExtendedView(getByLatLongResponse, is12Hour)}
+                                onClick={() => onShowExtendedView(getByLatLongResponse, is12Hour, isCelsius)}
                             >
                                 → {getByLatLongResponse.sys.country} ←
                             </Typography>
@@ -387,7 +402,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
                                     zIndex: 10,
                                     backgroundColor: 'transparent',
                                 }}
-                                onClick={() => onShowForecast(latitude, longitude, is12Hour)}
+                                onClick={() => onShowForecast(latitude, longitude, is12Hour, isCelsius)}
                             >
                                 <CalendarMonth/>
                             </IconButton>

@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Box, Button, Grid, Modal, Typography} from "@mui/material";
 import {WeatherLatLongResponse} from "../server/api/responses.ts";
-import {convertEpochToLocalTime, getWeatherIcon} from "../utils/sharedLogic.tsx";
+import {convertEpochToLocalTime, getTemperatureAsString, getWeatherIcon} from "../utils/sharedLogic.tsx";
 import {getCardStyles} from "../utils/weatherStyles.ts";
 import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 
@@ -9,9 +9,10 @@ interface ExtendedWeatherInfoProps {
     extendedViewData: WeatherLatLongResponse;
     is12Hour: boolean;
     onClose: () => void;
+    isCelsius: boolean;
 }
 
-const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewData, is12Hour, onClose}) => {
+const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewData, is12Hour, onClose, isCelsius}) => {
     const [sunriseTime, setSunriseTime] = useState<string>("");
     const [sunsetTime, setSunsetTime] = useState<string>("");
     const {mode} = useContext(ThemeModeContext);
@@ -55,16 +56,19 @@ const ExtendedWeatherInfo: React.FC<ExtendedWeatherInfoProps> = ({extendedViewDa
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <Typography variant="body1">
-                            <strong>Temperature:</strong> {Math.floor(extendedViewData.main.temp)}°C
+                            <strong>Temperature:</strong> {getTemperatureAsString(extendedViewData.main.temp, isCelsius)}
                         </Typography>
                         <Typography variant="body1">
-                            <strong>Feels Like:</strong> {Math.floor(extendedViewData.main.feels_like)}°C
+                            <strong>Feels
+                                Like:</strong> {getTemperatureAsString(extendedViewData.main.feels_like, isCelsius)}
                         </Typography>
                         <Typography variant="body1">
-                            <strong>Min Temp:</strong> {Math.floor(extendedViewData.main.temp_min)}°C
+                            <strong>Min
+                                Temp:</strong> {getTemperatureAsString(extendedViewData.main.temp_min, isCelsius)}
                         </Typography>
                         <Typography variant="body1">
-                            <strong>Max Temp:</strong> {Math.floor(extendedViewData.main.temp_max)}°C
+                            <strong>Max
+                                Temp:</strong> {getTemperatureAsString(extendedViewData.main.temp_max, isCelsius)}
                         </Typography>
                     </Grid>
 

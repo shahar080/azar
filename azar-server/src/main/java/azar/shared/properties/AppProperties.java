@@ -4,14 +4,13 @@ import azar.shared.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
-import static azar.cloud.utils.Constants.DEFAULT_APP_PROPERTIES_FILE_PATH;
 
 /**
  * Author: Shahar Azar
@@ -40,11 +39,8 @@ public class AppProperties {
     }
 
     private void loadPropertiesFromFile() {
-        String propertiesFileName = properties.getProperty("PROPERTIES_FILE_NAME", DEFAULT_APP_PROPERTIES_FILE_PATH);
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(propertiesFileName)) {
-            if (input == null) {
-                throw new IllegalArgumentException("Unable to find " + propertiesFileName);
-            }
+        String propertiesFileName = properties.getProperty("PROPERTIES_FILE_PATH", "/data/azar/server/app.properties");
+        try (InputStream input = new FileInputStream(propertiesFileName)) {
             properties.load(input);
         } catch (IOException ex) {
             throw new RuntimeException("Failed to load properties file: " + propertiesFileName, ex);

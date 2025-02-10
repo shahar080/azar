@@ -15,9 +15,11 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static azar.cloud.utils.Constants.DARK_MODE;
 import static azar.cloud.utils.Constants.DRAWER_PINNED;
 
 /**
@@ -45,17 +47,34 @@ public class UserDao extends GenericDao<User> {
                 vertx.executeBlocking(() -> {
                     super.add(user)
                             .onSuccess(dbUser -> {
-                                Preference drawerPinned = new Preference();
-                                drawerPinned.setKey(DRAWER_PINNED);
-                                drawerPinned.setValue(String.valueOf(true));
-                                drawerPinned.setUserId(String.valueOf(dbUser.getId()));
-                                preferencesDao.add(drawerPinned)
+                                List<Future<?>> futureToRun = getPreferencesToAdd(dbUser);
+                                Future.all(futureToRun)
                                         .onSuccess(_ -> promise.complete(dbUser))
                                         .onFailure(promise::fail);
                             })
                             .onFailure(promise::fail);
                     return null;
                 }, false));
+    }
+
+    private List<Future<?>> getPreferencesToAdd(User dbUser) {
+        List<Future<?>> futures = new ArrayList<>();
+
+        Preference drawerPinned = createPreference(dbUser, DRAWER_PINNED, String.valueOf(true));
+        futures.add(preferencesDao.add(drawerPinned));
+
+        Preference darkMode = createPreference(dbUser, DARK_MODE, String.valueOf(false));
+        futures.add(preferencesDao.add(darkMode));
+
+        return futures;
+    }
+
+    private Preference createPreference(User dbUser, String key, String value) {
+        Preference drawerPinned = new Preference();
+        drawerPinned.setKey(key);
+        drawerPinned.setValue(value);
+        drawerPinned.setUserId(String.valueOf(dbUser.getId()));
+        return drawerPinned;
     }
 
     @Override

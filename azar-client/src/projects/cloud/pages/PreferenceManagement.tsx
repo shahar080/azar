@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Box, CssBaseline, FormControlLabel, Grid, Switch, Toolbar, Typography, useMediaQuery} from "@mui/material";
 import AppBarHeader from "../../shared/components/AppBarHeader.tsx";
 import CloudDrawerMenu from "../components/general/DrawerMenu.tsx";
@@ -16,11 +16,12 @@ import {
     getUserType,
     setDrawerPinnedState
 } from "../../shared/utils/AppState.ts";
-import {DRAWER_PIN_STR} from "../utils/constants.ts";
+import {DARK_MODE_STR, DRAWER_PIN_STR} from "../utils/constants.ts";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {CLOUD_LOGIN_ROUTE, CLOUD_MANAGE_USERS_ROUTE, CLOUD_ROUTE} from "../../shared/utils/reactRoutes.ts";
 import {drawerWidth} from "../../shared/utils/constants.ts";
 import {pinDrawer, toggleDrawer} from "../components/sharedLogic.ts";
+import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 
 const CloudPreferenceManagement: React.FC = () => {
     const theme = useTheme();
@@ -31,6 +32,7 @@ const CloudPreferenceManagement: React.FC = () => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const {mode, setMode} = useContext(ThemeModeContext);
     const {setLoadingAnimation} = useLoading();
 
     const {showToast} = useToast();
@@ -120,6 +122,25 @@ const CloudPreferenceManagement: React.FC = () => {
             })
     };
 
+    const handleDarkModePreference = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = event.target.checked
+        const updatedPreference = {
+            userId: Number(getUserId()),
+            key: DARK_MODE_STR,
+            value: isChecked.toString(),
+        }
+        updatePreference({preference: updatedPreference, currentUser: userName})
+            .then(updatedResult => {
+                if (updatedResult) {
+                    const updatedPreferences = preferences.map((preference) => (preference.id === updatedResult.id ? updatedResult : preference));
+                    setPreferences(updatedPreferences);
+                    setMode(isChecked ? "dark" : "light");
+                } else {
+                    showToast("Error updating preference dark mode", "error")
+                }
+            })
+    };
+
     return (
         <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
             <CssBaseline/>
@@ -166,7 +187,14 @@ const CloudPreferenceManagement: React.FC = () => {
                 </Typography>
                 <Grid container spacing={2} sx={{height: "100%"}}>
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
-                        <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
+                        <Box sx={{
+                            flexGrow: 1,
+                            overflow: "hidden",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "start"
+                        }}>
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -176,6 +204,17 @@ const CloudPreferenceManagement: React.FC = () => {
                                     />
                                 }
                                 label={`Pin Drawer`}
+                                labelPlacement={"start"}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={mode === "dark"}
+                                        onChange={handleDarkModePreference}
+                                        color="primary"
+                                    />
+                                }
+                                label={`Dark mode`}
                                 labelPlacement={"start"}
                             />
                         </Box>

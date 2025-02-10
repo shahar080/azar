@@ -5,7 +5,6 @@ import azar.cloud.entities.db.Preference;
 import azar.cloud.entities.requests.preferences.PreferenceUpsertRequest;
 import azar.cloud.entities.requests.preferences.PreferencesGetAllRequest;
 import azar.shared.dal.service.UserService;
-import azar.shared.entities.requests.BaseRequest;
 import azar.shared.routers.BaseRouter;
 import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
@@ -14,6 +13,8 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
 
@@ -22,6 +23,8 @@ import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
  * Date:   29/12/2024
  **/
 public class PreferencesRouter extends BaseRouter {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     private final PreferencesService preferencesService;
     private final UserService userService;
     private final JsonManager jsonManager;
@@ -39,7 +42,6 @@ public class PreferencesRouter extends BaseRouter {
 
         preferencesRouter.post("/add").handler(this::handleAddPreference);
         preferencesRouter.post("/update").handler(this::handleUpdatePreference);
-        preferencesRouter.post("/delete/:id").handler(this::handleDeletePreference);
         preferencesRouter.post("/getAll").handler(this::handleGetAllPreferences);
 
         return preferencesRouter;
@@ -57,7 +59,7 @@ public class PreferencesRouter extends BaseRouter {
                         sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to add preferences!".formatted(currentUser));
                         return;
                     }
-
+                    logger.warn("Adding preference {} for user {} as new preference since it doesn't exist in DB", preferenceToAdd.getKey(), preferenceToAdd.getUserId());
                     preferencesService.add(preferenceToAdd)
                             .onSuccess(_ -> sendCreatedResponse(routingContext, "Successfully added preference", "Preference %s was added with value %s".formatted(preferenceToAdd.getKey(), preferenceToAdd.getValue())))
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error adding preference, error: %s".formatted(err.getMessage())));
@@ -73,37 +75,19 @@ public class PreferencesRouter extends BaseRouter {
         Preference preferenceToUpdate = preferenceUpsertRequest.getPreference();
         preferencesService.getByKey(preferenceToUpdate.getKey(), preferenceToUpdate.getUserId())
                 .onSuccess(dbPreference -> {
-                    dbPreference.setValue(preferenceToUpdate.getValue());
-                    preferencesService.update(dbPreference)
+                    if (dbPreference != null) {
+                        dbPreference.setValue(preferenceToUpdate.getValue());
+                        preferencesService.update(dbPreference)
+                                .onSuccess(preference -> sendOKResponse(routingContext, jsonManager.toJson(preference), "Preference %s was updated with value %s".formatted(preferenceToUpdate.getKey(), preferenceToUpdate.getValue())))
+                                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
+                        return;
+                    }
+
+                    preferencesService.add(preferenceToUpdate)
                             .onSuccess(preference -> sendOKResponse(routingContext, jsonManager.toJson(preference), "Preference %s was updated with value %s".formatted(preferenceToUpdate.getKey(), preferenceToUpdate.getValue())))
                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error updating preference, error: %s".formatted(err.getMessage())));
-    }
-
-    private void handleDeletePreference(RoutingContext routingContext) {
-        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
-        String currentUser = baseRequest.getCurrentUser();
-        if (isInvalidUsername(routingContext, currentUser)) return;
-
-        String preferenceId = routingContext.pathParam("id");
-        if (preferenceId == null || preferenceId.isEmpty()) {
-            sendBadRequestResponse(routingContext, "Preference ID is required");
-            return;
-        }
-
-        userService.isAdmin(currentUser)
-                .onSuccess(isAdmin -> {
-                    if (!isAdmin) {
-                        sendUnauthorizedErrorResponse(routingContext, "User %s is not authorized to delete preferences!".formatted(currentUser));
-                        return;
-                    }
-
-                    preferencesService.removeById(Integer.valueOf(preferenceId))
-                            .onSuccess(_ -> sendOKResponse(routingContext, "Successfully deleted preference", "Preference with id %s was deleted".formatted(preferenceId)))
-                            .onFailure(err -> sendInternalErrorResponse(routingContext, "Error deleting preference, error: %s".formatted(err.getMessage())));
-                })
-                .onFailure(err -> sendInternalErrorResponse(routingContext, "Error deleting preference, error: %s".formatted(err.getMessage())));
     }
 
     private void handleGetAllPreferences(RoutingContext routingContext) {

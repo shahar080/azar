@@ -26,3 +26,4 @@ export const USER_UPDATE_API = USER_PREFIX + OPS_PREFIX + "/update";
 
 /* Preferences */
 export const DRAWER_PIN_STR = "DRAWER_PINNED";
+export const DARK_MODE_STR = "DARK_MODE";

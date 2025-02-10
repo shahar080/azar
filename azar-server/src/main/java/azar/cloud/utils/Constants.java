@@ -10,6 +10,7 @@ public class Constants {
 
     /* Preferences  */
     public static final String DRAWER_PINNED = "DRAWER_PINNED";
+    public static final String DARK_MODE = "DARK_MODE";
 
     /* Default files path */
     public static final String DEFAULT_APP_PROPERTIES_FILE_PATH = "app.properties";

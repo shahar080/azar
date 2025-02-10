@@ -4,12 +4,10 @@ import azar.cloud.routers.CloudMainRouter;
 import azar.cloud.utils.AuthService;
 import azar.shared.properties.AppProperties;
 import azar.weather.routers.WeatherMainRouter;
-import azar.weather.routers.WeatherRouter;
 import azar.whoami.routers.WhoAmIMainRouter;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
@@ -42,8 +40,6 @@ public class ServerVertical extends AbstractVerticle {
     private final WeatherMainRouter weatherMainRouter;
 
     private final boolean IS_DEV;
-    private final String REQUIRED_HEADER_KEY;
-    private final String REQUIRED_HEADER_VALUE;
     private final List<String> ALLOWED_ORIGINS;
 
 
@@ -57,8 +53,6 @@ public class ServerVertical extends AbstractVerticle {
         this.whoAmIMainRouter = whoAmIMainRouter;
         this.weatherMainRouter = weatherMainRouter;
         this.IS_DEV = appProperties.getBooleanProperty("IS_DEV", false);
-        this.REQUIRED_HEADER_KEY = appProperties.getProperty("REQUIRED_HEADER_KEY");
-        this.REQUIRED_HEADER_VALUE = appProperties.getProperty("REQUIRED_HEADER_VALUE");
         this.ALLOWED_ORIGINS = appProperties.getListProperty("ALLOWED_ORIGINS");
     }
 
@@ -124,29 +118,7 @@ public class ServerVertical extends AbstractVerticle {
     private void catchAllRequests(RoutingContext routingContext) {
         logger.debug("A {} request was made for path: {}", routingContext.request().method(), routingContext.request().path());
 
-        if (!IS_DEV) {
-            // validate header
-            if (!validateHeader(routingContext)) {
-                return;
-            }
-        }
-
         routingContext.next();
-    }
-
-    private boolean validateHeader(RoutingContext context) {
-
-        String requiredHeader = context.request().getHeader(REQUIRED_HEADER_KEY);
-
-        if (requiredHeader == null || !requiredHeader.equalsIgnoreCase(REQUIRED_HEADER_VALUE)) {
-            context.response()
-                    .setStatusCode(400)
-                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
-                    .end("Missing or invalid headers");
-            return false;
-        }
-
-        return true;
     }
 
 }

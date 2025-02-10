@@ -49,14 +49,14 @@
 
 ### Server Environment Variables
 
-| **Setting**             | **Description**                                                                       |
-|-------------------------|---------------------------------------------------------------------------------------|
-| `JWT_SECRET_KEY`        | JWT Secret key for token creation.                                                    |
-| `PROPERTIES_FILE_NAME`  | The properties file name.                                                             |
-| `IS_DEV`                | Is development.                                                                       |
-| `REQUIRED_HEADER_KEY`   | Header key from LB.                                                                   |
-| `REQUIRED_HEADER_VALUE` | Header value from LB.                                                                 |
-| `ALLOWED_ORIGINS`       | The allowed origins that will the server handle requests from, separated by comma(,). |
+| **Setting**                | **Description**                                                                       |
+|----------------------------|---------------------------------------------------------------------------------------|
+| `ALLOWED_ORIGINS`          | The allowed origins that will the server handle requests from, separated by comma(,). |
+| `HIBERNATE_CFG_FILE_PATH`  | The hibernate config file path.                                                       |
+| `IS_DEV`                   | Is development.                                                                       |
+| `JWT_SECRET_KEY`           | JWT Secret key for token creation.                                                    |
+| `OPEN_WEATHER_MAP_API_KEY` | API key for OpenWeatherMap in-order to get weather data.                              |
+| `PROPERTIES_FILE_PATH`     | The properties file path.                                                             |
 
 <!-- LICENSE -->
 

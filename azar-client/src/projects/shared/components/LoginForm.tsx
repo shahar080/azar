@@ -3,12 +3,12 @@ import {Box, Button, TextField, Typography} from "@mui/material";
 import {AxiosError} from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 import {AccountCircle} from "@mui/icons-material";
-import {useLoading} from "../../shared/utils/loading/useLoading.ts";
-import PasswordField from "../../shared/components/PasswordField.tsx";
+import {useLoading} from "../utils/loading/useLoading.ts";
+import PasswordField from "./PasswordField.tsx";
 import {getUserTypeFromStr, UserType} from "../../cloud/models/models.ts";
-import {login} from "../../shared/server/api/userApi.ts";
-import {getUserType} from "../../shared/utils/AppState.ts";
-import {LoginResponse} from "../../cloud/server/api/responses.ts";
+import {login} from "../server/api/userApi.ts";
+import {getUserType} from "../utils/AppState.ts";
+import {LoginResponse} from "../server/api/responses.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;

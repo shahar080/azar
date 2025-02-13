@@ -13,3 +13,7 @@ export const CLOUD_MANAGE_PREFERENCES_ROUTE = CLOUD_ROUTE + "/manage-preferences
 
 /* Weather */
 export const WEATHER_ROUTE = "/weather";
+
+/* Gallery */
+export const GALLERY_ROUTE = "/gallery";
+export const GALLERY_MANAGE_ROUTE = "/gallery/manage";

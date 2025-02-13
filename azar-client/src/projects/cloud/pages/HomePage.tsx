@@ -13,7 +13,7 @@ import {deletePdf, getAllPdfs, updatePdf, uploadPdf} from "../server/api/pdfFile
 import EditPdfModal from "../components/pdf/EditPdfModal.tsx";
 import PdfGallery from "../components/pdf/PdfGallery.tsx";
 import {useTheme} from "@mui/material/styles";
-import {formatDate, loadPreferences} from "../utils/utilities.ts";
+import {loadPreferences} from "../utils/utilities.ts";
 import {useLoading} from "../../shared/utils/loading/useLoading.ts";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {getDrawerPinnedState, getUserId, getUserName, getUserType} from "../../shared/utils/AppState.ts";
@@ -24,7 +24,7 @@ import {
     CLOUD_ROUTE
 } from "../../shared/utils/reactRoutes.ts";
 import {drawerWidth} from "../../shared/utils/constants.ts";
-import {pinDrawer, toggleDrawer} from "../components/sharedLogic.ts";
+import {formatAsDateAndTime, pinDrawer, toggleDrawer} from "../components/sharedLogic.ts";
 
 const CloudHomePage: React.FC = () => {
     const theme = useTheme();
@@ -55,7 +55,8 @@ const CloudHomePage: React.FC = () => {
 
     useEffect(() => {
         loadingRef.current = loading;
-    }, [loading]);
+        setLoadingAnimation(loading);
+    }, [loading, setLoadingAnimation]);
 
     useEffect(() => {
         hasMoreRef.current = hasMore;
@@ -71,7 +72,6 @@ const CloudHomePage: React.FC = () => {
             if (!forceLoad && (loadingRef.current || !hasMoreRef.current)) return;
 
             setLoading(true);
-            setLoadingAnimation(true);
             const currentPage = forceLoad ? 1 : pageRef.current;
 
             getAllPdfs({currentUser: userName}, currentPage, 20)
@@ -90,11 +90,10 @@ const CloudHomePage: React.FC = () => {
                 .catch((err) => console.error("Failed to load PDFs:", err))
                 .finally(() => {
                     setLoading(false);
-                    setLoadingAnimation(false);
                 });
         },
 
-        [setLoadingAnimation, userName]
+        [userName]
     );
 
     useEffect(() => {
@@ -128,7 +127,7 @@ const CloudHomePage: React.FC = () => {
             const matchesQuery =
                 !query ||
                 pdf.fileName.toLowerCase().includes(query.toLowerCase()) ||
-                formatDate(pdf.uploadedAt).toLowerCase().includes(query.toLowerCase()) ||
+                formatAsDateAndTime(pdf.uploadedAt).toLowerCase().includes(query.toLowerCase()) ||
                 pdf.description?.toLowerCase().includes(query.toLowerCase()) ||
                 pdf.uploadedBy.toLowerCase().includes(query.toLowerCase()) ||
                 pdf.labels.some((label) => label.toLowerCase().includes(query.toLowerCase()));
@@ -143,7 +142,7 @@ const CloudHomePage: React.FC = () => {
     };
 
     const handleFileUpload = (file: File) => {
-        setLoadingAnimation(true);
+        setLoading(true);
         if (userName === null) {
             showToast("Error uploading PDF \"" + file.name + "\"", "error");
             return;
@@ -159,12 +158,11 @@ const CloudHomePage: React.FC = () => {
             })
             .finally(() => {
                 setLoading(false);
-                setLoadingAnimation(false);
             });
     };
 
     const handleDeletePdf = (pdf: PdfFile) => {
-        setLoadingAnimation(true);
+        setLoading(true);
         if (userName === null) {
             showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
             return;
@@ -184,7 +182,7 @@ const CloudHomePage: React.FC = () => {
             .catch(() => {
                 showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
             })
-            .finally(() => setLoadingAnimation(false));
+            .finally(() => setLoading(false));
     };
 
     const resetPaginationAndReload = () => {
@@ -213,7 +211,7 @@ const CloudHomePage: React.FC = () => {
     };
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
-        setLoadingAnimation(true);
+        setLoading(true);
         updatePdf({currentUser: userName, pdfFile: updatedPdf})
             .then((res) => {
                 if (res && res.id === updatedPdf.id) {
@@ -231,7 +229,6 @@ const CloudHomePage: React.FC = () => {
             })
             .finally(() => {
                 setLoading(false);
-                setLoadingAnimation(false);
             });
     };
 

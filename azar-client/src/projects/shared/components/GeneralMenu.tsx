@@ -2,7 +2,7 @@ import React, {useContext, useState} from "react";
 import {Box, Button, GlobalStyles, Menu, MenuItem} from "@mui/material";
 import {ArrowDropDown, Brightness4, Brightness7} from "@mui/icons-material";
 import {Link} from "react-router-dom";
-import {CLOUD_ROUTE, LANDING_ROUTE, WEATHER_ROUTE} from "../utils/reactRoutes.ts";
+import {CLOUD_ROUTE, GALLERY_ROUTE, LANDING_ROUTE, WEATHER_ROUTE} from "../utils/reactRoutes.ts";
 import {COMIC_NEUE_FONT} from "../utils/constants.ts";
 import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 
@@ -132,6 +132,23 @@ export function GeneralMenu({zIndex = 1}: GeneralMenuProps) {
                             }}
                         >
                             Weather
+                        </MenuItem>
+                        <MenuItem
+                            onClick={handleClose}
+                            component={Link}
+                            to={GALLERY_ROUTE}
+                            sx={{
+                                padding: "12px 20px",
+                                margin: "0",
+                                borderRadius: "0 0 8px 8px",
+                                color: "white",
+                                "&:hover": {
+                                    backgroundColor: "primary.dark",
+                                    color: "secondary.contrastText",
+                                },
+                            }}
+                        >
+                            Gallery
                         </MenuItem>
                     </Menu>
                 </Box>

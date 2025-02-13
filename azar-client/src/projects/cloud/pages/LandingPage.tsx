@@ -7,7 +7,7 @@ import {LoginForm} from "../components/general/LoginForm.tsx";
 import {CLOUD_ROUTE} from "../../shared/utils/reactRoutes.ts";
 import {GeneralMenu} from "../../shared/components/GeneralMenu.tsx";
 import bgImage from '../../../img/whoami/bg.jpg';
-import {LoginResponse} from "../server/api/responses.ts";
+import {LoginResponse} from "../../shared/server/api/responses.ts";
 import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
 
 const CloudLandingPage: React.FC = () => {

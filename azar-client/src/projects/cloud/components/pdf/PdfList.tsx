@@ -14,8 +14,8 @@ import {useTheme} from "@mui/material/styles";
 import {PdfFile} from "../../models/models.ts";
 import PdfContextMenu from "./PdfContextMenu.tsx";
 import ShowPDFModal from "./ShowPDFModal.tsx";
-import {downloadPdf, formatDate} from "../../utils/utilities.ts";
-import {handleRequestSort, sortData} from "../sharedLogic.ts";
+import {downloadPdf} from "../../utils/utilities.ts";
+import {formatAsDateAndTime, handleRequestSort, sortData} from "../sharedLogic.ts";
 
 interface PdfListProps {
     pdfs: PdfFile[];
@@ -162,7 +162,7 @@ const PdfList: React.FC<PdfListProps> = ({pdfs, onRowClick, onLoadMore, onDelete
                             >
                                 <TableCell>{pdf.fileName}</TableCell>
                                 <TableCell>{pdf.size}</TableCell>
-                                <TableCell>{formatDate(pdf.uploadedAt)}</TableCell>
+                                <TableCell>{formatAsDateAndTime(pdf.uploadedAt)}</TableCell>
                                 <TableCell>{pdf.labels?.join(", ") || "No labels available"}</TableCell>
                                 <TableCell>{pdf.description || "No description available"}</TableCell>
                                 <TableCell>{pdf.uploadedBy}</TableCell>

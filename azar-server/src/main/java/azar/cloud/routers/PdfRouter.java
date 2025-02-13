@@ -23,10 +23,12 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
+import static azar.shared.utils.Utilities.isInteger;
 
 /**
  * Author: Shahar Azar
@@ -91,13 +93,17 @@ public class PdfRouter extends BaseRouter {
                     try {
                         Utilities.generateThumbnail(pdfFile, vertx)
                                 .onSuccess(thumbnail -> {
+                                    if (thumbnail.length == 0) {
+                                        sendInternalErrorResponse(routingContext, "Error generating thumbnail for %s".formatted(fileUpload.fileName()));
+                                        return;
+                                    }
                                     pdfFile.setThumbnail(thumbnail);
                                     pdfFileService.add(pdfFile)
                                             .onSuccess(savedPdfFile -> {
                                                 savedPdfFile.setData(new byte[0]);
                                                 sendCreatedResponse(routingContext, jsonManager.toJson(savedPdfFile),
                                                         "File %s uploaded successfully by %s".formatted(savedPdfFile.getFileName(), userName));
-                                                cacheManager.put(CacheKeys.THUMBNAIL.formatted(savedPdfFile.getId()), jsonManager.toJson(thumbnail));
+                                                cacheManager.put(CacheKeys.PDF_THUMBNAIL.formatted(savedPdfFile.getId()), jsonManager.toJson(thumbnail));
                                             })
                                             .onFailure(err -> sendInternalErrorResponse(routingContext, "Error saving %s, error: %s".formatted(fileUpload.fileName(), err.getMessage())));
                                 })
@@ -141,7 +147,7 @@ public class PdfRouter extends BaseRouter {
 
 
         String pdfId = routingContext.pathParam("id");
-        if (pdfId == null || pdfId.isEmpty()) {
+        if (pdfId == null || pdfId.isEmpty() || !isInteger(pdfId)) {
             sendBadRequestResponse(routingContext, "PDF ID is required");
             return;
         }
@@ -203,16 +209,16 @@ public class PdfRouter extends BaseRouter {
         String pdfId = routingContext.pathParam("id");
 
         Type arrType = new TypeToken<byte[]>(){}.getType();
-        byte[] cachedThumbnail = jsonManager.fromJson(cacheManager.get(CacheKeys.THUMBNAIL.formatted(pdfId)), arrType);
+        byte[] cachedThumbnail = jsonManager.fromJson(cacheManager.get(CacheKeys.PDF_THUMBNAIL.formatted(pdfId)), arrType);
 
         if (cachedThumbnail != null) {
             logger.info("Sending cached thumbnail for {}", pdfId);
             sendOKImageResponse(routingContext, "Send thumbnail back to client", cachedThumbnail);
         } else {
-            logger.info("Calculating thumbnail for {}", pdfId);
+            logger.info("Getting thumbnail from db for {}", pdfId);
             pdfFileService.getThumbnailById(Integer.valueOf(pdfId))
                     .onSuccess(dbThumbnail -> {
-                        cacheManager.put(CacheKeys.THUMBNAIL.formatted(pdfId), jsonManager.toJson(dbThumbnail));
+                        cacheManager.put(CacheKeys.PDF_THUMBNAIL.formatted(pdfId), jsonManager.toJson(dbThumbnail));
                         logger.info("Sending thumbnail for {}", pdfId);
                         sendOKImageResponse(routingContext, "Send thumbnail back to client", dbThumbnail);
                     })

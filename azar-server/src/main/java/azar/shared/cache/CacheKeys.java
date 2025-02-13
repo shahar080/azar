@@ -7,8 +7,8 @@ package azar.shared.cache;
 public class CacheKeys {
 
     /* AzarCloud */
-    public static final String THUMBNAIL = "thumbnail:%s";
+    public static final String PDF_THUMBNAIL = "pdfThumbnail:%s";
 
-    /* Weather */
-    public static final String WEATHER_DATA = "weatherData:lat_%slong_%s";
+    /* Gallery */
+    public static final String PHOTO_THUMBNAIL = "photoThumbnail:%s";
 }

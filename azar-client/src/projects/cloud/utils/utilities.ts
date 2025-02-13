@@ -4,27 +4,6 @@ import {getAllPreferences} from "../server/api/preferencesApi.ts";
 import {DRAWER_PIN_STR} from "./constants.ts";
 import {setDrawerPinnedState} from "../../shared/utils/AppState.ts";
 
-export function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-
-    const timeFormatter = new Intl.DateTimeFormat('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    });
-
-    const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
-
-    const time = timeFormatter.format(date);
-    const dateFormatted = dateFormatter.format(date);
-
-    return `${time} ${dateFormatted}`;
-}
-
 export function parseSize(size: string): number {
     const regex = /(\d+\.?\d*)\s*(KB|MB|GB|B)/i;
     const match = size.match(regex);

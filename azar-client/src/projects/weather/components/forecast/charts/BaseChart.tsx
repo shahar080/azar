@@ -45,8 +45,6 @@ const BaseChart: React.FC<BaseChartProps> = ({
 
     const chartHeight = Math.max(chartWidth * 0.66, 300);
 
-    console.log(seriesData);
-    console.log(visibleSeries)
     return (
         <Box hidden={!shown} sx={{width: "100%"}}>
             <FormGroup row>

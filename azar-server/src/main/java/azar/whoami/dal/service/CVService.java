@@ -31,13 +31,13 @@ public class CVService extends GenericService<CV> {
     }
 
     @Override
-    public Future<CV> add(CV whoAmIData) {
-        return cvDao.add(whoAmIData);
+    public Future<CV> add(CV cv) {
+        return cvDao.add(cv);
     }
 
     @Override
-    public Future<CV> update(CV whoAmIData) {
-        return cvDao.update(whoAmIData);
+    public Future<CV> update(CV cv) {
+        return cvDao.update(cv);
     }
 
     @Override

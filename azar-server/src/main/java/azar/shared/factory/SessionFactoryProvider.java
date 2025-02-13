@@ -30,7 +30,7 @@ public class SessionFactoryProvider {
             Configuration configuration = new Configuration();
             configuration.configure(configFile);
             this.sessionFactory = configuration.buildSessionFactory();
-            System.out.println("Hibernate SessionFactory initialized successfully.");
+            logger.info("Hibernate SessionFactory initialized successfully.");
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load Hibernate configuration from " + hibernateConfigFilePath, ex);
         }

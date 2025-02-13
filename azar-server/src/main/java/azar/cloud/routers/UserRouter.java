@@ -21,6 +21,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 
 import static azar.cloud.utils.Constants.OPS_PREFIX_STRING;
+import static azar.shared.utils.Utilities.isInteger;
 
 /**
  * Author: Shahar Azar
@@ -144,7 +145,7 @@ public class UserRouter extends BaseRouter {
         if (isInvalidUsername(routingContext, currentUser)) return;
 
         String userId = routingContext.pathParam("id");
-        if (userId == null || userId.isEmpty()) {
+        if (userId == null || userId.isEmpty() || !isInteger(userId)) {
             sendBadRequestResponse(routingContext, "user ID is required");
             return;
         }

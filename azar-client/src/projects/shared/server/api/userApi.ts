@@ -9,7 +9,7 @@ import {
     USER_LOGIN_API,
     USER_UPDATE_API
 } from "../../../cloud/utils/constants.ts";
-import {LoginResponse} from "../../../cloud/server/api/responses.ts";
+import {LoginResponse} from "./responses.ts";
 import {BaseRequest} from "./requests.ts";
 
 export async function login(userLoginRequest: UserLoginRequest): Promise<LoginResponse | undefined> {

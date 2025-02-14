@@ -70,18 +70,18 @@ public class PhotoMetadataExtractor {
                 gpsMetadata.setAltitude(extractAltitude(altitude));
             }
         }
-        LocalDateTime localDateTime;
+        Instant date;
         if (dateTime != null) {
-            localDateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss"));
+            date = Instant.parse(dateTime);
         } else {
-            localDateTime = LocalDateTime.parse(Instant.now().toString(), DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss"));
+            date = Instant.now();
         }
         return PhotoMetadata.builder()
                 .imageHeight(imageHeight)
                 .imageWidth(imageWidth)
                 .cameraMake(make)
                 .cameraModel(model)
-                .dateTaken(localDateTime.toInstant(ZoneOffset.UTC))
+                .dateTaken(date)
                 .gps(gpsMetadata)
                 .build();
     }

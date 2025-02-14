@@ -301,7 +301,7 @@ const PhotoList: React.FC = () => {
 
             {selectedPhoto && showPhotoModal && (
                 <ShowPhotoModal
-                    photoId={Number(selectedPhoto.id)}
+                    photoId={selectedPhoto.id}
                     onClose={() => {
                         setSelectedPhoto(null);
                         setShowPhotoModal(false);

@@ -39,7 +39,7 @@ const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altT
 
     return (
         <img
-            src={thumbnailUrl || "/fallback-thumbnail.png"}
+            src={thumbnailUrl || "/fallback-image.png"}
             alt={altText}
             style={{width: "100%", height: "200px", objectFit: "cover"}}
         />

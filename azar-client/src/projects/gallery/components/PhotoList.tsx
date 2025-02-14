@@ -24,21 +24,18 @@ import {
 import {useToast} from "../../shared/utils/toast/useToast";
 import {formatAsDateAndTime, handleRequestSort, sortData} from "../../cloud/components/sharedLogic.ts";
 import {Photo} from "../models/models.ts";
-import GalleryContextMenu from "./GalleryContextMenu.tsx";
-import ShowPhotoModal from "./ShowPhotoModal.tsx";
+import GalleryContextMenu from "./Gallery/GalleryContextMenu.tsx";
+import ShowPhotoModal from "./PhotoModal/ShowPhotoModal.tsx";
 import {getUserName} from "../../shared/utils/AppState.ts";
-import EditPhotoModal from "./EditPhotoModal.tsx";
+import EditPhotoModal from "./PhotoModal/EditPhotoModal.tsx";
 import {useLoading} from "../../shared/utils/loading/useLoading.ts";
 
-//TODO AZAR-134
-//  tooltip of picture over row like in whoami
-//  table should use all width/height
 const PhotoList: React.FC = () => {
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const longPressTimer = useRef<NodeJS.Timeout | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [photosId, setPhotosId] = useState<number[]>([]);
+    const [photosId, setPhotosId] = useState<string[]>([]);
     const [visibleCount, setVisibleCount] = useState<number>(0);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -53,12 +50,7 @@ const PhotoList: React.FC = () => {
     const userName = getUserName();
     const {showToast} = useToast();
     const {setLoadingAnimation} = useLoading();
-
     const columns = isMobile ? 1 : isLarge ? 6 : 4;
-
-    useEffect(() => {
-        setVisibleCount(columns * 2);
-    }, [columns]);
 
     const handleTouchStart = (photo: Photo) => {
         if (isMobile) {
@@ -113,7 +105,7 @@ const PhotoList: React.FC = () => {
             return;
         }
         setIsLoading(true);
-        deletePhoto(Number(photoToRemove.id), {currentUser: userName})
+        deletePhoto(photoToRemove.id, {currentUser: userName})
             .then((res) => {
                 if (res === 200) {
                     setPhotos(photos.filter((photo) => photo !== photoToRemove));
@@ -137,7 +129,7 @@ const PhotoList: React.FC = () => {
             return;
         }
         setIsLoading(true);
-        refreshMetadata(Number(photoToRefreshMetadata.id), {currentUser: userName})
+        refreshMetadata(photoToRefreshMetadata.id, {currentUser: userName})
             .then((res) => {
                 if (res) {
                     showToast("Photo \"" + photoToRefreshMetadata.name + "\" metadata refreshed successfully.", "success");
@@ -191,6 +183,10 @@ const PhotoList: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        setVisibleCount(columns * 2);
+    }, [columns]);
+
+    useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
@@ -234,7 +230,7 @@ const PhotoList: React.FC = () => {
                 ref={containerRef}
                 component={Paper}
                 sx={{
-                    height: "calc(100vh - 250px)",
+                    height: "100%",
                     overflowY: "auto",
                     "&::-webkit-scrollbar": {width: "6px"},
                     "&::-webkit-scrollbar-thumb": {backgroundColor: "#b0b0b0", borderRadius: "10px"},

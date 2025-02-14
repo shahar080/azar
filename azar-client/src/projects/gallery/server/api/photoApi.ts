@@ -30,7 +30,7 @@ export async function uploadPhoto(photoFile: File): Promise<Photo | undefined> {
     return undefined;
 }
 
-export async function getLightweightPhoto(imageId: number): Promise<Photo> {
+export async function getLightweightPhoto(imageId: string): Promise<Photo> {
     try {
         const response = await apiClient.post(PHOTOS_GET_LIGHTWEIGHT_PHOTO_API + imageId);
         return response.data;
@@ -40,7 +40,7 @@ export async function getLightweightPhoto(imageId: number): Promise<Photo> {
     }
 }
 
-export async function getPhotoWithThumbnail(imageId: number): Promise<Photo> {
+export async function getPhotoWithThumbnail(imageId: string): Promise<Photo> {
     try {
         const response = await apiClient.post(PHOTOS_GET_PHOTO_WITH_THUMBNAIL_API + imageId);
         return response.data;
@@ -50,7 +50,7 @@ export async function getPhotoWithThumbnail(imageId: number): Promise<Photo> {
     }
 }
 
-export const getPhotoWithPhoto = async (imageId: number): Promise<Photo> => {
+export const getPhotoWithPhoto = async (imageId: string): Promise<Photo> => {
     try {
         const response = await apiClient.post(PHOTOS_GET_PHOTO_WITH_PHOTO_API + imageId);
         return response.data;
@@ -60,7 +60,7 @@ export const getPhotoWithPhoto = async (imageId: number): Promise<Photo> => {
     }
 };
 
-export async function getPhotosId(): Promise<number[]> {
+export async function getPhotosId(): Promise<string[]> {
     try {
         const response = await apiClient.get(PHOTOS_GET_PHOTOS_ID_API);
 
@@ -71,7 +71,7 @@ export async function getPhotosId(): Promise<number[]> {
     }
 }
 
-export async function deletePhoto(photoId: number, baseRequest: BaseRequest): Promise<number> {
+export async function deletePhoto(photoId: string, baseRequest: BaseRequest): Promise<number> {
     try {
         const response = await apiClient.post(PHOTOS_DELETE_PHOTO_API + photoId, baseRequest);
         return response.status;
@@ -86,7 +86,7 @@ export async function deletePhoto(photoId: number, baseRequest: BaseRequest): Pr
     return 400;
 }
 
-export async function refreshMetadata(photoId: number, baseRequest: BaseRequest): Promise<boolean> {
+export async function refreshMetadata(photoId: string, baseRequest: BaseRequest): Promise<boolean> {
     try {
         const response = await apiClient.post(PHOTOS_REFRESH_PHOTO_METADATA_API + photoId, baseRequest);
 

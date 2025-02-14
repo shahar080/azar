@@ -10,7 +10,7 @@ const ManageGalleryPage: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <Box sx={{display: 'flex', height: '100vh', width: '100vw'}}>
+        <Box sx={{display: 'flex', height: '100%', width: '100%'}}>
             <CssBaseline/>
 
             <AppBarHeader title={"Gallery Admin"} onLogoClick={() => navigate(GALLERY_MANAGE_ROUTE)}/>
@@ -25,6 +25,7 @@ const ManageGalleryPage: React.FC = () => {
                     flexGrow: 1,
                     padding: 2,
                     width: "100%",
+                    height: "100%",
                     transition: "margin-left 0.3s ease, width 0.3s ease",
                     display: "flex",
                     flexDirection: "column",
@@ -33,7 +34,7 @@ const ManageGalleryPage: React.FC = () => {
             >
                 <Toolbar/>
 
-                <Grid container spacing={2} sx={{height: "100%"}}>
+                <Grid container spacing={2} sx={{height: "100%", width: "100%"}}>
                     <Grid item xs={12} md={8} sx={{display: "flex", flexDirection: "column", gap: 2, height: "100%"}}>
                         <Box sx={{flexGrow: 1, overflow: "hidden", height: "100%"}}>
                             <PhotoList/>

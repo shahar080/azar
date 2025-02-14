@@ -86,4 +86,16 @@ public class PhotoService extends GenericService<Photo> {
     public Future<Boolean> updatePartial(Photo photo) {
         return photoDao.updatePartial(photo);
     }
+
+    public Future<Photo> getLightWeightById(Integer id) {
+        return photoDao.getLightWeightById(id);
+    }
+
+    public Future<Photo> getWithThumbnailById(Integer id) {
+        return photoDao.getWithThumbnailById(id);
+    }
+
+    public Future<Photo> getWithPhotoById(Integer id) {
+        return photoDao.getWithPhotoById(id);
+    }
 }

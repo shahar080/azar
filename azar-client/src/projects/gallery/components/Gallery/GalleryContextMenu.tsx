@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from "react";
 import {Menu, MenuItem} from "@mui/material";
-import {Photo} from "../models/models.ts";
+import {Photo} from "../../models/models.ts";
 
 
 interface GalleryContextMenuProps {

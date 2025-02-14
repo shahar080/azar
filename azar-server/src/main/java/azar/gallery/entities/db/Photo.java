@@ -24,7 +24,7 @@ public class Photo {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 1_000)
     private String description;
 
     @Setter

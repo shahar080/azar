@@ -7,11 +7,13 @@ import azar.shared.factory.SessionFactoryProvider;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import jakarta.persistence.TypedQuery;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -119,6 +121,113 @@ public class PhotoDao extends GenericDao<Photo> {
         }, false);
     }
 
+    public Future<Photo> getLightWeightById(Integer id) {
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                session.beginTransaction();
+
+                TypedQuery<Object[]> query = session.createQuery(
+                        "SELECT p.id, p.name, p.description, p.size, p.uploadedAt, p.photoMetadata FROM Photo p WHERE p.id = :id",
+                        Object[].class
+                );
+
+                query.setParameter("id", id);
+
+                Object[] result = query.getSingleResult();
+
+                session.getTransaction().commit();
+
+                if (result != null) {
+                    return Photo.builder()
+                            .id((Integer) result[0])
+                            .name((String) result[1])
+                            .description((String) result[2])
+                            .size((String) result[3])
+                            .uploadedAt((Instant) result[4])
+                            .photoMetadata((PhotoMetadata) result[5])
+                            .data(new byte[0])
+                            .thumbnail(new byte[0])
+                            .build();
+                }
+
+            } catch (Exception e) {
+                logger.error("Could not getLightWeightById from db! id: {}", id, e);
+            }
+            return null;
+        }, false);
+    }
+
+    public Future<Photo> getWithThumbnailById(Integer id) {
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                session.beginTransaction();
+
+                TypedQuery<Object[]> query = session.createQuery(
+                        "SELECT p.id, p.name, p.description, p.thumbnail, p.size, p.uploadedAt, p.photoMetadata FROM Photo p WHERE p.id = :id",
+                        Object[].class
+                );
+
+                query.setParameter("id", id);
+
+                Object[] result = query.getSingleResult();
+
+                session.getTransaction().commit();
+
+                if (result != null) {
+                    return Photo.builder()
+                            .id((Integer) result[0])
+                            .name((String) result[1])
+                            .description((String) result[2])
+                            .thumbnail((byte[]) result[3])
+                            .size((String) result[4])
+                            .uploadedAt((Instant) result[5])
+                            .photoMetadata((PhotoMetadata) result[6])
+                            .data(new byte[0])
+                            .build();
+                }
+
+            } catch (Exception e) {
+                logger.error("Could not getWithThumbnailById from db! id: {}", id, e);
+            }
+            return null;
+        }, false);
+    }
+
+    public Future<Photo> getWithPhotoById(Integer id) {
+        return vertx.executeBlocking(() -> {
+            try (Session session = openSession()) {
+                session.beginTransaction();
+
+                TypedQuery<Object[]> query = session.createQuery(
+                        "SELECT p.id, p.name, p.description, p.data, p.size, p.uploadedAt, p.photoMetadata FROM Photo p WHERE p.id = :id",
+                        Object[].class
+                );
+
+                query.setParameter("id", id);
+
+                Object[] result = query.getSingleResult();
+
+                session.getTransaction().commit();
+
+                if (result != null) {
+                    return Photo.builder()
+                            .id((Integer) result[0])
+                            .name((String) result[1])
+                            .description((String) result[2])
+                            .data((byte[]) result[3])
+                            .size((String) result[4])
+                            .uploadedAt((Instant) result[5])
+                            .photoMetadata((PhotoMetadata) result[6])
+                            .thumbnail(new byte[0])
+                            .build();
+                }
+
+            } catch (Exception e) {
+                logger.error("Could not getWithPhotoById from db! id: {}", id, e);
+            }
+            return null;
+        }, false);
+    }
 
 
     @Override

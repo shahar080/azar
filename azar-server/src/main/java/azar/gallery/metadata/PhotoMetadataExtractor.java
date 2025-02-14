@@ -13,9 +13,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Author: Shahar Azar
@@ -54,23 +57,24 @@ public class PhotoMetadataExtractor {
         GpsMetadata gpsMetadata = new GpsMetadata();
         GpsDirectory gps = metadata.getFirstDirectoryOfType(GpsDirectory.class);
         if (gps != null) {
-            // TODO: 11/02/2025 AZAR-134 Test with gps photo
             String latitude = gps.getDescription(GpsDirectory.TAG_LATITUDE);
             if (latitude != null) {
-                gpsMetadata.setLatitude(Double.valueOf(latitude));
+                gpsMetadata.setLatitude(parseDMS(latitude));
             }
             String longitude = gps.getDescription(GpsDirectory.TAG_LONGITUDE);
             if (longitude != null) {
-                gpsMetadata.setLongitude(Double.valueOf(longitude));
+                gpsMetadata.setLongitude(parseDMS(longitude));
             }
             String altitude = gps.getDescription(GpsDirectory.TAG_ALTITUDE);
             if (altitude != null) {
-                gpsMetadata.setAltitude(Double.valueOf(altitude));
+                gpsMetadata.setAltitude(extractAltitude(altitude));
             }
         }
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime;
         if (dateTime != null) {
             localDateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss"));
+        } else {
+            localDateTime = LocalDateTime.parse(Instant.now().toString(), DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss"));
         }
         return PhotoMetadata.builder()
                 .imageHeight(imageHeight)
@@ -80,5 +84,35 @@ public class PhotoMetadataExtractor {
                 .dateTaken(localDateTime.toInstant(ZoneOffset.UTC))
                 .gps(gpsMetadata)
                 .build();
+    }
+
+    private Double parseDMS(String dms) {
+        try {
+            Pattern pattern = Pattern.compile("(\\d+)°\\s*(\\d+)'\\s*([\\d.]+)\"");
+            Matcher matcher = pattern.matcher(dms);
+
+            if (matcher.find()) {
+                int degrees = Integer.parseInt(matcher.group(1));
+                int minutes = Integer.parseInt(matcher.group(2));
+                double seconds = Double.parseDouble(matcher.group(3));
+
+                return degrees + (minutes / 60.0) + (seconds / 3600.0);
+            } else {
+                logger.warn("Invalid DMS format for {}, setting default.. ", dms);
+            }
+        } catch (Exception e) {
+            logger.warn("Error parsing DMS coordinate: {}", dms, e);
+        }
+        return 0.0;
+    }
+
+    public Double extractAltitude(String text) {
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+        Matcher matcher = pattern.matcher(text);
+
+        if (matcher.find()) {
+            return Double.parseDouble(matcher.group());
+        }
+        return 0.0;
     }
 }

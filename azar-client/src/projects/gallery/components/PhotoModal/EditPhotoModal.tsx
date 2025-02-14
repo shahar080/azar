@@ -1,9 +1,9 @@
-import {Photo} from "../models/models.ts";
+import {Photo} from "../../models/models.ts";
 import React, {useState} from "react";
 import {Box, Button, Modal, Stack, TextField, Typography} from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import {Description, Notes, Place, Terrain} from "@mui/icons-material";
-import {getFileExtension} from "../../cloud/components/sharedLogic.ts";
+import {getFileExtension} from "../../../cloud/components/sharedLogic.ts";
 
 interface EditPhotoModalProps {
     open: boolean;
@@ -91,6 +91,7 @@ const EditPhotoModal: React.FC<EditPhotoModalProps> = ({open, photo, onClose, on
                             </InputAdornment>
                         ),
                     }}
+                    inputProps={{maxLength: 1_000}}
                 />
 
                 <TextField

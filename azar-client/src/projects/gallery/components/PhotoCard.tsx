@@ -8,13 +8,22 @@ import {formatAsDate} from "../../cloud/components/sharedLogic.ts";
 
 
 interface PhotoCardProps {
-    photoId: number;
-    handleTouchStart: (photoId: number) => void;
+    photoId: string;
+    handleTouchStart: (photoId: string) => void;
     handleTouchEnd: () => void;
-    handleThumbnailClick: (photoId: number) => void;
+    handleThumbnailClick: (photoId: string) => void;
+    onPhotoLoaded: (photo: Photo) => void;
+    cityCountry: string | undefined;
 }
 
-const PhotoCard: React.FC<PhotoCardProps> = ({photoId, handleTouchStart, handleTouchEnd, handleThumbnailClick}) => {
+const PhotoCard: React.FC<PhotoCardProps> = ({
+                                                 photoId,
+                                                 handleTouchStart,
+                                                 handleTouchEnd,
+                                                 handleThumbnailClick,
+                                                 onPhotoLoaded,
+                                                 cityCountry
+                                             }) => {
     const [photo, setPhoto] = useState<Photo | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [photoDate, setPhotoDate] = useState<string>("");
@@ -24,7 +33,10 @@ const PhotoCard: React.FC<PhotoCardProps> = ({photoId, handleTouchStart, handleT
         setIsLoading(true);
 
         getPhotoWithThumbnail(photoId)
-            .then(value => setPhoto(value))
+            .then(value => {
+                setPhoto(value);
+                onPhotoLoaded(value);
+            })
             .catch(error => console.error("Error fetching photo:", error))
             .finally(() => setIsLoading(false));
     };
@@ -38,7 +50,13 @@ const PhotoCard: React.FC<PhotoCardProps> = ({photoId, handleTouchStart, handleT
             const tooltipArr: string[] = [];
             if (photo) {
                 void (photo.name && tooltipArr.push(`Name: ${photo.name}`));
-                void (photo.description && tooltipArr.push(`Description: ${photo.description}`));
+                void (
+                    photo.description &&
+                    tooltipArr.push(`Description: ${photo.description.length > 100
+                        ? photo.description.slice(0, 100) + "..."
+                        : photo.description}`)
+                );
+                void (cityCountry && tooltipArr.push(`Location: ${cityCountry}`));
                 void (photo.photoMetadata.imageHeight && tooltipArr.push(`Height: ${photo.photoMetadata.imageHeight}`));
                 void (photo.photoMetadata.imageWidth && tooltipArr.push(`Width: ${photo.photoMetadata.imageWidth}`));
                 void (photo.photoMetadata.cameraMake && tooltipArr.push(`CameraMake: ${photo.photoMetadata.cameraMake}`));

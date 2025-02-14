@@ -37,11 +37,9 @@ const PhotoThumbnail: React.FC<PhotoThumbnailProps> = ({photoBlob, altText}) => 
     }, [photoBlob]);
 
 
-    {/* TODO AZAR-134 fallback for pdf too */
-    }
     return (
         <img
-            src={thumbnailUrl || "/fallback-thumbnail.png"}
+            src={thumbnailUrl || "/fallback-image.png"}
             alt={altText}
             style={{width: "100%", height: "200px", objectFit: "cover"}}
         />

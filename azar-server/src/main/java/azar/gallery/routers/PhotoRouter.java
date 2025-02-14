@@ -101,6 +101,7 @@ public class PhotoRouter extends BaseRouter {
                                 photoService.add(photo)
                                         .onSuccess(dbPhoto -> {
                                             dbPhoto.setData(new byte[0]);
+                                            dbPhoto.setThumbnail(new byte[0]);
                                             sendCreatedResponse(routingContext, jsonManager.toJson(dbPhoto), "Sending photo back to client");
                                             cacheManager.put(CacheKeys.PHOTO_THUMBNAIL.formatted(dbPhoto.getId()), jsonManager.toJson(thumbnail));
                                         })
@@ -120,10 +121,8 @@ public class PhotoRouter extends BaseRouter {
             sendBadRequestResponse(routingContext, "Photo ID is required");
             return;
         }
-        photoService.getById(Integer.valueOf(photoId))
+        photoService.getLightWeightById(Integer.valueOf(photoId))
                 .onSuccess(photo -> {
-                    photo.setData(new byte[0]); //TODO AZAR-134 better to get without data from the start ~ apply everywhere
-                    photo.setThumbnail(new byte[0]);
                     sendOKResponse(routingContext, jsonManager.toJson(photo), "Sending photo[lightweight] with id %s to client".formatted(photoId));
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting photo with id: %s from db, error: %s".formatted(photoId, err.getMessage())));
@@ -135,9 +134,8 @@ public class PhotoRouter extends BaseRouter {
             sendBadRequestResponse(routingContext, "Photo ID is required");
             return;
         }
-        photoService.getById(Integer.valueOf(photoId))
+        photoService.getWithThumbnailById(Integer.valueOf(photoId))
                 .onSuccess(photo -> {
-                    photo.setData(new byte[0]);
                     String base64Data = Base64.getEncoder().encodeToString(photo.getThumbnail());
                     photo.setThumbnail(base64Data.getBytes());
                     sendOKResponse(routingContext, jsonManager.toJson(photo), "Sending photo[with thumbnail] with id %s to client".formatted(photoId));
@@ -149,9 +147,8 @@ public class PhotoRouter extends BaseRouter {
         String photoId = routingContext.pathParam("id");
 
         logger.info("Getting photo from db for {}", photoId);
-        photoService.getById(Integer.valueOf(photoId))
+        photoService.getWithPhotoById(Integer.valueOf(photoId))
                 .onSuccess(photo -> {
-                    photo.setThumbnail(new byte[0]);
                     String base64Data = Base64.getEncoder().encodeToString(photo.getData());
                     photo.setData(base64Data.getBytes());
                     sendOKResponse(routingContext, jsonManager.toJson(photo), "Sending photo[with photo] with id %s to client".formatted(photoId));

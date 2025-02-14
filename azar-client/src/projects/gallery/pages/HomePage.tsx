@@ -9,7 +9,7 @@ import {SourceCodeButton} from "../../shared/components/SourceCodeButton.tsx";
 import {useTheme} from "@mui/material/styles";
 import {LoginResponse} from "../../shared/server/api/responses.ts";
 import {LoginForm} from "../../shared/components/LoginForm.tsx";
-import PhotoGallery from "../components/PhotoGallery.tsx";
+import PhotoGallery from "../components/Gallery/PhotoGallery.tsx";
 
 export function GalleryHomePage() {
     const [showLoginForm, setShowLoginForm] = useState(false);

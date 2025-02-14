@@ -1,4 +1,4 @@
-import {UserType} from "../../models/models.ts";
+import {UserType} from "../../../cloud/models/models.ts";
 
 export interface LoginResponse {
     success: boolean;

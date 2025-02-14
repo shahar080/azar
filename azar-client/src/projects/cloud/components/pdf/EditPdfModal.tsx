@@ -4,6 +4,7 @@ import {PdfFile} from "../../models/models.ts";
 import CustomLabel from "../label/CustomLabel.tsx";
 import InputAdornment from "@mui/material/InputAdornment";
 import {Description, Notes} from "@mui/icons-material";
+import {getFileExtension} from "../sharedLogic.ts";
 
 interface EditPdfModalProps {
     open: boolean;
@@ -73,9 +74,12 @@ const EditPdfModal: React.FC<EditPdfModalProps> = ({
                     value={fileName}
                     onChange={(e) => setFileName(e.target.value)}
                     onBlur={() => {
-                        if (!fileName.endsWith('.pdf')) {
-                            const baseName = fileName.replace(/\.[^/.]+$/, '');
-                            setFileName(`${baseName}.pdf`);
+                        if (pdf) {
+                            const fileExtension = getFileExtension(pdf.fileName);
+                            if (!fileName.endsWith(`.${fileExtension}`)) {
+                                const baseName = fileName.replace(/\.[^/.]+$/, '');
+                                setFileName(`${baseName}.${fileExtension}`);
+                            }
                         }
                     }}
                     margin="dense"

@@ -11,6 +11,8 @@ import {
     CLOUD_MANAGE_PREFERENCES_ROUTE,
     CLOUD_MANAGE_USERS_ROUTE,
     CLOUD_ROUTE,
+    GALLERY_MANAGE_ROUTE,
+    GALLERY_ROUTE,
     LANDING_ROUTE,
     WEATHER_ROUTE,
     WHOAMI_MANAGE_CV_ROUTE,
@@ -22,6 +24,8 @@ import WhoAmIManageCVPage from "./projects/whoami/pages/ManageCVPage.tsx";
 import WhoAmIManageWHOAMIPage from "./projects/whoami/pages/ManageWhoAmIPage.tsx";
 import ManageEmailPage from "./projects/whoami/pages/ManageEmailPage.tsx";
 import {WeatherHomePage} from "./projects/weather/pages/HomePage.tsx";
+import {GalleryHomePage} from "./projects/gallery/pages/HomePage.tsx";
+import ManageGalleryPage from "./projects/gallery/pages/ManageGalleryPage.tsx";
 
 function App() {
     return (
@@ -52,6 +56,10 @@ function App() {
                            redirectPath={CLOUD_LOGIN_ROUTE}><CloudPreferenceManagement/></ProtectedRoute>}/>
 
                 <Route path={WEATHER_ROUTE} element={<WeatherHomePage/>}/>
+
+                <Route path={GALLERY_ROUTE} element={<GalleryHomePage/>}/>
+                <Route path={GALLERY_MANAGE_ROUTE} element={<ProtectedRoute
+                    redirectPath={GALLERY_ROUTE}><ManageGalleryPage/></ProtectedRoute>}/>
             </Routes>
         </>
     )

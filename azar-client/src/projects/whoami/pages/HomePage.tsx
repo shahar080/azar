@@ -2,10 +2,10 @@ import {Box, Button, ButtonBase, Container, Grid, Modal, Typography, useMediaQue
 import {GeneralMenu} from "../../shared/components/GeneralMenu.tsx";
 import {useEffect, useState} from "react";
 import PdfModal from "../components/PdfModal.tsx";
-import {LoginForm} from "../components/LoginForm.tsx";
+import {LoginForm} from "../../shared/components/LoginForm.tsx";
 import {login} from "../../shared/store/authSlice.ts";
 import {useDispatch} from "react-redux";
-import {LoginResponse} from "../../cloud/server/api/responses.ts";
+import {LoginResponse} from "../../shared/server/api/responses.ts";
 import {getWhoAmIData} from "../server/api/whoAmIDataApi.ts";
 import {WhoAmIData} from "../models/models.ts";
 import {useNavigate} from "react-router-dom";

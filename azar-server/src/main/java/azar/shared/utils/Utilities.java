@@ -63,12 +63,21 @@ public class Utilities {
 
                 return byteArrayOutputStream.toByteArray();
             } catch (Exception e) {
-                return null;
+                return new byte[0];
             }
         });
     }
 
     public static boolean isValidEmail(String email) {
         return email != null && Pattern.matches(EMAIL_REGEX, email);
+    }
+
+    public static boolean isInteger(String maybeInteger) {
+        try {
+            Integer.parseInt(maybeInteger);
+            return true;
+        } catch (NumberFormatException ignored) {
+        }
+        return false;
     }
 }

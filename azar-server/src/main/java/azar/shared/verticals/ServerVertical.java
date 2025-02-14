@@ -2,6 +2,7 @@ package azar.shared.verticals;
 
 import azar.cloud.routers.CloudMainRouter;
 import azar.cloud.utils.AuthService;
+import azar.gallery.routers.GalleryMainRouter;
 import azar.shared.properties.AppProperties;
 import azar.weather.routers.WeatherMainRouter;
 import azar.whoami.routers.WhoAmIMainRouter;
@@ -36,8 +37,8 @@ public class ServerVertical extends AbstractVerticle {
 
     private final CloudMainRouter cloudMainRouter;
     private final WhoAmIMainRouter whoAmIMainRouter;
-
     private final WeatherMainRouter weatherMainRouter;
+    private final GalleryMainRouter galleryMainRouter;
 
     private final boolean IS_DEV;
     private final List<String> ALLOWED_ORIGINS;
@@ -46,12 +47,13 @@ public class ServerVertical extends AbstractVerticle {
     @Inject
     public ServerVertical(AppProperties appProperties, AuthService authService,
                           CloudMainRouter cloudMainRouter, WhoAmIMainRouter whoAmIMainRouter,
-                          WeatherMainRouter weatherMainRouter) {
+                          WeatherMainRouter weatherMainRouter, GalleryMainRouter galleryMainRouter) {
         this.appProperties = appProperties;
         this.jwtAuth = authService.getJwtAuth();
         this.cloudMainRouter = cloudMainRouter;
         this.whoAmIMainRouter = whoAmIMainRouter;
         this.weatherMainRouter = weatherMainRouter;
+        this.galleryMainRouter = galleryMainRouter;
         this.IS_DEV = appProperties.getBooleanProperty("IS_DEV", false);
         this.ALLOWED_ORIGINS = appProperties.getListProperty("ALLOWED_ORIGINS");
     }
@@ -83,6 +85,7 @@ public class ServerVertical extends AbstractVerticle {
             apiRouter.route("/c/*").subRouter(cloudMainRouter.create(vertx, jwtAuth));
             apiRouter.route("/wai/*").subRouter(whoAmIMainRouter.create(vertx));
             apiRouter.route("/w/*").subRouter(weatherMainRouter.create(vertx));
+            apiRouter.route("/g/*").subRouter(galleryMainRouter.create(vertx, jwtAuth));
 
             mainRouter.route("/api/*").subRouter(apiRouter);
 

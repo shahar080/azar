@@ -72,3 +72,41 @@ export const sortData = (array: any[],
         return 0;
     });
 };
+
+export function formatAsDateAndTime(dateString: string): string {
+    const date = new Date(dateString);
+
+    const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+
+    const time = timeFormatter.format(date);
+    const dateFormatted = dateFormatter.format(date);
+
+    return `${time} ${dateFormatted}`;
+}
+
+export function formatAsDate(dateString: string): string {
+    const date = new Date(dateString);
+
+    const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+
+    return dateFormatter.format(date);
+}
+
+export function getFileExtension(filename: string): string | null {
+    const index = filename.lastIndexOf(".");
+    return index !== -1 ? filename.slice(index + 1) : null;
+}

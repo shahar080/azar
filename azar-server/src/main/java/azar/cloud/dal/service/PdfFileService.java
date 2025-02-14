@@ -43,7 +43,7 @@ public class PdfFileService extends GenericService<azar.cloud.entities.db.PdfFil
     }
 
     public Future<byte[]> getThumbnailById(Integer id) {
-        return pdfFileDao.getThumbnailById(id);
+        return pdfFileDao.getThumbnailById("pdf_files", id);
     }
 
     @Override

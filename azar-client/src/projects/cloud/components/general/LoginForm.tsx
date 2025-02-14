@@ -6,7 +6,7 @@ import {AxiosError} from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 import {AccountCircle} from "@mui/icons-material";
 import {useLoading} from "../../../shared/utils/loading/useLoading.ts";
-import {LoginResponse} from "../../server/api/responses.ts";
+import {LoginResponse} from "../../../shared/server/api/responses.ts";
 
 interface LoginFormProps {
     handleGoBack: () => void;

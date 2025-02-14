@@ -51,23 +51,6 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
         }, false);
     }
 
-    public Future<byte[]> getThumbnailById(Integer id) {
-        return vertx.executeBlocking(() -> {
-            try (Session session = openSession()) {
-                return session
-                        .createNativeQuery(
-                                "SELECT lo_get(p.thumbnail) FROM pdf_files p WHERE p.id = :id",
-                                byte[].class
-                        )
-                        .setParameter("id", id)
-                        .getSingleResult();
-            } catch (Exception e) {
-                logger.error("Could not get thumbnail by id from db!", e);
-            }
-            return new byte[0];
-        }, false);
-    }
-
     public Future<String> getOwnerByPdfId(Integer id) {
         return vertx.executeBlocking(() -> {
             try (Session session = openSession()) {
@@ -111,5 +94,8 @@ public class PdfFileDao extends GenericDao<azar.cloud.entities.db.PdfFile> {
         }, false);
     }
 
-
+    @Override
+    protected boolean hasThumbnail() {
+        return true;
+    }
 }

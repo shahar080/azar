@@ -133,6 +133,32 @@ public abstract class GenericDao<T> {
         }, false);
     }
 
+    public Future<byte[]> getThumbnailById(String tableName, Integer id) {
+        return vertx.executeBlocking(() -> {
+            if (!hasThumbnail()) {
+                logger.warn("getThumbnailById was called by unsupported type! {}", getType());
+                return new byte[0];
+            }
+            try (Session session = openSession()) {
+                String query = String.format(
+                        "SELECT lo_get(p.thumbnail) FROM %s p WHERE p.id = :id",
+                        tableName
+                );
+
+                return session.createNativeQuery(query, byte[].class)
+                        .setParameter("id", id)
+                        .getSingleResult();
+            } catch (Exception e) {
+                logger.error("Could not get thumbnail by id from table {}!", tableName, e);
+            }
+            return new byte[0];
+        }, false);
+    }
+
+    protected boolean hasThumbnail() {
+        return false;
+    }
+
     protected abstract Class<T> getType();
 
 }

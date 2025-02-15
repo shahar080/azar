@@ -22,7 +22,7 @@ const GallerySearchBar: React.FC<SearchBarProps> = ({
     const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
-        triggerSearch(e.target.value, selectedLabels);
+        triggerSearch(query, selectedLabels);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {

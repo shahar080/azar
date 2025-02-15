@@ -22,7 +22,7 @@ const PhotoGallery: React.FC = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const isLarge = useMediaQuery(theme.breakpoints.up("lg"));
     const [cityCountries, setCityCountries] = useState<Set<string>>(new Set());
-    const [cityCountryToIds, setCityCountryToIds] = useState<Map<string, string[]>>(new Map());
+    const [cityCountryToIds, setCityCountryToIds] = useState<Map<string, string[]>>(new Map()); // todo string, set
     const [idToCityCountry, setIdToCityCountry] = useState<Map<string, string>>(new Map());
 
     const columns = isMobile ? 1 : isLarge ? 6 : 4;
@@ -93,7 +93,7 @@ const PhotoGallery: React.FC = () => {
     }
 
     const handleSearch = (query: string, labels: string[]) => {
-        if (query && labels) {
+        if ((query && query.length > 0) || (labels && labels.length > 0)) {
             const lowerQuery = query.toLowerCase();
             let textFilteredIds: string[] = [];
             if (query && query.length > 0) {
@@ -105,6 +105,11 @@ const PhotoGallery: React.FC = () => {
             }
 
             const locationFilteredIds = labels.flatMap(label => cityCountryToIds.get(label) ?? []);
+            cityCountryToIds.forEach((ids, cityCountry) => {
+                if (cityCountry.toLowerCase().includes(lowerQuery)) {
+                    locationFilteredIds.push(...ids)
+                }
+            })
             const filteredIds = Array.from(new Set([...textFilteredIds, ...locationFilteredIds]));
             setFilteredPhotosId(filteredIds);
         } else {

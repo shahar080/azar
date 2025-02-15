@@ -3,6 +3,7 @@ package azar.gallery.metadata;
 import azar.gallery.entities.db.GpsMetadata;
 import azar.gallery.entities.db.PhotoMetadata;
 import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
@@ -48,12 +49,11 @@ public class PhotoMetadataExtractor {
     }
 
     private PhotoMetadata extract(Metadata metadata) {
-        String imageHeight = metadata.getFirstDirectoryOfType(JpegDirectory.class).getDescription(JpegDirectory.TAG_IMAGE_HEIGHT);
-        String imageWidth = metadata.getFirstDirectoryOfType(JpegDirectory.class).getDescription(JpegDirectory.TAG_IMAGE_WIDTH);
-        String make = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class).getDescription(ExifIFD0Directory.TAG_MAKE);
-        String model = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class).getDescription(ExifIFD0Directory.TAG_MODEL);
-        String dateTime = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class).getDescription(ExifSubIFDDirectory.TAG_DATETIME);
-
+        String imageHeight = extractValue(metadata, JpegDirectory.class, JpegDirectory.TAG_IMAGE_HEIGHT, "height", "");
+        String imageWidth = extractValue(metadata, JpegDirectory.class, JpegDirectory.TAG_IMAGE_WIDTH, "width", "");
+        String make = extractValue(metadata, ExifIFD0Directory.class, ExifIFD0Directory.TAG_MAKE, "make", "");
+        String model = extractValue(metadata, ExifIFD0Directory.class, ExifIFD0Directory.TAG_MODEL, "model", "");
+        String dateTime = extractValue(metadata, ExifIFD0Directory.class, ExifSubIFDDirectory.TAG_DATETIME, "dateTime", null);
         GpsMetadata gpsMetadata = new GpsMetadata();
         GpsDirectory gps = metadata.getFirstDirectoryOfType(GpsDirectory.class);
         if (gps != null) {
@@ -70,9 +70,16 @@ public class PhotoMetadataExtractor {
                 gpsMetadata.setAltitude(extractAltitude(altitude));
             }
         }
-        Instant date;
+        Instant date = Instant.now();
         if (dateTime != null) {
-            date = Instant.parse(dateTime);
+            try {
+                date = Instant.parse(dateTime);
+            } catch (Exception ignored) {
+                try {
+                    date = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss")).toInstant(ZoneOffset.UTC);
+                } catch (Exception ignored2) {
+                }
+            }
         } else {
             date = Instant.now();
         }
@@ -84,6 +91,16 @@ public class PhotoMetadataExtractor {
                 .dateTaken(date)
                 .gps(gpsMetadata)
                 .build();
+    }
+
+    private String extractValue(Metadata metadata, Class<? extends Directory> clazz, int tag, String label, String defaultValue) {
+        String res = defaultValue;
+        try {
+            res = metadata.getFirstDirectoryOfType(clazz).getDescription(tag);
+        } catch (Exception e) {
+            logger.warn("Could not get image {} due to {}", label, e.getMessage());
+        }
+        return res;
     }
 
     private Double parseDMS(String dms) {
@@ -115,4 +132,5 @@ public class PhotoMetadataExtractor {
         }
         return 0.0;
     }
+
 }

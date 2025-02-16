@@ -6,13 +6,15 @@ import {
     PHOTOS_GET_PHOTO_WITH_THUMBNAIL_API,
     PHOTOS_GET_PHOTOS_ID_API,
     PHOTOS_REFRESH_PHOTO_METADATA_API,
+    PHOTOS_REVERSE_GEOCODE_ALL_PHOTOS_API,
+    PHOTOS_REVERSE_GEOCODE_API,
     PHOTOS_UPDATE_PHOTO_API,
     PHOTOS_UPLOAD_PHOTO_API
 } from "../../utils/constants.ts";
 import {Photo} from "../../models/models.ts";
 import {AxiosError} from "axios";
 import {BaseRequest} from "../../../shared/server/api/requests.ts";
-import {PhotoUpdateRequest} from "./requests.ts";
+import {PhotoReverseGeocodeRequest, PhotoUpdateRequest} from "./requests.ts";
 
 export async function uploadPhoto(photoFile: File): Promise<Photo | undefined> {
     try {
@@ -107,4 +109,26 @@ export async function updatePhoto(photoUpdateRequest: PhotoUpdateRequest): Promi
         console.error('Update photo ' + photoUpdateRequest.photo.id + ' failed', error);
     }
     return undefined;
+}
+
+export async function reverseGeocode(photoReverseGeocodeRequest: PhotoReverseGeocodeRequest): Promise<boolean> {
+    try {
+        const response = await apiClient.post(PHOTOS_REVERSE_GEOCODE_API, photoReverseGeocodeRequest);
+
+        return response.status === 200;
+    } catch (error) {
+        console.error("Failed to reverse geocode for photo id:" + photoReverseGeocodeRequest.photoId, error);
+        throw error;
+    }
+}
+
+export async function reverseGeocodeAllPhotos(baseRequest: BaseRequest): Promise<boolean> {
+    try {
+        const response = await apiClient.post(PHOTOS_REVERSE_GEOCODE_ALL_PHOTOS_API, baseRequest);
+
+        return response.status === 200;
+    } catch (error) {
+        console.error("Failed to reverse geocode all photos", error);
+        throw error;
+    }
 }

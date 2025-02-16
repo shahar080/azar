@@ -1,8 +1,6 @@
 import {Paper, Table, TableBody, TableCell, TableContainer, TableRow} from "@mui/material";
 import {Photo} from "../../models/models.ts";
-
-const truncateText = (text: string, maxLength: number) =>
-    text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+import {truncateText} from "../../../cloud/components/sharedLogic.ts";
 
 const getBottomInformation = (photo: Photo | null, cityCountry: string | undefined) => {
     if (!photo)

@@ -106,7 +106,15 @@ export function formatAsDate(dateString: string): string {
     return dateFormatter.format(date);
 }
 
-export function getFileExtension(filename: string): string | null {
+export function getFileExtension(filename: string): string {
     const index = filename.lastIndexOf(".");
-    return index !== -1 ? filename.slice(index + 1) : null;
+    return index !== -1 ? filename.slice(index + 1) : filename;
 }
+
+export function getFileName(filenameWithExtension: string): string {
+    const index = filenameWithExtension.lastIndexOf(".");
+    return index !== -1 ? filenameWithExtension.slice(0, index) : filenameWithExtension;
+}
+
+export const truncateText = (text: string, maxLength: number) =>
+    text.length > maxLength ? text.slice(0, maxLength) + "..." : text;

@@ -69,7 +69,7 @@ export function GalleryHomePage() {
                 </Typography>
             </Box>
 
-            <PhotoGallery/>
+            <PhotoGallery viewMode={"web"}/>
 
             <Box
                 sx={{

@@ -6,10 +6,15 @@ import ShowPhotoModal from "../PhotoModal/ShowPhotoModal.tsx";
 import PhotoCard from "../PhotoCard.tsx";
 import GallerySearchBar from "./GallerySearchBar.tsx";
 import {Photo} from "../../models/models.ts";
-import {reverseGeocode} from "../../server/api/openStreetMapApi.ts";
 import {formatAsDate} from "../../../cloud/components/sharedLogic.ts";
+import HeatmapModal from "../HeatMap/HeatmapModal.tsx";
 
-const PhotoGallery: React.FC = () => {
+interface PhotoGalleryProps {
+    viewMode: "web" | "modal";
+    gpsPhotos?: Photo[];
+}
+
+const PhotoGallery: React.FC<PhotoGalleryProps> = ({viewMode, gpsPhotos}) => {
     const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -22,8 +27,9 @@ const PhotoGallery: React.FC = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const isLarge = useMediaQuery(theme.breakpoints.up("lg"));
     const [cityCountries, setCityCountries] = useState<Set<string>>(new Set());
-    const [cityCountryToIds, setCityCountryToIds] = useState<Map<string, string[]>>(new Map()); // todo string, set
+    const [cityCountryToIds, setCityCountryToIds] = useState<Map<string, Set<string>>>(new Map());
     const [idToCityCountry, setIdToCityCountry] = useState<Map<string, string>>(new Map());
+    const [showHeatMap, setShowHeatMap] = useState<boolean>(false);
 
     const columns = isMobile ? 1 : isLarge ? 6 : 4;
 
@@ -64,58 +70,65 @@ const PhotoGallery: React.FC = () => {
     };
 
     const onPhotoLoaded = (photo: Photo) => {
-        setPhotos(prevState => [...prevState, photo]);
+        setPhotos((prevState) => [...prevState, photo]);
         if (photo.photoMetadata.gps) {
-            if (photo.photoMetadata.gps.latitude && photo.photoMetadata.gps.latitude !== 0 &&
-                photo.photoMetadata.gps.longitude && photo.photoMetadata.gps.longitude !== 0) {
-                reverseGeocode(photo.photoMetadata.gps.latitude, photo.photoMetadata.gps.longitude)
-                    .then(cityCountry => {
-                        if (cityCountry === "") return;
-                        setCityCountryToIds(prevState => {
-                            const next = new Map(prevState);
-                            const nextArr = next.get(cityCountry) || [];
-                            next.set(cityCountry, [...nextArr, photo.id]);
-                            return next;
-                        });
-                        setCityCountries(prevState => {
-                            const next = new Set(prevState)
-                            next.add(cityCountry);
-                            return next
-                        });
-                        setIdToCityCountry(prevState => {
-                            const next = new Map(prevState);
-                            next.set(String(photo.id), cityCountry);
-                            return next;
-                        });
-                    });
+            if (
+                photo.photoMetadata.gps.city &&
+                photo.photoMetadata.gps.city.length !== 0 &&
+                photo.photoMetadata.gps.country &&
+                photo.photoMetadata.gps.country.length !== 0
+            ) {
+                const cityCountry = `${photo.photoMetadata.gps.city}, ${photo.photoMetadata.gps.country}`;
+                setCityCountryToIds((prevState) => {
+                    const next = new Map(prevState);
+                    const existingSet = next.get(cityCountry) || new Set<string>();
+                    existingSet.add(photo.id);
+                    next.set(cityCountry, existingSet);
+                    return next;
+                });
+                setCityCountries((prevState) => {
+                    const next = new Set(prevState);
+                    next.add(cityCountry);
+                    return next;
+                });
+                setIdToCityCountry((prevState) => {
+                    const next = new Map(prevState);
+                    next.set(String(photo.id), cityCountry);
+                    return next;
+                });
             }
         }
-    }
+    };
 
     const handleSearch = (query: string, labels: string[]) => {
         if ((query && query.length > 0) || (labels && labels.length > 0)) {
             const lowerQuery = query.toLowerCase();
             let textFilteredIds: string[] = [];
             if (query && query.length > 0) {
-                textFilteredIds = photos.filter(photo =>
-                    photo.name.toLowerCase().includes(lowerQuery) ||
-                    photo.description.toLowerCase().includes(lowerQuery) ||
-                    formatAsDate(photo.photoMetadata.dateTaken).toLowerCase().includes(lowerQuery)
-                ).map(photo => photo.id);
+                textFilteredIds = photos
+                    .filter(
+                        (photo) =>
+                            photo.name.toLowerCase().includes(lowerQuery) ||
+                            photo.description.toLowerCase().includes(lowerQuery) ||
+                            formatAsDate(photo.photoMetadata.dateTaken).toLowerCase().includes(lowerQuery)
+                    )
+                    .map((photo) => photo.id);
             }
 
-            const locationFilteredIds = labels.flatMap(label => cityCountryToIds.get(label) ?? []);
+            const locationFilteredIds = labels.flatMap((label) =>
+                Array.from(cityCountryToIds.get(label) ?? new Set<string>())
+            );
             cityCountryToIds.forEach((ids, cityCountry) => {
                 if (cityCountry.toLowerCase().includes(lowerQuery)) {
-                    locationFilteredIds.push(...ids)
+                    locationFilteredIds.push(...ids);
                 }
-            })
+            });
             const filteredIds = Array.from(new Set([...textFilteredIds, ...locationFilteredIds]));
             setFilteredPhotosId(filteredIds);
         } else {
             setFilteredPhotosId(photosId);
         }
-    }
+    };
 
     useEffect(() => {
         fetchData();
@@ -163,11 +176,17 @@ const PhotoGallery: React.FC = () => {
                     },
                     "&::-webkit-scrollbar-track": {backgroundColor: "transparent"},
                     paddingRight: 1,
-                    justifyItems: "center"
+                    justifyItems: "center",
                 }}
             >
-                <GallerySearchBar onSearch={handleSearch} cityCountries={cityCountries}/>
-                <Grid container spacing={5} p={"1vw"} justifyContent={"center"}>
+                {viewMode === "web" && (
+                    <GallerySearchBar
+                        onSearch={handleSearch}
+                        cityCountries={cityCountries}
+                        onOpenHeatMap={() => setShowHeatMap(true)}
+                    />
+                )}
+                <Grid container spacing={viewMode === "web" ? 5 : 1} p={"1vw"} justifyContent={"center"}>
                     {isLoading ? (
                         <Typography mt={"3vw"} variant={"h6"} color="primary">
                             Loading photos...
@@ -177,18 +196,48 @@ const PhotoGallery: React.FC = () => {
                             No photos available.
                         </Typography>
                     ) : (
-                        filteredPhotosId.slice(0, visibleCount).map((photoId) => (
-                            <Grid item xs={10} sm={5} md={3} lg={2} key={photoId}>
-                                <PhotoCard
-                                    photoId={photoId}
-                                    handleTouchStart={handleTouchStart}
-                                    handleTouchEnd={handleTouchEnd}
-                                    handleThumbnailClick={handleThumbnailClick}
-                                    onPhotoLoaded={onPhotoLoaded}
-                                    cityCountry={idToCityCountry.get(photoId)}
-                                />
-                            </Grid>
-                        ))
+                        <>
+                            {viewMode === "web" ? (
+                                filteredPhotosId.slice(0, visibleCount).map((photoId) => (
+                                    <Grid
+                                        item
+                                        xs={10}
+                                        sm={5}
+                                        md={3}
+                                        lg={2}
+                                        key={photoId}>
+                                        <PhotoCard
+                                            photoId={photoId}
+                                            handleTouchStart={handleTouchStart}
+                                            handleTouchEnd={handleTouchEnd}
+                                            handleThumbnailClick={handleThumbnailClick}
+                                            onPhotoLoaded={onPhotoLoaded}
+                                            cityCountry={idToCityCountry.get(photoId)}
+                                            viewMode={viewMode}
+                                        />
+                                    </Grid>
+                                ))
+                            ) : (
+                                (gpsPhotos || []).slice(0, visibleCount).map((photo) => (
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        sm={7}
+                                        md={4}
+                                        lg={3}
+                                        key={photo.id}>
+                                        <PhotoCard
+                                            photoId={photo.id}
+                                            handleTouchStart={handleTouchStart}
+                                            handleTouchEnd={handleTouchEnd}
+                                            handleThumbnailClick={handleThumbnailClick}
+                                            cityCountry={idToCityCountry.get(photo.id)}
+                                            viewMode={viewMode}
+                                        />
+                                    </Grid>
+                                ))
+                            )}
+                        </>
                     )}
                 </Grid>
             </Box>
@@ -200,6 +249,12 @@ const PhotoGallery: React.FC = () => {
                     cityCountry={idToCityCountry.get(String(selectedPhotoId))}
                 />
             )}
+            {showHeatMap &&
+                <HeatmapModal
+                    photosId={photosId}
+                    onClose={() => setShowHeatMap(false)}
+                />
+            }
         </>
     );
 };

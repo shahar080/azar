@@ -1,7 +1,5 @@
 package azar.gallery.routers;
 
-import azar.whoami.routers.CVRouter;
-import azar.whoami.routers.EmailRouter;
 import com.google.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -14,17 +12,20 @@ import io.vertx.ext.web.Router;
 public class GalleryMainRouter {
 
     private final PhotoRouter photoRouter;
+    private final HeatmapRouter heatmapRouter;
 
     @Inject
-    public GalleryMainRouter(PhotoRouter photoRouter) {
+    public GalleryMainRouter(PhotoRouter photoRouter, HeatmapRouter heatmapRouter) {
         this.photoRouter = photoRouter;
+        this.heatmapRouter = heatmapRouter;
     }
 
     public Router create(Vertx vertx, JWTAuth jwtAuth) {
-        Router whoAmIMainRouter = Router.router(vertx);
+        Router galleryMainRouter = Router.router(vertx);
 
-        whoAmIMainRouter.route("/photo/*").subRouter(photoRouter.create(vertx, jwtAuth));
+        galleryMainRouter.route("/photo/*").subRouter(photoRouter.create(vertx, jwtAuth));
+        galleryMainRouter.route("/heatMap/*").subRouter(heatmapRouter.create(vertx));
 
-        return whoAmIMainRouter;
+        return galleryMainRouter;
     }
 }

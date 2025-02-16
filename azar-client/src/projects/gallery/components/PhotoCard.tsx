@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {getPhotoWithThumbnail} from "../server/api/photoApi.ts";
 import {Photo} from "../models/models.ts";
 import {base64ToUint8Array, byteArrayToString} from "../../shared/utils/utilities.ts";
-import {formatAsDate} from "../../cloud/components/sharedLogic.ts";
+import {formatAsDate, getFileName, truncateText} from "../../cloud/components/sharedLogic.ts";
 
 
 interface PhotoCardProps {
@@ -12,8 +12,10 @@ interface PhotoCardProps {
     handleTouchStart: (photoId: string) => void;
     handleTouchEnd: () => void;
     handleThumbnailClick: (photoId: string) => void;
-    onPhotoLoaded: (photo: Photo) => void;
+    onPhotoLoaded?: (photo: Photo) => void;
     cityCountry: string | undefined;
+    viewMode: "web" | "modal";
+
 }
 
 const PhotoCard: React.FC<PhotoCardProps> = ({
@@ -22,20 +24,21 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
                                                  handleTouchEnd,
                                                  handleThumbnailClick,
                                                  onPhotoLoaded,
-                                                 cityCountry
+                                                 cityCountry,
+                                                 viewMode,
                                              }) => {
-    const [photo, setPhoto] = useState<Photo | null>(null);
+    const [photoCardPhoto, setPhotoCardPhoto] = useState<Photo | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [photoDate, setPhotoDate] = useState<string>("");
-    const [cardTooltip, setCardTooltip] = useState<string[]>(["test1", "test12"]);
+    const [cardTooltip, setCardTooltip] = useState<string[]>([""]);
 
     const fetchData = () => {
         setIsLoading(true);
 
         getPhotoWithThumbnail(photoId)
             .then(value => {
-                setPhoto(value);
-                onPhotoLoaded(value);
+                setPhotoCardPhoto(value);
+                void (onPhotoLoaded && onPhotoLoaded(value));
             })
             .catch(error => console.error("Error fetching photo:", error))
             .finally(() => setIsLoading(false));
@@ -48,29 +51,29 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
     useEffect(() => {
         const getTooltipData = (stringifiedDate: string): string[] => {
             const tooltipArr: string[] = [];
-            if (photo) {
-                void (photo.name && tooltipArr.push(`Name: ${photo.name}`));
+            if (photoCardPhoto) {
+                void (photoCardPhoto.name && tooltipArr.push(`Name: ${photoCardPhoto.name}`));
                 void (
-                    photo.description &&
-                    tooltipArr.push(`Description: ${photo.description.length > 100
-                        ? photo.description.slice(0, 100) + "..."
-                        : photo.description}`)
+                    photoCardPhoto.description &&
+                    tooltipArr.push(`Description: ${photoCardPhoto.description.length > 100
+                        ? photoCardPhoto.description.slice(0, 100) + "..."
+                        : photoCardPhoto.description}`)
                 );
                 void (cityCountry && tooltipArr.push(`Location: ${cityCountry}`));
-                void (photo.photoMetadata.imageHeight && tooltipArr.push(`Height: ${photo.photoMetadata.imageHeight}`));
-                void (photo.photoMetadata.imageWidth && tooltipArr.push(`Width: ${photo.photoMetadata.imageWidth}`));
-                void (photo.photoMetadata.cameraMake && tooltipArr.push(`CameraMake: ${photo.photoMetadata.cameraMake}`));
-                void (photo.photoMetadata.cameraModel && tooltipArr.push(`CameraModel: ${photo.photoMetadata.cameraModel}`));
+                void (photoCardPhoto.photoMetadata.imageHeight && tooltipArr.push(`Height: ${photoCardPhoto.photoMetadata.imageHeight}`));
+                void (photoCardPhoto.photoMetadata.imageWidth && tooltipArr.push(`Width: ${photoCardPhoto.photoMetadata.imageWidth}`));
+                void (photoCardPhoto.photoMetadata.cameraMake && tooltipArr.push(`CameraMake: ${photoCardPhoto.photoMetadata.cameraMake}`));
+                void (photoCardPhoto.photoMetadata.cameraModel && tooltipArr.push(`CameraModel: ${photoCardPhoto.photoMetadata.cameraModel}`));
                 void (stringifiedDate && tooltipArr.push(`Date: ${stringifiedDate}`));
             }
             return tooltipArr;
         }
 
-        if (photo && photo.photoMetadata) {
-            setPhotoDate(formatAsDate(photo.photoMetadata.dateTaken));
-            setCardTooltip(getTooltipData(formatAsDate(photo.photoMetadata.dateTaken)))
+        if (photoCardPhoto && photoCardPhoto.photoMetadata) {
+            setPhotoDate(formatAsDate(photoCardPhoto.photoMetadata.dateTaken));
+            setCardTooltip(getTooltipData(formatAsDate(photoCardPhoto.photoMetadata.dateTaken)))
         }
-    }, [photo]);
+    }, [photoCardPhoto]);
 
 
     return (
@@ -96,17 +99,17 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
                 }}
             >
                 <CardActionArea onClick={() => handleThumbnailClick(photoId)}>
-                    {isLoading || photo === null ? (
+                    {isLoading || photoCardPhoto === null ? (
                             <Typography mt={"3vw"} variant={"h6"} color="primary">Loading photo...</Typography>
                         )
                         :
                         <>
                             <PhotoThumbnail
-                                photoBlob={new Blob([base64ToUint8Array(byteArrayToString(photo.thumbnail))], {type: "image/png"})}
-                                altText={photo.name}/>
+                                photoBlob={new Blob([base64ToUint8Array(byteArrayToString(photoCardPhoto.thumbnail))], {type: "image/png"})}
+                                altText={photoCardPhoto.name}/>
                             <CardContent sx={{display: "flex", justifyContent: "space-between"}}>
                                 <Typography variant="body2" color="text.secondary">
-                                    {photo.name}
+                                    {viewMode === "web" ? truncateText(getFileName(photoCardPhoto.name), 15) : truncateText(getFileName(photoCardPhoto.name), 8)}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {photoDate}

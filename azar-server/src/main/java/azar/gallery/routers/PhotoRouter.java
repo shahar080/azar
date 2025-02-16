@@ -1,9 +1,15 @@
 package azar.gallery.routers;
 
 import azar.gallery.dal.service.PhotoService;
+import azar.gallery.entities.db.GpsMetadata;
 import azar.gallery.entities.db.Photo;
 import azar.gallery.entities.db.PhotoMetadata;
+import azar.gallery.entities.external.mapbox.api.LatLong;
+import azar.gallery.entities.external.mapbox.api.MBProperties;
+import azar.gallery.entities.requests.photo.PhotoReverseGeocodeRequest;
 import azar.gallery.entities.requests.photo.PhotoUpdateRequest;
+import azar.gallery.entities.responses.ReverseGeocodeData;
+import azar.gallery.managers.GeocodeManager;
 import azar.gallery.metadata.PhotoMetadataExtractor;
 import azar.gallery.utils.Utilities;
 import azar.shared.cache.CacheKeys;
@@ -13,16 +19,17 @@ import azar.shared.entities.requests.BaseRequest;
 import azar.shared.routers.BaseRouter;
 import azar.shared.utils.JsonManager;
 import com.google.inject.Inject;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.JWTAuthHandler;
-import jnr.ffi.provider.jffi.NumberUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -44,16 +51,18 @@ public class PhotoRouter extends BaseRouter {
     private final CacheManager cacheManager;
     private final PhotoMetadataExtractor photoMetadataExtractor;
     private final UserService userService;
+    private final GeocodeManager geocodeManager;
 
     @Inject
     public PhotoRouter(Vertx vertx, JsonManager jsonManager, PhotoService photoService, CacheManager cacheManager,
-                       PhotoMetadataExtractor photoMetadataExtractor, UserService userService) {
+                       PhotoMetadataExtractor photoMetadataExtractor, UserService userService, GeocodeManager geocodeManager) {
         this.vertx = vertx;
         this.jsonManager = jsonManager;
         this.photoService = photoService;
         this.cacheManager = cacheManager;
         this.photoMetadataExtractor = photoMetadataExtractor;
         this.userService = userService;
+        this.geocodeManager = geocodeManager;
     }
 
     public Router create(Vertx vertx, JWTAuth jwtAuth) {
@@ -69,6 +78,8 @@ public class PhotoRouter extends BaseRouter {
         photoRouter.post(OPS_PREFIX_STRING + "/refreshMetadata/:id").handler(this::handleRefreshMetadata);
         photoRouter.post(OPS_PREFIX_STRING + "/delete/:id").handler(this::handleDeletePhoto);
         photoRouter.post(OPS_PREFIX_STRING + "/update").handler(this::handleUpdatePhoto);
+        photoRouter.post(OPS_PREFIX_STRING + "/reverseGeocode").handler(this::handleReverseGeocode);
+        photoRouter.post(OPS_PREFIX_STRING + "/reverseGeocodeAllPhotos").handler(this::handleReverseGeocodeAllPhotos);
 
         return photoRouter;
     }
@@ -122,9 +133,7 @@ public class PhotoRouter extends BaseRouter {
             return;
         }
         photoService.getLightWeightById(Integer.valueOf(photoId))
-                .onSuccess(photo -> {
-                    sendOKResponse(routingContext, jsonManager.toJson(photo), "Sending photo[lightweight] with id %s to client".formatted(photoId));
-                })
+                .onSuccess(photo -> sendOKResponse(routingContext, jsonManager.toJson(photo), "Sending photo[lightweight] with id %s to client".formatted(photoId)))
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Error getting photo with id: %s from db, error: %s".formatted(photoId, err.getMessage())));
     }
 
@@ -238,7 +247,7 @@ public class PhotoRouter extends BaseRouter {
         if (isInvalidUsername(routingContext, currentUser)) return;
 
         Photo photo = photoUpdateRequest.getPhoto();
-        photoService.updatePartial(photo)
+        photoService.editPhotoPartial(photo)
                 .onSuccess(isSuccess -> {
                     if (isSuccess) {
                         sendOKResponse(routingContext, jsonManager.toJson(photo),
@@ -248,6 +257,88 @@ public class PhotoRouter extends BaseRouter {
                     }
                 })
                 .onFailure(err -> sendInternalErrorResponse(routingContext, "Failed to update photo with ID: %s, error: %s".formatted(photo.getId(), err.getMessage())));
+    }
+
+    private void handleReverseGeocode(RoutingContext routingContext) {
+        PhotoReverseGeocodeRequest photoReverseGeocodeRequest = jsonManager.fromJson(routingContext.body().asString(), PhotoReverseGeocodeRequest.class);
+        String currentUser = photoReverseGeocodeRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
+        GpsMetadata gpsMetadata = photoReverseGeocodeRequest.getGpsMetadata();
+
+        if (gpsMetadata.getLatitude() == 0 && gpsMetadata.getLongitude() == 0) {
+            sendBadRequestResponse(routingContext, "Can't reverseGeocode for lat=0, long=0");
+            return;
+        }
+
+        geocodeManager.reverseGeocode(gpsMetadata.getLatitude(), gpsMetadata.getLongitude())
+                .onSuccess(mbData -> {
+                    ReverseGeocodeData reverseGeocodeData = new ReverseGeocodeData();
+                    mbData.getFeatures().forEach(mbFeature -> {
+                        MBProperties properties = mbFeature.getProperties();
+                        if (properties.getFeature_type().equals("place")) {
+                            reverseGeocodeData.setPlace(properties.getName());
+                        }
+                        if (properties.getFeature_type().equals("region")) {
+                            reverseGeocodeData.setRegion(properties.getName());
+                        }
+                        if (properties.getFeature_type().equals("country")) {
+                            reverseGeocodeData.setCountry(properties.getName());
+                        }
+                    });
+                    if (reverseGeocodeData.hasAllData()) {
+                        photoService.editGpsMetadataPartial(photoReverseGeocodeRequest.getPhotoId(), reverseGeocodeData)
+                                .onSuccess(isSuccess -> {
+                                    if (isSuccess) {
+                                        sendOKResponse(routingContext, "Successfully updated gpsMetadata using reverse geocode");
+                                    } else {
+                                        sendInternalErrorResponse(routingContext, "Failed to update gpsMetadata using reverse geocode");
+                                    }
+                                })
+                                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to update gpsMetadata using reverse geocode"));
+                    } else {
+                        sendInternalErrorResponse(routingContext, "Could not get reverse geocode data for %s".formatted(gpsMetadata));
+                    }
+                })
+                .onFailure(err -> sendInternalErrorResponse(routingContext, "Failed to update photo with ID: %s, error: %s".formatted(gpsMetadata.getId(), err.getMessage())));
+    }
+
+    private void handleReverseGeocodeAllPhotos(RoutingContext routingContext) {
+        BaseRequest baseRequest = jsonManager.fromJson(routingContext.body().asString(), BaseRequest.class);
+        String currentUser = baseRequest.getCurrentUser();
+        if (isInvalidUsername(routingContext, currentUser)) return;
+
+        photoService.getAllGps()
+                .onSuccess(photos -> {
+                    List<LatLong> latLongs = new ArrayList<>();
+                    photos.forEach(photo -> latLongs.add(new LatLong(photo.getPhotoMetadata().getGps().getLatitude(), photo.getPhotoMetadata().getGps().getLongitude())));
+                    geocodeManager.reverseGeocodeBatch(latLongs)
+                            .onSuccess(mbDatas -> {
+                                List<Future<Boolean>> futures = new ArrayList<>();
+                                for (int i = 0; i < photos.size() && i < mbDatas.size(); i++) {
+                                    ReverseGeocodeData reverseGeocodeData = new ReverseGeocodeData();
+                                    mbDatas.get(i).getFeatures().forEach(mbFeature -> {
+                                        MBProperties properties = mbFeature.getProperties();
+                                        if (properties.getFeature_type().equals("place")) {
+                                            reverseGeocodeData.setPlace(properties.getName());
+                                        }
+                                        if (properties.getFeature_type().equals("region")) {
+                                            reverseGeocodeData.setRegion(properties.getName());
+                                        }
+                                        if (properties.getFeature_type().equals("country")) {
+                                            reverseGeocodeData.setCountry(properties.getName());
+                                        }
+                                    });
+                                    if (reverseGeocodeData.hasAllData()) {
+                                        futures.add(photoService.editGpsMetadataPartial(String.valueOf(photos.get(i).getId()), reverseGeocodeData));
+                                    }
+                                }
+                                Future.all(futures)
+                                        .onSuccess(_ -> sendOKResponse(routingContext, "Successfully reverse geocoded all photos"))
+                                        .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to reverse gecode all photos"));
+                            });
+                })
+                .onFailure(_ -> sendInternalErrorResponse(routingContext, "Failed to reverse gecode all photos"));
     }
 
 }

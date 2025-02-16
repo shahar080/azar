@@ -3,17 +3,13 @@ package azar.gallery.dal.service;
 import azar.gallery.dal.dao.PhotoDao;
 import azar.gallery.entities.db.Photo;
 import azar.gallery.entities.db.PhotoMetadata;
+import azar.gallery.entities.responses.ReverseGeocodeData;
 import azar.gallery.metadata.PhotoMetadataExtractor;
 import azar.shared.dal.service.GenericService;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import net.coobird.thumbnailator.Thumbnails;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -83,8 +79,8 @@ public class PhotoService extends GenericService<Photo> {
         });
     }
 
-    public Future<Boolean> updatePartial(Photo photo) {
-        return photoDao.updatePartial(photo);
+    public Future<Boolean> editPhotoPartial(Photo photo) {
+        return photoDao.editPhotoPartial(photo);
     }
 
     public Future<Photo> getLightWeightById(Integer id) {
@@ -97,5 +93,18 @@ public class PhotoService extends GenericService<Photo> {
 
     public Future<Photo> getWithPhotoById(Integer id) {
         return photoDao.getWithPhotoById(id);
+    }
+
+    public Future<List<Photo>> getHeatmapPhotos() {
+        return photoDao.getHeatmapPhotos();
+    }
+
+    public Future<Boolean> editGpsMetadataPartial(String photoId, ReverseGeocodeData reverseGeocodeData) {
+        String country = reverseGeocodeData.getCountry() != null ? reverseGeocodeData.getCountry() : reverseGeocodeData.getRegion();
+        return photoDao.editGpsMetadataPartial(photoId, reverseGeocodeData.getPlace(), country);
+    }
+
+    public Future<List<Photo>> getAllGps() {
+        return photoDao.getAllGps();
     }
 }

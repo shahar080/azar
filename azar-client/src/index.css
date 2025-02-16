@@ -33,7 +33,7 @@ html, body {
 }
 
 /* Material UI button adjustment */
-html .MuiButton-root {
+html .MuiButton-root, .MuiToggleButtonGroup-grouped {
     text-transform: none !important;
 }
 

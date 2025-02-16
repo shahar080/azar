@@ -11,6 +11,7 @@ interface GalleryContextMenuProps {
     onEdit: (photo: Photo) => void;
     onDelete: (photo: Photo) => void;
     onRefreshMetadata: (photo: Photo) => void;
+    onReverseGeocode: (photo: Photo) => void;
 }
 
 const GalleryContextMenu: React.FC<GalleryContextMenuProps> = ({
@@ -21,6 +22,7 @@ const GalleryContextMenu: React.FC<GalleryContextMenuProps> = ({
                                                                    onEdit,
                                                                    onDelete,
                                                                    onRefreshMetadata,
+                                                                   onReverseGeocode,
                                                                }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +54,7 @@ const GalleryContextMenu: React.FC<GalleryContextMenuProps> = ({
             <MenuItem onClick={() => photo && onOpen(photo)}>Open</MenuItem>
             <MenuItem onClick={() => photo && onEdit(photo)}>Edit</MenuItem>
             <MenuItem onClick={() => photo && onRefreshMetadata(photo)}>Refresh metadata</MenuItem>
+            <MenuItem onClick={() => photo && onReverseGeocode(photo)}>Reverse geocode</MenuItem>
             <MenuItem onClick={() => photo && onDelete(photo)}>Delete</MenuItem>
         </Menu>
     );

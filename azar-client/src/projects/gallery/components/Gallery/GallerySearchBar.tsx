@@ -4,12 +4,14 @@ import {getSearchWidthPercentageDynamic} from "./galleryFunctions.ts";
 
 interface SearchBarProps {
     onSearch: (query: string, labels: string[]) => void;
-    cityCountries?: Set<string>;
+    cityCountries: Set<string>;
+    onOpenHeatMap: () => void;
 }
 
 const GallerySearchBar: React.FC<SearchBarProps> = ({
                                                         onSearch,
                                                         cityCountries,
+                                                        onOpenHeatMap,
                                                     }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [width, setWidth] = useState(window.innerWidth);
@@ -22,7 +24,7 @@ const GallerySearchBar: React.FC<SearchBarProps> = ({
     const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
-        triggerSearch(e.target.value, selectedLabels);
+        triggerSearch(query, selectedLabels);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -39,64 +41,66 @@ const GallerySearchBar: React.FC<SearchBarProps> = ({
     }, []);
 
     return (
-        <Box sx={{display: "flex", flexDirection: "column", gap: 2, width: getSearchWidthPercentageDynamic(width)}}>
-            <Box sx={{display: "flex", justifyContent: "center", width: "100%"}}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        gap: 1,
-                        alignItems: "center",
-                        width: "100%",
+        <Box sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            justifyContent: "space-between",
+            gap: 2
+        }}>
+            <Box sx={{flex: 1}}/>
+
+            <Box sx={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 1,
+                alignItems: "center",
+                width: getSearchWidthPercentageDynamic(width),
+                justifyContent: "center"
+            }}>
+                <Autocomplete
+                    multiple
+                    freeSolo
+                    options={
+                        Array.from(cityCountries)
+                            .filter(city => city.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .slice(0, 5)
+                    }
+                    onChange={(_, newLabels) => {
+                        setSelectedLabels(newLabels);
+                        triggerSearch(searchQuery, newLabels);
                     }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            placeholder="Search.."
+                            value={searchQuery}
+                            onChange={handleSearchQueryChange}
+                            onKeyDown={handleKeyPress}
+                            fullWidth
+                        />
+                    )}
+                    sx={{width: "100%"}}
+                />
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => triggerSearch(searchQuery, selectedLabels)}
                 >
-                    <Autocomplete
-                        multiple
-                        freeSolo
-                        options={cityCountries
-                            ? Array.from(cityCountries)
-                                .filter(city => city.toLowerCase().includes(searchQuery.toLowerCase()))
-                                .slice(0, 5)
-                            : []
-                        }
-                        onChange={(_, newLabels) => {
-                            setSelectedLabels(newLabels);
-                            triggerSearch(searchQuery, newLabels);
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                placeholder="Search.."
-                                value={searchQuery}
-                                onChange={handleSearchQueryChange}
-                                onKeyDown={handleKeyPress}
-                                fullWidth
-                            />
-                        )}
-                        sx={{width: "100%"}}
-                    />
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => triggerSearch(searchQuery, selectedLabels)}
-                    >
-                        Search
-                    </Button>
-                </Box>
+                    Search
+                </Button>
             </Box>
 
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: 2,
-                    gap: 2,
-                }}
-            >
+            <Box sx={{flex: 1, display: "flex", justifyContent: "flex-end"}}>
+                <Button variant="outlined"
+                        color="secondary"
+                        onClick={onOpenHeatMap}
+                >
+                    Open Heatmap
+                </Button>
             </Box>
         </Box>
     );
-
 };
 
 export default GallerySearchBar;

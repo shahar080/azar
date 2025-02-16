@@ -34,6 +34,14 @@ public class GpsMetadata {
     @Column(name = "altitude")
     private Double altitude;
 
+    @Setter
+    @Column(name = "city")
+    private String city;
+
+    @Setter
+    @Column(name = "country")
+    private String country;
+
     @PrePersist
     protected void onCreate() {
         if (latitude == null) {

@@ -24,4 +24,6 @@ export interface GpsMetadata {
     latitude: number;
     longitude: number;
     altitude: number;
+    city: string;
+    country: string;
 }

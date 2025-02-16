@@ -18,6 +18,8 @@ import {
     getLightweightPhoto,
     getPhotosId,
     refreshMetadata,
+    reverseGeocode,
+    reverseGeocodeAllPhotos,
     updatePhoto,
     uploadPhoto
 } from "../server/api/photoApi.ts";
@@ -99,6 +101,17 @@ const PhotoList: React.FC = () => {
         }
     };
 
+    const handleReverseGeocodeAllPhotos = () => {
+        reverseGeocodeAllPhotos({currentUser: userName})
+            .then((success) => {
+                if (success) {
+                    showToast("Successfully reverse geocoded all photos", "success")
+                } else {
+                    showToast("Error reverse geocoding all photos", "error")
+                }
+            });
+    }
+
     const handleDeletePhoto = (photoToRemove: Photo) => {
         if (userName === null) {
             showToast("Error deleting Photo \"" + photoToRemove.id + "\"", "error");
@@ -139,6 +152,31 @@ const PhotoList: React.FC = () => {
             })
             .catch(() => {
                 showToast("Error refreshing metadata for Photo \"" + photoToRefreshMetadata.name + "\"", "error");
+            })
+            .finally(() => setIsLoading(false));
+        handleCloseMenu();
+    }
+
+    const onReverseGeocode = (photoToReverseGeocode: Photo) => {
+        if (userName === null) {
+            showToast("Error reverse geocode for Photo \"" + photoToReverseGeocode.id + "\"", "error");
+            return;
+        }
+        setIsLoading(true);
+        reverseGeocode({
+            photoId: photoToReverseGeocode.id,
+            gpsMetadata: photoToReverseGeocode.photoMetadata.gps,
+            currentUser: userName
+        })
+            .then((res) => {
+                if (res) {
+                    showToast("Photo \"" + photoToReverseGeocode.name + "\" geocode reversed successfully.", "success");
+                } else {
+                    showToast("Error reverse geocode for Photo \"" + photoToReverseGeocode.name + "\"", "error");
+                }
+            })
+            .catch(() => {
+                showToast("Error reverse geocode for Photo \"" + photoToReverseGeocode.name + "\"", "error");
             })
             .finally(() => setIsLoading(false));
         handleCloseMenu();
@@ -225,6 +263,10 @@ const PhotoList: React.FC = () => {
                     Upload Photo
                     <input type="file" hidden onChange={handleFileUpload} accept="image/jpeg"/>
                 </Button>
+                <Button variant="outlined" component="label" color="secondary" sx={{ml: "1vw"}}
+                        onClick={handleReverseGeocodeAllPhotos}>
+                    Reverse Geocode All Photos
+                </Button>
             </Box>
             <TableContainer
                 ref={containerRef}
@@ -297,6 +339,7 @@ const PhotoList: React.FC = () => {
                 }}
                 onDelete={(photoToRemove) => handleDeletePhoto(photoToRemove)}
                 onRefreshMetadata={handleRefreshMetadata}
+                onReverseGeocode={onReverseGeocode}
             />
 
             {selectedPhoto && showPhotoModal && (

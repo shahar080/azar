@@ -1,5 +1,5 @@
 /* API */
-export const BASE_URL_API = import.meta.env.VITE_IS_DEV === "true" ? "http://127.0.0.1:8080/api" : 'https://azar-backend-production.up.railway.app/api';
+export const BASE_URL_API = import.meta.env.VITE_IS_DEV === "true" ? "http://127.0.0.1:8080/api" : 'https://azar-backend-graalvm.up.railway.app/api';
 
 export const OPS_PREFIX = "/ops";
 

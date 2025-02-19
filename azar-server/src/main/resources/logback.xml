@@ -1,11 +1,13 @@
 <configuration>
-    <!-- Define logging pattern -->
+    <!-- Define logging pattern for console -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- File logging removed for native-image compatibility -->
+    <!--
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>logs/application.log</file>
         <append>true</append>
@@ -13,13 +15,15 @@
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    -->
 
     <!-- Set the root logging level -->
     <root level="debug">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <!-- <appender-ref ref="FILE"/> -->
     </root>
 
+    <!-- Package-specific logger levels -->
     <logger name="io.netty" level="WARN"/>
     <logger name="io.vertx" level="WARN"/>
     <logger name="org.hibernate" level="WARN"/>
@@ -35,9 +39,10 @@
     <logger name="org.apache.fontbox.util" level="ERROR"/>
     <logger name="org.apache.pdfbox.pdmodel" level="ERROR"/>
 
-
-    <!-- Example of package-specific logging -->
-    <!--    <logger name="com.example" level="debug" additivity="false">-->
-    <!--        <appender-ref ref="CONSOLE" />-->
-    <!--    </logger>-->
+    <!-- Example of package-specific logging (commented out) -->
+    <!--
+    <logger name="com.example" level="debug" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    -->
 </configuration>

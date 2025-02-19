@@ -1,31 +1,28 @@
 #
-# Build stage
+# Stage 1: Build Java JAR using Maven
 #
-FROM maven:3.9.9-eclipse-temurin-23 AS build
-
-# Set working directory inside the build container
+FROM maven:3.9.9-eclipse-temurin-23 AS maven-build
 WORKDIR /home/app
-
-# Copy the project files (source code and pom.xml)
 COPY src /home/app/src
 COPY pom.xml /home/app/
-
-# Run the Maven build
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 #
-# Package stage
+# Stage 2: Compile Native Image using GraalVM
 #
-FROM openjdk:23-jdk-slim
+FROM ghcr.io/graalvm/graalvm-community:23.0.2-ol8-20250121 AS native-build
+WORKDIR /home/app
+# The JAR is built with the updated logback.xml (which disables file logging)
+COPY --from=maven-build /home/app/target/azar-1.0-jar-with-dependencies.jar /home/app/
+RUN native-image --no-fallback \
+    --initialize-at-build-time=ch.qos.logback,ch.qos.logback.classic.Logger \
+    -jar /home/app/azar-1.0-jar-with-dependencies.jar -o /home/app/azar
 
-# Set working directory inside the final container
+#
+# Stage 3: Minimal Runtime Image
+#
+FROM busybox:glibc AS runtime
 WORKDIR /app
-
-# Copy the generated jar from the build container
-COPY --from=build /home/app/target/azar-1.0-jar-with-dependencies.jar /app/
-
-# Expose the port Vert.x will run on
+COPY --from=native-build /home/app/azar /app/azar
 EXPOSE 8080
-
-# Run the Vert.x server
-CMD ["java", "-jar", "/app/azar-1.0-jar-with-dependencies.jar"]
+CMD ["/app/azar"]

@@ -3,7 +3,7 @@ import {Dialog, DialogContent, DialogTitle, IconButton, Typography,} from "@mui/
 import {Close, FileDownload, ZoomIn, ZoomOut} from "@mui/icons-material";
 import ShowBlob, {ShowBlobHandle} from "../../../shared/components/ShowBlob.tsx";
 import {getPhotoWithPhoto} from "../../server/api/photoApi.ts";
-import {base64ToUint8Array, byteArrayToString, resizeImageBlob,} from "../../../shared/utils/utilities.ts";
+import {base64ToBytes, detectContentType, resizeImageBlob,} from "../../../shared/utils/utilities.ts";
 import {Photo} from "../../models/models.ts";
 import getBottomInformation from "./GetBottomInformation.tsx";
 
@@ -80,8 +80,9 @@ const ShowPhotoModal: React.FC<ShowPhotoModalProps> = ({photoId, onClose, cityCo
         }
 
         fetchPhoto().then((value) => {
-            const byteArray = base64ToUint8Array(byteArrayToString(value.data));
-            setOriginalBlob(new Blob([byteArray], {type: "image/png"}));
+
+            const byteArray = base64ToBytes(value.data);
+            setOriginalBlob(new Blob([byteArray], {type: detectContentType(value.name)}));
             setPhoto(value);
         });
     }, [photoId]);

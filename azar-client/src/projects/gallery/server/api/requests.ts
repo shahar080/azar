@@ -6,6 +6,6 @@ export interface PhotoUpdateRequest extends BaseRequest {
 }
 
 export interface PhotoReverseGeocodeRequest extends BaseRequest {
-    photoId: string;
+    photoId: number;
     gpsMetadata: GpsMetadata;
 }

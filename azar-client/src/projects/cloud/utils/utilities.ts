@@ -26,9 +26,9 @@ export function parseSize(size: string): number {
     }
 }
 
-export async function downloadPdf(userName: string, pdfFile: PdfFile) {
+export async function downloadPdf(pdfFile: PdfFile) {
     try {
-        const blob = await fetchPDF({currentUser: userName}, pdfFile.id);
+        const blob = await fetchPDF({}, pdfFile.id);
         const url = URL.createObjectURL(blob);
 
         const anchor = document.createElement("a");
@@ -46,8 +46,8 @@ export async function downloadPdf(userName: string, pdfFile: PdfFile) {
     }
 }
 
-export async function loadPreferences(userName: string, userId: string) {
-    await getAllPreferences({currentUser: userName, userId: userId}, 1, 20)
+export async function loadPreferences(userId: number) {
+    await getAllPreferences({userId: userId}, 1, 20)
         .then((preferences) => {
             const drawerPinned = preferences.filter(pref => pref.key === DRAWER_PIN_STR) || []
             if (drawerPinned.length > 0) {

@@ -29,7 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         try {
             setErrorMessage("");
 
-            const response = await login({currentUser: formData.userName, userNameAndPassword: formData});
+            const response = await login({userNameAndPassword: formData});
 
             if (response?.success) {
                 onLoginSuccess(response);

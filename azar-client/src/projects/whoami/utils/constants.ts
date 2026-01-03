@@ -1,4 +1,4 @@
-import {OPS_PREFIX} from "../../shared/utils/constants.ts";
+import {ADMIN_PREFIX} from "../../shared/utils/constants.ts";
 
 const ROUTE_PREFIX = "/wai";
 
@@ -6,14 +6,14 @@ const ROUTE_PREFIX = "/wai";
 const CV_PREFIX = ROUTE_PREFIX + "/cv";
 export const CV_GET_API = CV_PREFIX + "/get";
 export const CV_SEND_TO_EMAIL_API = CV_PREFIX + "/sendToEmail";
-export const CV_UPDATE_API = CV_PREFIX + OPS_PREFIX + "/update";
+export const CV_UPDATE_API = CV_PREFIX + ADMIN_PREFIX + "/update";
 
 /* WhoAmI */
 const WHO_AM_I_PREFIX = ROUTE_PREFIX + "/whoami";
 export const WHO_AM_I_GET_API = WHO_AM_I_PREFIX + "/get";
-export const WHO_AM_I_UPDATE_API = WHO_AM_I_PREFIX + OPS_PREFIX + '/update';
+export const WHO_AM_I_UPDATE_API = WHO_AM_I_PREFIX + ADMIN_PREFIX + '/update';
 
 /* Email */
 const EMAIL_PREFIX = ROUTE_PREFIX + "/email";
-export const EMAIL_GET_API = EMAIL_PREFIX + OPS_PREFIX + "/get";
-export const EMAIL_UPDATE_API = EMAIL_PREFIX + OPS_PREFIX + '/update';
+export const EMAIL_GET_API = EMAIL_PREFIX + ADMIN_PREFIX + "/get";
+export const EMAIL_UPDATE_API = EMAIL_PREFIX + ADMIN_PREFIX + '/update';

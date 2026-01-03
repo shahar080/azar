@@ -1,13 +1,13 @@
 package azar.weather.entities.external.api.open_weather_map.forecast_response;
 
-import azar.weather.entities.external.api.open_weather_map.shared.base.OWMBaseResponse;
+import java.util.List;
 import azar.weather.entities.external.api.open_weather_map.forecast_response.inner_objects.OWMForecastCity;
+import azar.weather.entities.external.api.open_weather_map.shared.base.OWMBaseResponse;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * Author: Shahar Azar
@@ -17,6 +17,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class OWMForecastResponse {
     private Integer cod;
     private String message;

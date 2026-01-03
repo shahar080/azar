@@ -20,7 +20,7 @@ export async function login(userLoginRequest: UserLoginRequest): Promise<LoginRe
             setAuthToken(loginResponse.token);
             setUserName(loginResponse.userName);
             setUserType(loginResponse.userType);
-            setUserId(String(loginResponse.userId));
+            setUserId(loginResponse.userId);
             return loginResponse;
         }
         return undefined;

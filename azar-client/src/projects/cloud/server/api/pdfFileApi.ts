@@ -1,6 +1,6 @@
 import apiClient from "../../../shared/server/api/apiClient.ts";
 import {PdfFile} from "../../models/models.ts";
-import {PdfUpdateRequest} from "./requests.ts";
+import {PdfDeleteRequest, PdfUpdateRequest} from "./requests.ts";
 import {
     PDF_DELETE_API,
     PDF_GET_ALL_API,
@@ -29,9 +29,9 @@ export async function uploadPdf(pdfFile: File, userName: string): Promise<PdfFil
     return undefined;
 }
 
-export async function deletePdf(pdfId: string, baseRequest: BaseRequest): Promise<number> {
+export async function deletePdf(pdfId: string, pdfDeleteRequest: PdfDeleteRequest): Promise<number> {
     try {
-        const response = await apiClient.post(PDF_DELETE_API + pdfId, baseRequest);
+        const response = await apiClient.post(PDF_DELETE_API + pdfId, pdfDeleteRequest);
         return response.status;
     } catch (error: unknown) {
         console.error('Delete pdf ' + pdfId + ' failed', error);

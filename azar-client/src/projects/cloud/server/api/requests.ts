@@ -15,8 +15,13 @@ export interface PdfUpdateRequest extends BaseRequest {
 
 export interface PreferenceUpsertRequest extends BaseRequest {
     preference: Preference;
+    userId: number;
 }
 
 export interface PreferenceGetAllRequest extends BaseRequest {
-    userId: string;
+    userId: number;
+}
+
+export interface PdfDeleteRequest extends BaseRequest {
+    userName: string;
 }

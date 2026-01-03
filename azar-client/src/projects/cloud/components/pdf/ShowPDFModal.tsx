@@ -4,7 +4,6 @@ import {PdfFile} from "../../models/models.ts";
 import ShowBlob from "../../../shared/components/ShowBlob.tsx";
 import React, {useEffect, useState} from "react";
 import {fetchPDF} from "../../server/api/pdfFileApi.ts";
-import {getUserName} from "../../../shared/utils/AppState.ts";
 
 interface ShowPDFModalProps {
     open: boolean;
@@ -16,11 +15,10 @@ const ShowPDFModal: React.FC<ShowPDFModalProps> = ({open, pdfFile, onClose}) => 
     const [blob, setBlob] = useState<Blob | null>(null);
 
     useEffect(() => {
-        const userName = getUserName();
         const fetchData = async () => {
             let blob = null;
             if (pdfFile) {
-                blob = await fetchPDF({currentUser: userName}, pdfFile.id.toString());
+                blob = await fetchPDF({}, pdfFile.id.toString());
             }
             return blob;
         };

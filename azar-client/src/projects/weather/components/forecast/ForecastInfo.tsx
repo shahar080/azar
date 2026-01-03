@@ -10,8 +10,8 @@ import {ForecastChildComponentHandle} from "../../types/ChildComponent.types.ts"
 import ForecastChart from "./ForecastChart.tsx";
 
 interface ExtendedWeatherInfoProps {
-    latitude: string;
-    longitude: string;
+    latitude: number;
+    longitude: number;
     is12Hour: boolean;
     isCelsius: boolean;
     onClose: () => void;

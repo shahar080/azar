@@ -102,7 +102,7 @@ const PhotoList: React.FC = () => {
     };
 
     const handleReverseGeocodeAllPhotos = () => {
-        reverseGeocodeAllPhotos({currentUser: userName})
+        reverseGeocodeAllPhotos({})
             .then((success) => {
                 if (success) {
                     showToast("Successfully reverse geocoded all photos", "success")
@@ -118,7 +118,7 @@ const PhotoList: React.FC = () => {
             return;
         }
         setIsLoading(true);
-        deletePhoto(photoToRemove.id, {currentUser: userName})
+        deletePhoto(photoToRemove.id, {})
             .then((res) => {
                 if (res === 200) {
                     setPhotos(photos.filter((photo) => photo !== photoToRemove));
@@ -142,7 +142,7 @@ const PhotoList: React.FC = () => {
             return;
         }
         setIsLoading(true);
-        refreshMetadata(photoToRefreshMetadata.id, {currentUser: userName})
+        refreshMetadata(photoToRefreshMetadata.id, {})
             .then((res) => {
                 if (res) {
                     showToast("Photo \"" + photoToRefreshMetadata.name + "\" metadata refreshed successfully.", "success");
@@ -164,9 +164,8 @@ const PhotoList: React.FC = () => {
         }
         setIsLoading(true);
         reverseGeocode({
-            photoId: photoToReverseGeocode.id,
+            photoId: Number(photoToReverseGeocode.id),
             gpsMetadata: photoToReverseGeocode.photoMetadata.gps,
-            currentUser: userName
         })
             .then((res) => {
                 if (res) {
@@ -184,7 +183,7 @@ const PhotoList: React.FC = () => {
 
     const handleSaveEdit = (updatedPhoto: Photo) => {
         setIsLoading(true);
-        updatePhoto({currentUser: userName, photo: updatedPhoto})
+        updatePhoto({photo: updatedPhoto})
             .then((res) => {
                 if (res && res.id === updatedPhoto.id) {
                     setSelectedPhoto(res);
@@ -261,7 +260,13 @@ const PhotoList: React.FC = () => {
             <Box>
                 <Button variant="outlined" component="label" color="secondary">
                     Upload Photo
-                    <input type="file" hidden onChange={handleFileUpload} accept="image/jpeg"/>
+                    <input
+                        type="file"
+                        hidden
+                        onChange={handleFileUpload}
+                        accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,
+                        image/bmp,image/tiff,image/x-icon,image/avif,image/heic,.heif"
+                    />
                 </Button>
                 <Button variant="outlined" component="label" color="secondary" sx={{ml: "1vw"}}
                         onClick={handleReverseGeocodeAllPhotos}>

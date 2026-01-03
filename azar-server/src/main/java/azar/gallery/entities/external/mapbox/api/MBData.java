@@ -1,9 +1,9 @@
 package azar.gallery.entities.external.mapbox.api;
 
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * Author: Shahar Azar
@@ -11,6 +11,7 @@ import java.util.List;
  **/
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MBData {
     private String type;
     private List<MBFeature> features;

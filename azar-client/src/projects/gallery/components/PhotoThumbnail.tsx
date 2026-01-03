@@ -7,7 +7,6 @@ interface PhotoThumbnailProps {
 
 const PhotoThumbnail: React.FC<PhotoThumbnailProps> = ({photoBlob, altText}) => {
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-
     useEffect(() => {
         let isCancelled = false;
 

@@ -1,9 +1,18 @@
 package azar.gallery.entities.db;
 
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.Instant;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Author: Shahar Azar
@@ -16,7 +25,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class GpsMetadata {
+public class GpsMetadata extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

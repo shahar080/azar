@@ -1,17 +1,15 @@
 import React, {useEffect, useState} from "react";
 import {fetchPdfThumbnail} from "../../server/api/pdfFileApi.ts";
-import {getUserName} from "../../../shared/utils/AppState.ts";
 
 const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altText}) => {
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-    const userName = getUserName();
 
     useEffect(() => {
         let isCancelled = false;
 
         const loadThumbnail = async () => {
             try {
-                const blob = await fetchPdfThumbnail({currentUser: userName}, pdfId);
+                const blob = await fetchPdfThumbnail({}, pdfId);
                 if (!isCancelled) {
                     const url = URL.createObjectURL(blob);
                     setThumbnailUrl((prevUrl) => {
@@ -32,7 +30,7 @@ const PdfThumbnail: React.FC<{ pdfId: string; altText: string }> = ({pdfId, altT
             isCancelled = true;
             promise.catch((error) => console.error("Error cleaning up loadThumbnail", error));
         };
-    }, [pdfId, userName]);
+    }, [pdfId]);
 
 
 

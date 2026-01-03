@@ -1,110 +1,113 @@
 package azar.gallery.dal.service;
 
+import java.util.List;
 import azar.gallery.dal.dao.PhotoDao;
+import azar.gallery.entities.db.GpsMetadata;
 import azar.gallery.entities.db.Photo;
 import azar.gallery.entities.db.PhotoMetadata;
 import azar.gallery.entities.responses.ReverseGeocodeData;
 import azar.gallery.metadata.PhotoMetadataExtractor;
+import azar.shared.dal.dao.GenericDao;
 import azar.shared.dal.service.GenericService;
-import com.google.inject.Inject;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-
-import java.util.List;
-import java.util.Set;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Author: Shahar Azar
  * Date:   11/02/2025
  **/
+@ApplicationScoped
 public class PhotoService extends GenericService<Photo> {
 
     private final PhotoDao photoDao;
     private final PhotoMetadataExtractor photoMetadataExtractor;
-    private final Vertx vertx;
 
-    @Inject
-    public PhotoService(PhotoDao photoDao, PhotoMetadataExtractor photoMetadataExtractor, Vertx vertx) {
+    public PhotoService(PhotoDao photoDao, PhotoMetadataExtractor photoMetadataExtractor) {
         this.photoDao = photoDao;
         this.photoMetadataExtractor = photoMetadataExtractor;
-        this.vertx = vertx;
     }
 
     @Override
-    public Future<Set<Photo>> getAll() {
-        return photoDao.getAll();
+    protected GenericDao<Photo> getDao() {
+        return photoDao;
     }
 
-    @Override
-    public Future<Photo> add(Photo photo) {
-        return photoDao.add(photo);
-    }
-
-    @Override
-    public Future<Photo> update(Photo photo) {
-        return photoDao.update(photo);
-    }
-
-    @Override
-    public Future<Photo> getById(Integer id) {
-        return photoDao.getById(id);
-    }
-
-    @Override
-    public Future<Boolean> removeById(Integer id) {
-        return photoDao.removeById(id);
-    }
-
-    public Future<List<Integer>> getPhotosId() {
+    public List<Integer> getPhotosId() {
         return photoDao.getPhotosId();
     }
 
-    public Future<byte[]> getPhoto(Integer id) {
+    public byte[] getPhoto(Integer id) {
         return photoDao.getPhoto(id);
     }
 
-    public Future<Boolean> refreshMetadata(Integer id) {
-        return Future.future(promise -> {
-            vertx.executeBlocking(() -> {
-                photoDao.getPhoto(id)
-                        .onSuccess(bytes -> {
-                            PhotoMetadata photoMetadata = photoMetadataExtractor.extractMetadataFromBytes(bytes);
-                            photoDao.updateMetadata(id, photoMetadata)
-                                    .onSuccess(promise::complete)
-                                    .onFailure(promise::fail);
-                        })
-                        .onFailure(promise::fail);
-                return null;
-            }, false);
-        });
+    public void refreshMetadata(Integer id) {
+        byte[] photoBytes = photoDao.getPhoto(id);
+        PhotoMetadata photoMetadata = photoMetadataExtractor.extractMetadataFromBytes(photoBytes);
+        photoDao.updateMetadata(id, photoMetadata);
     }
 
-    public Future<Boolean> editPhotoPartial(Photo photo) {
-        return photoDao.editPhotoPartial(photo);
+    public boolean editPhotoPartial(Photo photoToEdit) {
+        Photo dbPhoto = photoDao.findById(photoToEdit.getId());
+        if (dbPhoto == null) return false;
+
+        // Basic fields
+        if (photoToEdit.getName() != null) dbPhoto.setName(photoToEdit.getName());
+        if (photoToEdit.getDescription() != null) dbPhoto.setDescription(photoToEdit.getDescription());
+
+        // Nested metadata and GPS with null-safety
+        PhotoMetadata srcMeta = photoToEdit.getPhotoMetadata();
+        if (srcMeta != null) {
+            if (dbPhoto.getPhotoMetadata() == null) {
+                dbPhoto.setPhotoMetadata(new PhotoMetadata());
+            }
+            GpsMetadata srcGps = srcMeta.getGps();
+            if (srcGps != null) {
+                if (dbPhoto.getPhotoMetadata().getGps() == null) {
+                    dbPhoto.getPhotoMetadata().setGps(new GpsMetadata());
+                }
+                GpsMetadata tgt = dbPhoto.getPhotoMetadata().getGps();
+                tgt.setLongitude(srcGps.getLongitude());
+                tgt.setLatitude(srcGps.getLatitude());
+                tgt.setAltitude(srcGps.getAltitude());
+                tgt.setCity(srcGps.getCity());
+                tgt.setCountry(srcGps.getCountry());
+            }
+        }
+        // Persistence is handled by managed entity in transaction
+        return true;
     }
 
-    public Future<Photo> getLightWeightById(Integer id) {
+    public Photo getLightWeightById(Integer id) {
         return photoDao.getLightWeightById(id);
     }
 
-    public Future<Photo> getWithThumbnailById(Integer id) {
+    public Photo getWithThumbnailById(Integer id) {
         return photoDao.getWithThumbnailById(id);
     }
 
-    public Future<Photo> getWithPhotoById(Integer id) {
+    public Photo getWithPhotoById(Integer id) {
         return photoDao.getWithPhotoById(id);
     }
 
-    public Future<List<Photo>> getHeatmapPhotos() {
+    public List<Photo> getHeatmapPhotos() {
         return photoDao.getHeatmapPhotos();
     }
 
-    public Future<Boolean> editGpsMetadataPartial(String photoId, ReverseGeocodeData reverseGeocodeData) {
+    public boolean editGpsMetadataPartial(Integer photoId, ReverseGeocodeData reverseGeocodeData) {
         String country = reverseGeocodeData.getCountry() != null ? reverseGeocodeData.getCountry() : reverseGeocodeData.getRegion();
-        return photoDao.editGpsMetadataPartial(photoId, reverseGeocodeData.getPlace(), country);
+        Photo photo = photoDao.findById(photoId);
+        GpsMetadata gpsMetadata = photo.getPhotoMetadata().getGps();
+        if (gpsMetadata != null) {
+            gpsMetadata.setCity(reverseGeocodeData.getPlace());
+            gpsMetadata.setCountry(country);
+            photo.getPhotoMetadata().setGps(gpsMetadata);
+            photoDao.persist(photo);
+            return true;
+        }
+
+        return false;
     }
 
-    public Future<List<Photo>> getAllGps() {
+    public List<Photo> getAllGps() {
         return photoDao.getAllGps();
     }
 }

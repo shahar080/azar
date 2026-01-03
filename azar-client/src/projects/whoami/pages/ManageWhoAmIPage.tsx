@@ -12,7 +12,6 @@ import {useNavigate} from "react-router-dom";
 import WhoAmIDrawerMenu from "../components/DrawerMenu.tsx";
 import {getWhoAmIData, updateWhoAmIData} from "../server/api/whoAmIDataApi.ts";
 import {useLoading} from "../../shared/utils/loading/useLoading.ts";
-import {getUserName} from "../../shared/utils/AppState.ts";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {WhoAmIData} from "../models/models.ts";
 
@@ -30,7 +29,6 @@ const initialData: WhoAmIData = {
 
 const ManageWhoAmIPage: React.FC = () => {
     const [formData, setFormData] = useState<WhoAmIData>(initialData);
-    const userName = getUserName();
     const {setLoadingAnimation} = useLoading();
     const navigate = useNavigate();
     const {showToast} = useToast();
@@ -87,7 +85,7 @@ const ManageWhoAmIPage: React.FC = () => {
     const handleSave = () => {
         setLoadingAnimation(true);
 
-        updateWhoAmIData({whoAmIData: formData, currentUser: userName})
+        updateWhoAmIData({whoAmIData: formData})
             .then(res => {
                 if (res) {
                     showToast("Successfully updated WhoAmI data", "success")

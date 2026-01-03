@@ -20,15 +20,15 @@ import {getCardStyles} from "../utils/weatherStyles.ts";
 
 interface WeatherCardProps {
     id: number;
-    longitude: string;
-    latitude: string;
+    longitude: number;
+    latitude: number;
     onDelete: (id: number) => void;
     onShowExtendedView: (
         getByLatLongResponse: WeatherLatLongResponse,
         is12Hour: boolean,
         isCelsius: boolean,
     ) => void;
-    onShowForecast: (latitude: string, longitude: string, is12Hour: boolean, isCelsius: boolean) => void;
+    onShowForecast: (latitude: number, longitude: number, is12Hour: boolean, isCelsius: boolean) => void;
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({

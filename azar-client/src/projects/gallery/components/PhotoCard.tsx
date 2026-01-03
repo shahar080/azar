@@ -3,7 +3,7 @@ import PhotoThumbnail from "./PhotoThumbnail.tsx";
 import React, {useEffect, useState} from "react";
 import {getPhotoWithThumbnail} from "../server/api/photoApi.ts";
 import {Photo} from "../models/models.ts";
-import {base64ToUint8Array, byteArrayToString} from "../../shared/utils/utilities.ts";
+import {base64ToBytes, detectContentType} from "../../shared/utils/utilities.ts";
 import {formatAsDate, getFileName, truncateText} from "../../cloud/components/sharedLogic.ts";
 
 
@@ -105,7 +105,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
                         :
                         <>
                             <PhotoThumbnail
-                                photoBlob={new Blob([base64ToUint8Array(byteArrayToString(photoCardPhoto.thumbnail))], {type: "image/png"})}
+                                photoBlob={new Blob([base64ToBytes((photoCardPhoto.thumbnail))], {type: detectContentType(photoCardPhoto.name)})}
                                 altText={photoCardPhoto.name}/>
                             <CardContent sx={{display: "flex", justifyContent: "space-between"}}>
                                 <Typography variant="body2" color="text.secondary">

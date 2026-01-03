@@ -1,52 +1,50 @@
 package azar.gallery.utils;
 
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import net.coobird.thumbnailator.Thumbnails;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
+import net.coobird.thumbnailator.Thumbnails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Author: Shahar Azar
  * Date:   11/02/2025
  **/
 public class Utilities {
+    private static final Logger logger = LoggerFactory.getLogger(Utilities.class);
 
-    public static Future<byte[]> generateThumbnail(byte[] imageBytes, int width, int height, Vertx vertx) {
-        return Future.future(promise -> {
-            vertx.executeBlocking(() -> {
-                try {
-                    if (imageBytes == null || imageBytes.length == 0) {
-                        promise.fail("Input image bytes are empty or null");
-                        return null;
-                    }
+    private Utilities() {
+    }
 
-                    ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
-                    BufferedImage originalImage = ImageIO.read(inputStream);
+    public static byte[] generateThumbnail(byte[] imageBytes, int width, int height) {
+        try {
+            if (imageBytes == null || imageBytes.length == 0) {
+                logger.error("Input image bytes are empty or null");
+                return new byte[0];
+            }
 
-                    if (originalImage == null) {
-                        promise.fail("Failed to decode input image");
-                        return null;
-                    }
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
+            BufferedImage originalImage = ImageIO.read(inputStream);
 
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    Thumbnails.of(originalImage)
-                            .size(width, height)
-                            .outputQuality(1.0)
-                            .outputFormat("png")
-                            .toOutputStream(outputStream);
+            if (originalImage == null) {
+                logger.error("Failed to decode input image");
+                return new byte[0];
+            }
 
-                    promise.complete(outputStream.toByteArray());
-                } catch (Exception e) {
-                    promise.fail(e);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            Thumbnails.of(originalImage)
+                    .size(width, height)
+                    .outputQuality(1.0)
+                    .outputFormat("png")
+                    .toOutputStream(outputStream);
 
-                }
-                return null;
-            }, false);
-        });
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            logger.error("Failed to generate thumbnail", e);
+        }
+        return new byte[0];
     }
 }
 

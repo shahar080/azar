@@ -5,8 +5,16 @@ package azar.cloud.utils;
  * Date:   25/12/2024
  **/
 public class Constants {
+
+    private Constants() {
+    }
+
     /* General */
-    public static final String OPS_PREFIX_STRING = "/ops";
+    public static final String ADMIN_PREFIX_STRING = "/admin";
+
+    /* Jwt */
+    public static final String USER_GROUP = "User";
+    public static final String ADMIN_GROUP = "Admin";
 
     /* Preferences  */
     public static final String DRAWER_PINNED = "DRAWER_PINNED";

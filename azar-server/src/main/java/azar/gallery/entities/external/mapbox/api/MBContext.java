@@ -1,5 +1,6 @@
 package azar.gallery.entities.external.mapbox.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
  **/
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MBContext {
     private MBContextEntry locality;  // may represent the city
     private MBContextEntry place;     // may also represent the city

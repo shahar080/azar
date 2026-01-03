@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, IconButton, Modal, TextField, Typography, useMediaQuery} from "@mui/material";
+import {Box, Button, IconButton, Modal, Typography, useMediaQuery} from "@mui/material";
 import {Close} from "@mui/icons-material";
-import {getCV, sendToEmail} from "../server/api/cvApi.ts";
+import {getCV} from "../server/api/cvApi.ts";
 import {Document, Page} from "react-pdf";
 import LoadingComponent from "../../shared/components/LoadingComponent.tsx";
 import {useTheme} from "@mui/material/styles";
@@ -16,13 +16,13 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-    const [email, setEmail] = useState("");
-    const [emailError, setEmailError] = useState<string | null>(null);
+    // const [email, setEmail] = useState("");
+    // const [emailError, setEmailError] = useState<string | null>(null);
     const [scale, setScale] = useState(isMobile ? 0.7 : 1.0);
     const [containerWidth, setContainerWidth] = useState<number>(0);
     const [containerHeight, setContainerHeight] = useState<number>(0);
     const [status, setStatus] = useState<"loading" | "success" | "error" | "">("");
-    const [emailButtonText, setEmailButtonText] = useState("Email me");
+    // const [emailButtonText, setEmailButtonText] = useState("Email me");
 
     useEffect(() => {
         if (open) {
@@ -46,21 +46,21 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
         };
     }, [open, pdfUrl]);
 
-    useEffect(() => {
-        switch (status) {
-            case "":
-                setEmailButtonText("Email me");
-                break;
-            case "loading":
-                setEmailButtonText("Sending...");
-                break;
-            case "success":
-                setEmailButtonText("Send again");
-                break;
-            case "error":
-                setEmailButtonText("Try again");
-        }
-    }, [status]);
+    // useEffect(() => {
+    //     switch (status) {
+    //         case "":
+    //             setEmailButtonText("Email me");
+    //             break;
+    //         case "loading":
+    //             setEmailButtonText("Sending...");
+    //             break;
+    //         case "success":
+    //             setEmailButtonText("Send again");
+    //             break;
+    //         case "error":
+    //             setEmailButtonText("Try again");
+    //     }
+    // }, [status]);
 
     useEffect(() => {
         const updateContainerDimensions = () => {
@@ -87,36 +87,36 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
     }, [isMobile]);
 
     const handleClose = () => {
-        setEmail("");
-        setEmailError(null);
+        // setEmail("");
+        // setEmailError(null);
         setStatus("");
         onClose();
     };
 
-    const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    // const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    const handleSendEmail = async () => {
-        if (!email) {
-            setEmailError("Email is required.");
-        } else if (!validateEmail(email)) {
-            setEmailError("Please enter a valid email address.");
-        } else {
-            setEmailError(null);
-            setStatus("loading");
-
-            try {
-                const isSent = await sendToEmail({email});
-                if (isSent) {
-                    setStatus("success");
-                } else {
-                    setStatus("error");
-                }
-            } catch (error) {
-                console.error("Error sending email", error);
-                setStatus("error");
-            }
-        }
-    };
+    // const handleSendEmail = async () => {
+    //     if (!email) {
+    //         setEmailError("Email is required.");
+    //     } else if (!validateEmail(email)) {
+    //         setEmailError("Please enter a valid email address.");
+    //     } else {
+    //         setEmailError(null);
+    //         setStatus("loading");
+    //
+    //         try {
+    //             const isSent = await sendToEmail({email});
+    //             if (isSent) {
+    //                 setStatus("success");
+    //             } else {
+    //                 setStatus("error");
+    //             }
+    //         } catch (error) {
+    //             console.error("Error sending email", error);
+    //             setStatus("error");
+    //         }
+    //     }
+    // };
 
     return (
         <Modal open={open} onClose={handleClose}>
@@ -257,22 +257,22 @@ const PdfModal: React.FC<PdfModalProps> = ({open, onClose}) => {
                     >
                         Download PDF
                     </Button>
-                    <Box display="flex" gap={2} alignItems="center">
-                        <TextField
-                            label="Email"
-                            autoComplete={"email"}
-                            type="email"
-                            size="small"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            error={!!emailError}
-                            helperText={emailError}
-                            disabled={status === "loading"}
-                        />
-                        <Button variant="contained" onClick={handleSendEmail} disabled={status === "loading"}>
-                            {emailButtonText}
-                        </Button>
-                    </Box>
+                    {/*<Box display="flex" gap={2} alignItems="center">*/}
+                    {/*    <TextField*/}
+                    {/*        label="Email"*/}
+                    {/*        autoComplete={"email"}*/}
+                    {/*        type="email"*/}
+                    {/*        size="small"*/}
+                    {/*        value={email}*/}
+                    {/*        onChange={(e) => setEmail(e.target.value)}*/}
+                    {/*        error={!!emailError}*/}
+                    {/*        helperText={emailError}*/}
+                    {/*        disabled={status === "loading"}*/}
+                    {/*    />*/}
+                    {/*    /!*<Button variant="contained" onClick={handleSendEmail} disabled={status === "loading"}>*!/*/}
+                    {/*    /!*    {emailButtonText}*!/*/}
+                    {/*    /!*</Button>*!/*/}
+                    {/*</Box>*/}
                 </Box>
             </Box>
         </Modal>

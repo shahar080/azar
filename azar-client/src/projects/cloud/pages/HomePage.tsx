@@ -74,7 +74,7 @@ const CloudHomePage: React.FC = () => {
             setLoading(true);
             const currentPage = forceLoad ? 1 : pageRef.current;
 
-            getAllPdfs({currentUser: userName}, currentPage, 20)
+            getAllPdfs({}, currentPage, 20)
                 .then((newPdfs) => {
                     if (newPdfs.length < 20) {
                         setHasMore(false);
@@ -93,7 +93,7 @@ const CloudHomePage: React.FC = () => {
                 });
         },
 
-        [userName]
+        []
     );
 
     useEffect(() => {
@@ -109,7 +109,7 @@ const CloudHomePage: React.FC = () => {
     }, [loadPdfs]);
 
     useEffect(() => {
-        loadPreferences(getUserName(), getUserId()).then(() => {
+        loadPreferences(getUserId()).then(() => {
             setDrawerPinned(isDesktop && getDrawerPinnedState());
             setDrawerOpen(isDesktop && getDrawerPinnedState());
         });
@@ -167,7 +167,7 @@ const CloudHomePage: React.FC = () => {
             showToast("Error deleting PDF \"" + pdf.fileName + "\"", "error");
             return;
         }
-        deletePdf(pdf.id, {currentUser: userName})
+        deletePdf(pdf.id, {userName: getUserName()})
             .then((res) => {
                 if (res === 200) {
                     showToast("PDF \"" + pdf.fileName + "\" deleted successfully.", "success");
@@ -212,7 +212,7 @@ const CloudHomePage: React.FC = () => {
 
     const handleSaveEdit = (updatedPdf: PdfFile) => {
         setLoading(true);
-        updatePdf({currentUser: userName, pdfFile: updatedPdf})
+        updatePdf({pdfFile: updatedPdf})
             .then((res) => {
                 if (res && res.id === updatedPdf.id) {
                     setSelectedPdf(res);
@@ -253,7 +253,7 @@ const CloudHomePage: React.FC = () => {
             <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
-                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, userName, showToast)}
+                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, showToast)}
                 onManageUser={handleRegisterUser}
                 onManagePreferences={handleMangePreferences}
                 onClose={() => setDrawerOpen(false)}

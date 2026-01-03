@@ -1,6 +1,6 @@
 pipelines:
   branches:
-    production:
+    '**': # run this step for any branch
       - step:
           name: Sync GitHub Mirror
           image: alpine/git:latest

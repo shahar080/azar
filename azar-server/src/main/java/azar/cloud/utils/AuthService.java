@@ -1,11 +1,15 @@
 package azar.cloud.utils;
 
+import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
+import static azar.cloud.utils.Constants.ADMIN_GROUP;
+import static azar.cloud.utils.Constants.USER_GROUP;
+import azar.shared.entities.db.User;
+import azar.shared.entities.db.UserType;
 import azar.shared.properties.AppProperties;
-import com.google.inject.Inject;
-import io.vertx.core.Vertx;
-import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.smallrye.jwt.build.Jwt;
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Getter;
 
 /**
@@ -15,16 +19,26 @@ import lombok.Getter;
 
 
 @Getter
+@ApplicationScoped
 public class AuthService {
-    private final JWTAuth jwtAuth;
 
-    @Inject
-    public AuthService(Vertx vertx, AppProperties appProperties) {
-        this.jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions()
-                .addPubSecKey(new PubSecKeyOptions()
-                        .setAlgorithm("HS256")
-                        .setBuffer(appProperties.getProperty("JWT_SECRET_KEY"))
-                ));
+    private final AppProperties appProperties;
+
+    public AuthService(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
+
+    public String getAuthToken(User user) {
+        Set<String> groups = new HashSet<>();
+        groups.add(USER_GROUP);
+        if (user.getUserType().equals(UserType.ADMIN)) {
+            groups.add(ADMIN_GROUP);
+        }
+        return Jwt.issuer(appProperties.getJwtIssuer())
+                .upn(user.getUserName())
+                .groups(groups)
+                .expiresIn(Duration.ofMinutes(appProperties.getJwtMinutesDuration()))
+                .sign();
     }
 
 }

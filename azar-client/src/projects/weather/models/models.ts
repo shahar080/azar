@@ -41,8 +41,8 @@ export interface DBWeatherLocation {
     id: number;
     name: string;
     country: string;
-    latitude: string;
-    longitude: string;
+    latitude: number;
+    longitude: number;
 }
 
 export interface ForecastCity {
@@ -57,8 +57,8 @@ export interface ForecastCity {
 }
 
 export interface Coordinates {
-    latitude: string;
-    longitude: string;
+    latitude: number;
+    longitude: number;
 }
 
 export enum Locale {

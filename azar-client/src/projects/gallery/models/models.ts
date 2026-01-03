@@ -2,8 +2,8 @@ export interface Photo {
     id: string;
     name: string;
     description: string;
-    data: number[];
-    thumbnail: number[];
+    data: string;
+    thumbnail: string;
     size: string;
     uploadedAt: string
     photoMetadata: PhotoMetadata;

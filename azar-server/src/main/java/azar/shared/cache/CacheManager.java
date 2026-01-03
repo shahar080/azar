@@ -1,25 +1,22 @@
 package azar.shared.cache;
 
-
+import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import java.util.concurrent.TimeUnit;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Author: Shahar Azar
  * Date:   22/12/2024
  **/
-@Singleton
+@ApplicationScoped
 public class CacheManager {
 
     private final Cache<String, String> cache;
 
-    @Inject
     public CacheManager() {
         this.cache = CacheBuilder.newBuilder()
+                .maximumSize(10000)
                 .expireAfterWrite(1, TimeUnit.HOURS)
                 .build();
     }

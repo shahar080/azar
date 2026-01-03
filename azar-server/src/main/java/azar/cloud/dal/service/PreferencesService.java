@@ -1,64 +1,47 @@
 package azar.cloud.dal.service;
 
+import java.util.Set;
 import azar.cloud.dal.dao.PreferencesDao;
 import azar.cloud.entities.db.Preference;
+import azar.shared.dal.dao.GenericDao;
+import azar.shared.dal.dao.UserDao;
 import azar.shared.dal.service.GenericService;
-import com.google.inject.Inject;
-import io.vertx.core.Future;
-
-import java.util.Set;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Author: Shahar Azar
  * Date:   29/12/2024
  **/
+@ApplicationScoped
 public class PreferencesService extends GenericService<Preference> {
 
     private final PreferencesDao preferencesDao;
+    private final UserDao userDao;
 
-    @Inject
-    public PreferencesService(PreferencesDao preferencesDao) {
+    public PreferencesService(PreferencesDao preferencesDao, UserDao userDao) {
         this.preferencesDao = preferencesDao;
+        this.userDao = userDao;
     }
 
     @Override
-    public Future<Set<Preference>> getAll() {
-        return preferencesDao.getAll();
+    protected GenericDao<Preference> getDao() {
+        return preferencesDao;
     }
 
-    public Future<Set<Preference>> getAllUsers(String userId) {
-        return preferencesDao.getAllUsers(userId);
+    public Set<Preference> getAllUsers(Integer userId) {
+        return userDao.findById(userId).getPreferences();
     }
 
-    @Override
-    public Future<Preference> add(Preference preference) {
-        return preferencesDao.add(preference);
-    }
 
-    @Override
-    public Future<Preference> update(Preference newItem) {
-        return preferencesDao.update(newItem);
-    }
-
-    @Override
-    public Future<Preference> getById(Integer id) {
-        return preferencesDao.getById(id);
-    }
-
-    @Override
-    public Future<Boolean> removeById(Integer id) {
-        return preferencesDao.removeById(id);
-    }
-
-    public Future<String> getValue(String key, String userId) {
+    public String getValue(String key, Integer userId) {
         return preferencesDao.getValue(key, userId);
     }
 
-    public Future<Boolean> getBooleanValue(String key, String userId) {
+    public boolean getBooleanValue(String key, Integer userId) {
         return preferencesDao.getBooleanValue(key, userId);
     }
 
-    public Future<Preference> getByKey(String key, String userId) {
+    public Preference getByKey(String key, Integer userId) {
         return preferencesDao.getByKey(key, userId);
     }
 

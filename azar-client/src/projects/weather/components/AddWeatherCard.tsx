@@ -55,7 +55,7 @@ const AddWeatherCard: React.FC<AddWeatherCardProps> = ({addLocationByObj}) => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const {latitude, longitude} = position.coords;
-                addLocationByLatLong(latitude.toString(), longitude.toString())
+                addLocationByLatLong(latitude, longitude)
                     .finally(() => setIsLocating(false));
             },
             (error) => {
@@ -66,13 +66,13 @@ const AddWeatherCard: React.FC<AddWeatherCardProps> = ({addLocationByObj}) => {
         );
     };
 
-    const addLocationByLatLong = async (latitude: string, longitude: string) => {
+    const addLocationByLatLong = async (latitude: number, longitude: number) => {
         getWeatherByLatLong({latitude: latitude, longitude: longitude})
             .then(getByLatLongResponse => {
                 const dbWeatherLocation: DBWeatherLocation = {
                     id: Date.now(),
-                    longitude: getByLatLongResponse.coord.lon.toString(),
-                    latitude: getByLatLongResponse.coord.lat.toString(),
+                    longitude: getByLatLongResponse.coord.lon,
+                    latitude: getByLatLongResponse.coord.lat,
                     country: getByLatLongResponse.sys.country,
                     name: getByLatLongResponse.name,
                 }

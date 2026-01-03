@@ -1,111 +1,56 @@
 package azar.shared.utils.email;
 
-import azar.shared.properties.AppProperties;
 import azar.whoami.dal.service.CVService;
 import azar.whoami.dal.service.EmailService;
-import com.google.inject.Inject;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import jakarta.activation.DataHandler;
-import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.util.ByteArrayDataSource;
+import azar.whoami.entities.db.CV;
+import azar.whoami.entities.db.EmailData;
+import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.Mailer;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Properties;
 
 /**
  * Author: Shahar Azar
  * Date:   18/01/2025
  **/
+@ApplicationScoped
 public class EmailManager {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final AppProperties appProperties;
     private final CVService cvService;
     private final EmailService emailService;
+    private final Mailer mailer;
 
-    @Inject
-    public EmailManager(AppProperties appProperties, CVService cvService, EmailService emailService) {
-        this.appProperties = appProperties;
+    public EmailManager(CVService cvService, EmailService emailService, Mailer mailer) {
         this.cvService = cvService;
         this.emailService = emailService;
+        this.mailer = mailer;
     }
 
-    public Future<Boolean> sendEmail(String recipientEmail, Vertx vertx) {
-        return Future.future(promise ->
-                vertx.executeBlocking(() -> {
-                    emailService.getEmailFromDB()
-                            .onSuccess(optionalEmailData -> {
-                                if (optionalEmailData.isEmpty()) {
-                                    promise.succeed(false);
-                                    return;
-                                }
+    public boolean sendEmail(String recipientEmail) {
+        try {
+            EmailData emailData = emailService.getFirst();
+            if (emailData == null) {
+                emailData = emailService.getDefaultData();
+                logger.warn("Using default email data");
+            }
 
-                                final String senderEmail = appProperties.getProperty("email.sender.email");
-                                final String senderPassword = appProperties.getProperty("email.sender.password");
+            CV cv = cvService.getFirst();
+            if (cv == null) {
+                cv = cvService.getDefault();
+                logger.warn("Using default cv");
+            }
 
-                                Properties props = new Properties();
-                                props.put("mail.smtp.host", "smtp.gmail.com");
-                                props.put("mail.smtp.port", "587");
-                                props.put("mail.smtp.auth", "true");
-                                props.put("mail.smtp.starttls.enable", "true");
+            Mail mail = Mail.withText(recipientEmail, emailData.getTitle(), emailData.getBody());
+            mail.addAttachment(cv.getFileName(), cv.getData(), "application/pdf");
+            mailer.send(mail);
+            logger.info("Successfully sent email to {}", recipientEmail);
+            return true;
 
-                                Session session = Session.getInstance(props, new Authenticator() {
-                                    @Override
-                                    protected PasswordAuthentication getPasswordAuthentication() {
-                                        return new PasswordAuthentication(senderEmail, senderPassword);
-                                    }
-                                });
-
-                                try {
-                                    Message message = new MimeMessage(session);
-                                    message.setFrom(new InternetAddress(senderEmail));
-                                    message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-                                    message.setSubject(optionalEmailData.get().getTitle());
-
-                                    MimeBodyPart textPart = new MimeBodyPart();
-                                    textPart.setText(optionalEmailData.get().getBody());
-
-                                    MimeBodyPart attachmentPart = new MimeBodyPart();
-                                    cvService.getCVFromDB()
-                                            .onSuccess(optionalCV -> {
-                                                if (optionalCV.isEmpty()) {
-                                                    logger.error("Can't send email due to empty CV");
-                                                    promise.complete(false);
-                                                    return;
-                                                }
-                                                try {
-                                                    ByteArrayDataSource dataSource = new ByteArrayDataSource(optionalCV.get().getData(), "application/pdf");
-                                                    attachmentPart.setDataHandler(new DataHandler(dataSource));
-                                                    attachmentPart.setFileName(optionalCV.get().getFileName());
-
-                                                    Multipart multipart = new MimeMultipart();
-                                                    multipart.addBodyPart(textPart);
-                                                    multipart.addBodyPart(attachmentPart);
-
-                                                    message.setContent(multipart);
-
-                                                    Transport.send(message);
-
-                                                    logger.info("Successfully sent email to {}", recipientEmail);
-                                                    promise.complete(true);
-                                                } catch (Exception e) {
-                                                    logger.error("Can't send email due to ", e);
-                                                    promise.fail(e);
-                                                }
-                                            })
-                                            .onFailure(promise::fail);
-                                } catch (MessagingException e) {
-                                    logger.error("Failed to send email to {}", (recipientEmail), e);
-                                }
-                            })
-                            .onFailure(promise::fail);
-                    return null;
-                }, false));
+        } catch (Exception e) {
+            logger.error("Failed to send email to {}", recipientEmail, e);
+            return false;
+        }
     }
 }

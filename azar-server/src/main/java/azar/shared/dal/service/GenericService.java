@@ -1,8 +1,7 @@
 package azar.shared.dal.service;
 
-import io.vertx.core.Future;
-
-import java.util.Set;
+import java.util.List;
+import azar.shared.dal.dao.GenericDao;
 
 /**
  * Author: Shahar Azar
@@ -11,14 +10,31 @@ import java.util.Set;
  **/
 public abstract class GenericService<T> {
 
-    public abstract Future<Set<T>> getAll();
+    protected abstract GenericDao<T> getDao();
 
-    public abstract Future<T> add(T t);
+    public List<T> getAll() {
+        return getDao().listAll();
+    }
 
-    public abstract Future<T> update(T newItem);
+    public T merge(T t) {
+        getDao().persist(t);
+        return t;
+    }
 
-    public abstract Future<T> getById(Integer id);
+    public T getById(Integer id) {
+        return getDao().findById(id);
+    }
 
-    public abstract Future<Boolean> removeById(Integer id);
+    public boolean removeById(Integer id) {
+        return getDao().deleteById(id);
+    }
+
+    public T getFirst() {
+        return getDao().findAll().firstResult();
+    }
+
+    public void detach(T t) {
+        getDao().getEntityManager().detach(t);
+    }
 
 }

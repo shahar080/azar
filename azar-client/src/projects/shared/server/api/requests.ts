@@ -1,6 +1,4 @@
 export type EmptyBaseRequest = object
 
 
-export interface BaseRequest {
-    currentUser: string;
-}
+export type BaseRequest = object

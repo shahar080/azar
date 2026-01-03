@@ -1,66 +1,49 @@
 package azar.cloud.dal.service;
 
-import azar.cloud.dal.dao.PdfFileDao;
-import azar.cloud.entities.client.PdfFile;
-import azar.shared.dal.service.GenericService;
-import com.google.inject.Inject;
-import io.vertx.core.Future;
-
 import java.util.List;
-import java.util.Set;
+import azar.cloud.dal.dao.PdfFileDao;
+import azar.cloud.entities.db.PdfFile;
+import azar.shared.dal.dao.GenericDao;
+import azar.shared.dal.service.GenericService;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Author: Shahar Azar
  * Date:   18/12/2024
  **/
+@ApplicationScoped
 public class PdfFileService extends GenericService<azar.cloud.entities.db.PdfFile> {
 
     private final PdfFileDao pdfFileDao;
 
-    @Inject
     public PdfFileService(PdfFileDao pdfFileDao) {
         this.pdfFileDao = pdfFileDao;
     }
 
     @Override
-    public Future<Set<azar.cloud.entities.db.PdfFile>> getAll() {
-        return pdfFileDao.getAll();
+    protected GenericDao<PdfFile> getDao() {
+        return pdfFileDao;
     }
 
-    @Override
-    public Future<azar.cloud.entities.db.PdfFile> add(azar.cloud.entities.db.PdfFile pdfFile) {
-        return pdfFileDao.add(pdfFile);
-    }
-
-    @Override
-    public Future<azar.cloud.entities.db.PdfFile> update(azar.cloud.entities.db.PdfFile newItem) {
-        return pdfFileDao.update(newItem);
-    }
-
-    @Override
-    public Future<azar.cloud.entities.db.PdfFile> getById(Integer id) {
-        return pdfFileDao.getById(id);
-    }
-
-    public Future<byte[]> getThumbnailById(Integer id) {
+    public byte[] getThumbnailById(Integer id) {
         return pdfFileDao.getThumbnailById("pdf_files", id);
     }
 
-    @Override
-    public Future<Boolean> removeById(Integer id) {
-        return pdfFileDao.removeById(id);
+    public List<PdfFile> getAllClientPaginated(int page, int size) {
+        return pdfFileDao.getAllClientPaginated(page, size);
     }
 
-    public Future<List<PdfFile>> getAllClientPaginated(int offset, int limit) {
-        return pdfFileDao.getAllClientPaginated(offset, limit);
+    public String getOwnerByPdfId(Integer pdfId) {
+        return pdfFileDao.getOwnerByPdfId(pdfId);
     }
 
-    public Future<String> getOwnerByPdfId(Integer id) {
-        return pdfFileDao.getOwnerByPdfId(id);
-    }
+    public boolean updatePartial(PdfFile pdfFile) {
+        PdfFile dbPdfFile = pdfFileDao.findById(pdfFile.getId());
+        dbPdfFile.setFileName(pdfFile.getFileName());
+        dbPdfFile.setLabels(pdfFile.getLabels());
+        dbPdfFile.setDescription(pdfFile.getDescription());
 
-    public Future<Boolean> updatePartial(azar.cloud.entities.db.PdfFile pdfFile) {
-        return pdfFileDao.updatePartial(pdfFile);
+        return merge(dbPdfFile) != null;
     }
 
 }

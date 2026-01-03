@@ -48,7 +48,7 @@ const CloudUserManagement: React.FC = () => {
 
             const currentPage = forceLoad ? 1 : page;
 
-            getAllUsers({currentUser: userName}, currentPage, 20)
+            getAllUsers({}, currentPage, 20)
                 .then((newUsers) => {
                     if (newUsers.length < 20) {
                         setHasMore(false);
@@ -106,7 +106,7 @@ const CloudUserManagement: React.FC = () => {
             setLoadingAnimation(false);
             return false;
         }
-        deleteUser(user.id, {currentUser: userName})
+        deleteUser(user.id, {})
             .then((res) => {
                 resetPaginationAndReload();
                 if (res) {
@@ -133,7 +133,7 @@ const CloudUserManagement: React.FC = () => {
 
     const handleSaveEdit = (updatedUser: User) => {
         setLoadingAnimation(true);
-        updateUser({user: updatedUser, currentUser: userName})
+        updateUser({user: updatedUser})
             .then((res) => {
                 if (res) {
                     const updatedUsers = users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
@@ -168,7 +168,7 @@ const CloudUserManagement: React.FC = () => {
             showToast("Error adding user \"" + user.userName + "\"", "error");
             return;
         }
-        add({currentUser: userName, user: user}).then((success) => {
+        add({user: user}).then((success) => {
                 resetPaginationAndReload();
                 if (success) {
                     showToast("user \"" + user.userName + "\" added successfully.", "success");
@@ -197,7 +197,7 @@ const CloudUserManagement: React.FC = () => {
             <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
-                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, userName, showToast)}
+                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, showToast)}
                 onManageUser={handleManageUser}
                 onManagePreferences={handleMangePreferences}
                 onClose={() => setDrawerOpen(false)}

@@ -1,5 +1,13 @@
 package azar.gallery.metadata;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import azar.gallery.entities.db.GpsMetadata;
 import azar.gallery.entities.db.PhotoMetadata;
 import com.drew.imaging.ImageMetadataReader;
@@ -9,22 +17,15 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Author: Shahar Azar
  * Date:   11/02/2025
  **/
+@ApplicationScoped
 public class PhotoMetadataExtractor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

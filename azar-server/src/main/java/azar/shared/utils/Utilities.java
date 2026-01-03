@@ -1,15 +1,7 @@
 package azar.shared.utils;
 
-import azar.cloud.entities.db.PdfFile;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 /**
@@ -18,6 +10,9 @@ import java.util.regex.Pattern;
  **/
 public class Utilities {
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+    private Utilities() {
+    }
 
     public static boolean isNumber(String maybeNumber) {
         if (maybeNumber == null) {
@@ -51,22 +46,33 @@ public class Utilities {
         return String.format("%.2f %s", sizeInUnits, units[unitIndex]);
     }
 
-    public static Future<byte[]> generateThumbnail(PdfFile pdfFile, Vertx vertx) {
-        return vertx.executeBlocking(() -> {
-            try (PDDocument document = Loader.loadPDF(pdfFile.getData())) {
-                PDFRenderer renderer = new PDFRenderer(document);
+    public static byte[] generateThumbnail(byte[] pdfBytes) {
+        try {
+            Path tmpPdf = Files.createTempFile("thumb-", ".pdf");
+            Files.write(tmpPdf, pdfBytes);
 
-                BufferedImage image = renderer.renderImageWithDPI(0, 150);
+            Path out = Files.createTempFile("thumb-out-", "");
+            // Render page 1 at 150 DPI to PNG
+            Process p = new ProcessBuilder(
+                    "pdftoppm", "-singlefile", "-f", "1", "-l", "1",
+                    "-png", "-r", "150",
+                    tmpPdf.toString(), out.toString()
+            ).inheritIO().start();
 
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ImageIO.write(image, "PNG", byteArrayOutputStream);
+            if (p.waitFor() != 0) return new byte[0];
 
-                return byteArrayOutputStream.toByteArray();
-            } catch (Exception e) {
-                return new byte[0];
-            }
-        });
+            Path png = Path.of(out.toString() + ".png");
+            byte[] bytes = Files.readAllBytes(png);
+
+            Files.deleteIfExists(png);
+            Files.deleteIfExists(tmpPdf);
+            Files.deleteIfExists(out);
+            return bytes;
+        } catch (Exception e) {
+            return new byte[0];
+        }
     }
+
 
     public static boolean isValidEmail(String email) {
         return email != null && Pattern.matches(EMAIL_REGEX, email);

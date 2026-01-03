@@ -9,7 +9,6 @@ import {
 import {useNavigate} from "react-router-dom";
 import WhoAmIDrawerMenu from "../components/DrawerMenu.tsx";
 import {useLoading} from "../../shared/utils/loading/useLoading.ts";
-import {getUserName} from "../../shared/utils/AppState.ts";
 import {useToast} from "../../shared/utils/toast/useToast.ts";
 import {EmailData} from "../models/models.ts";
 import {getEmailData, updateEmailData} from "../server/api/EmailDataApi.ts";
@@ -21,7 +20,6 @@ const initialData: EmailData = {
 
 const ManageEmailPage: React.FC = () => {
     const [formData, setFormData] = useState<EmailData>(initialData);
-    const userName = getUserName();
     const {setLoadingAnimation} = useLoading();
     const navigate = useNavigate();
     const {showToast} = useToast();
@@ -36,7 +34,7 @@ const ManageEmailPage: React.FC = () => {
     const handleSave = () => {
         setLoadingAnimation(true);
 
-        updateEmailData({emailData: formData, currentUser: userName})
+        updateEmailData({emailData: formData})
             .then(res => {
                 if (res) {
                     showToast("Successfully updated email data", "success")

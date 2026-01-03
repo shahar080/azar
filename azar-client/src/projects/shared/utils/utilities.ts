@@ -4,7 +4,7 @@ export function clearCredentials() {
     setAuthToken('');
     setUserName('');
     setUserType('');
-    setUserId('');
+    setUserId(-1);
 }
 
 export const resizeImageBlob = (blob: Blob, maxWidth: number, maxHeight: number): Promise<Blob> => {
@@ -53,22 +53,39 @@ export const resizeImageBlob = (blob: Blob, maxWidth: number, maxHeight: number)
     });
 };
 
-export function byteArrayToString(byteArray: number[]): string {
-    let result = '';
-    const chunkSize = 0x8000; // 32k characters per chunk (you can adjust as needed)
-    for (let i = 0; i < byteArray.length; i += chunkSize) {
-        // slice the array into a chunk and use apply to convert it
-        result += String.fromCharCode.apply(null, byteArray.slice(i, i + chunkSize));
-    }
-    return result;
+export function base64ToBytes(b64: string): Uint8Array {
+    const binary = atob(b64);
+    return Uint8Array.from(binary, c => c.charCodeAt(0));
 }
 
-export function base64ToUint8Array(base64: string) {
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+export function detectContentType(filename: string): string {
+    const clean = filename.split(/[?#]/, 1)[0].split('/').pop() ?? filename;
+    const ext = clean.includes('.') ? clean.slice(clean.lastIndexOf('.') + 1).toLowerCase() : '';
+    switch (ext) {
+        case 'png':
+            return 'image/png';
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'gif':
+            return 'image/gif';
+        case 'webp':
+            return 'image/webp';
+        case 'svg':
+            return 'image/svg+xml';
+        case 'bmp':
+            return 'image/bmp';
+        case 'tif':
+        case 'tiff':
+            return 'image/tiff';
+        case 'ico':
+            return 'image/x-icon';
+        case 'avif':
+            return 'image/avif';
+        case 'heic':
+        case 'heif':
+            return 'image/heic';
+        default:
+            return 'application/octet-stream';
     }
-    return bytes;
 }

@@ -1,7 +1,7 @@
 let authToken: string;
 let userName: string;
 let userType: string;
-let userId: string;
+let userId: number;
 let drawerPinned: boolean;
 
 export function setAuthToken(token: string) {
@@ -28,12 +28,12 @@ export function getUserType(): string {
     return userType || '';
 }
 
-export function setUserId(id: string) {
+export function setUserId(id: number) {
     userId = id;
 }
 
-export function getUserId(): string {
-    return userId || '';
+export function getUserId(): number {
+    return userId || -1;
 }
 
 export function setDrawerPinnedState(pinned: boolean) {

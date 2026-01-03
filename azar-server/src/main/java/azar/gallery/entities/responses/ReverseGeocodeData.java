@@ -1,5 +1,6 @@
 package azar.gallery.entities.responses;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
  **/
 @Data
 @NoArgsConstructor
+@RegisterForReflection
 public class ReverseGeocodeData {
     private String place;
     private String region;

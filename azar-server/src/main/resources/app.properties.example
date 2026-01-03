@@ -1,5 +1,0 @@
-server.port=8080
-server.host=localhost
-server.file.max.size.mb=50
-email.sender.email=test@test.com
-email.sender.password=supersecretpassword

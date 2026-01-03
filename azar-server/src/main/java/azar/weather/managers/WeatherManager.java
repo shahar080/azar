@@ -1,79 +1,51 @@
 package azar.weather.managers;
 
 import azar.shared.properties.AppProperties;
-import azar.shared.utils.JsonManager;
-import azar.weather.entities.external.api.open_weather_map.lat_long_response.OWMLatLongResponse;
 import azar.weather.entities.external.api.open_weather_map.forecast_response.OWMForecastResponse;
-import com.google.inject.Inject;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.ext.web.client.WebClient;
+import azar.weather.entities.external.api.open_weather_map.lat_long_response.OWMLatLongResponse;
+import static azar.weather.utils.Constants.FORECAST_BASE_URL;
+import static azar.weather.utils.Constants.WEATHER_BASE_URL;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Author: Shahar Azar
  * Date:   29/01/2025
  **/
+@ApplicationScoped
 public class WeatherManager {
-
-    private final WebClient webClient;
-    private final Vertx vertx;
-    private final JsonManager jsonManager;
-
+    private final Client client;
     private final String apiKey;
 
-    private final String weatherBaseUrl = "https://api.openweathermap.org/data/2.5/weather";
-    private final String forecastBaseUrl = "https://api.openweathermap.org/data/2.5/forecast";
-
-    @Inject
-    public WeatherManager(Vertx vertx, JsonManager jsonManager, AppProperties appProperties) {
-        this.vertx = vertx;
-        this.webClient = WebClient.create(vertx);
-        this.jsonManager = jsonManager;
-        this.apiKey = appProperties.getProperty("OPEN_WEATHER_MAP_API_KEY");
+    public WeatherManager(AppProperties appProperties) {
+        this.apiKey = appProperties.getOpenWeatherApiKey();
+        this.client = ClientBuilder.newClient();
     }
 
-    public Future<OWMLatLongResponse> weatherUsingLatLong(double latitude, double longitude) {
-        return Future.future(getValuePromise ->
-                vertx.executeBlocking(() -> {
-                    webClient.getAbs(weatherBaseUrl)
-                            .addQueryParam("lat", String.valueOf(latitude))
-                            .addQueryParam("lon", String.valueOf(longitude))
-                            .addQueryParam("appid", apiKey)
-                            .addQueryParam("units", "metric") //temperatureUnit.equalsIgnoreCase(CELSIUS) ? "metric" : "imperial"
-                            .send()
-                            .onSuccess(bufferHttpResponse -> {
-                                if (bufferHttpResponse.statusCode() == 200) {
-                                    String response = bufferHttpResponse.bodyAsString();
-                                    getValuePromise.complete(jsonManager.fromJson(response, OWMLatLongResponse.class));
-                                } else {
-                                    getValuePromise.fail(bufferHttpResponse.statusMessage());
-                                }
-                            })
-                            .onFailure(getValuePromise::fail);
-                    return null;
-                }, false));
+    public OWMLatLongResponse weatherUsingLatLong(double latitude, double longitude) {
+        Response response = client
+                .target(WEATHER_BASE_URL)
+                .queryParam("lat", String.valueOf(latitude))
+                .queryParam("lon", String.valueOf(longitude))
+                .queryParam("appid", apiKey)
+                .queryParam("units", "metric") //temperatureUnit.equalsIgnoreCase(CELSIUS) ? "metric" : "imperial"
+                .request().get();
+
+        return response.readEntity(OWMLatLongResponse.class);
     }
 
-    public Future<OWMForecastResponse> forecastUsingLatLong(double latitude, double longitude) {
-        return Future.future(getValuePromise ->
-                vertx.executeBlocking(() -> {
-                    webClient.getAbs(forecastBaseUrl)
-                            .addQueryParam("lat", String.valueOf(latitude))
-                            .addQueryParam("lon", String.valueOf(longitude))
-                            .addQueryParam("appid", apiKey)
-                            .addQueryParam("units", "metric") //temperatureUnit.equalsIgnoreCase(CELSIUS) ? "metric" : "imperial"
-                            .send()
-                            .onSuccess(bufferHttpResponse -> {
-                                if (bufferHttpResponse.statusCode() == 200) {
-                                    OWMForecastResponse response = jsonManager.fromJson(bufferHttpResponse.bodyAsString(), OWMForecastResponse.class);
-                                    getValuePromise.complete(response);
-                                } else {
-                                    getValuePromise.fail(bufferHttpResponse.statusMessage());
-                                }
-                            })
-                            .onFailure(getValuePromise::fail);
-                    return null;
-                }, false));
+    public OWMForecastResponse forecastUsingLatLong(double latitude, double longitude) {
+        Response response = client
+                .target(FORECAST_BASE_URL)
+                .queryParam("lat", String.valueOf(latitude))
+                .queryParam("lon", String.valueOf(longitude))
+                .queryParam("appid", apiKey)
+                .queryParam("units", "metric") //temperatureUnit.equalsIgnoreCase(CELSIUS) ? "metric" : "imperial"
+                .request().get();
+
+        return response.readEntity(OWMForecastResponse.class);
     }
 
 }

@@ -1,31 +1,38 @@
-#
-# Build stage
-#
-FROM maven:3.9.9-eclipse-temurin-23 AS build
+# syntax=docker/dockerfile:1
 
-# Set working directory inside the build container
-WORKDIR /home/app
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.1-java21 AS build
+USER root
+ENV MAVEN_VERSION=3.9.9
+RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+    | tar -xz -C /opt \
+ && ln -s /opt/apache-maven-${MAVEN_VERSION}/bin/mvn /usr/local/bin/mvn
 
-# Copy the project files (source code and pom.xml)
-COPY src /home/app/src
-COPY pom.xml /home/app/
+WORKDIR /project
+ENV MAVEN_CONFIG=/project/.m2
+RUN mkdir -p /project/.m2
 
-# Run the Maven build
-RUN mvn clean package
+COPY pom.xml .
+COPY src/ src/
 
-#
-# Package stage
-#
-FROM openjdk:23-jdk-slim
+ENV QUARKUS_NATIVE_RESOURCES_INCLUDES=backup/**
 
-# Set working directory inside the final container
-WORKDIR /app
+# Build native and assert the runner exists. Move it to a known path.
+RUN mvn -B \
+  -Dquarkus.package.type=native \
+  -Dquarkus.native.fail-on-error=true \
+  -DskipTests \
+  -Dmaven.repo.local=/project/.m2/repository \
+  package \
+ && echo "==== TARGET CONTENTS ====" && ls -lah target \
+ && RUNNER=$(ls -1 target/*-runner 2>/dev/null | head -n1) \
+ && test -n "$RUNNER" || (echo "Native runner not found in target/*-runner" && exit 1) \
+ && cp "$RUNNER" /project/application \
+ && chmod +x /project/application
 
-# Copy the generated jar from the build container
-COPY --from=build /home/app/target/azar-1.0-jar-with-dependencies.jar /app/
-
-# Expose the port Vert.x will run on
+# ---- Runtime image ----
+FROM quay.io/quarkus/quarkus-micro-image:2.0
+WORKDIR /work/
+COPY --from=build /project/application /work/application
+USER 1001
 EXPOSE 8080
-
-# Run the Vert.x server
-CMD ["java", "-jar", "/app/azar-1.0-jar-with-dependencies.jar"]
+ENTRYPOINT ["/work/application","-Dquarkus.http.host=0.0.0.0"]

@@ -1,12 +1,11 @@
 package azar.cloud.entities.client;
 
+import java.time.Instant;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
-import java.util.List;
 
 /**
  * Author: Shahar Azar

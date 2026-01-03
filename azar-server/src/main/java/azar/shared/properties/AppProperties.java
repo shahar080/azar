@@ -1,146 +1,27 @@
 package azar.shared.properties;
 
-import azar.shared.utils.Utilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.Getter;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * Author: Shahar Azar
  * Date:   12/12/2024
  **/
-
+@ApplicationScoped
+@Getter
 public class AppProperties {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    @ConfigProperty(name = "azar.open.weather.api.key")
+    String openWeatherApiKey;
 
-    private final Properties properties;
+    @ConfigProperty(name = "mp.jwt.verify.issuer")
+    String jwtIssuer;
 
-    public AppProperties() {
-        properties = new Properties();
-        loadEnvironmentVariables();
-        loadPropertiesFromFile();
-    }
+    @ConfigProperty(name = "azar.jwt.minutes.duration")
+    Integer jwtMinutesDuration;
 
-    private void loadEnvironmentVariables() {
-        for (String key : System.getenv().keySet()) {
-            String envValue = System.getenv(key);
-            if (envValue != null) {
-                properties.setProperty(key, envValue);
-            }
-        }
-    }
+    @ConfigProperty(name = "azar.map.box.api.key")
+    String mapBoxApiKey;
 
-    private void loadPropertiesFromFile() {
-        String propertiesFileName = properties.getProperty("PROPERTIES_FILE_PATH", "/data/azar/server/app.properties");
-        try (InputStream input = new FileInputStream(propertiesFileName)) {
-            properties.load(input);
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to load properties file: " + propertiesFileName, ex);
-        }
-    }
-
-    public String getProperty(String key) {
-        return getProperty(key, null, false);
-    }
-
-    public String getProperty(String key, String defaultValue) {
-        return getProperty(key, defaultValue, true);
-    }
-
-    private String getProperty(String key, String defaultValue, boolean useDefaultValue) {
-        String propertyValue = properties.getProperty(key);
-        if (propertyValue == null) {
-            if (useDefaultValue) {
-                logWarnDefaultValue(key, defaultValue);
-                return defaultValue;
-            } else {
-                logErrorNotFound(key);
-                throw new RuntimeException();
-            }
-        }
-        return propertyValue;
-    }
-
-    public int getIntProperty(String key) {
-        return getIntProperty(key, -1, false);
-    }
-
-    public int getIntProperty(String key, int defaultValue) {
-        return getIntProperty(key, defaultValue, true);
-    }
-
-    private int getIntProperty(String key, int defaultValue, boolean useDefaultValue) {
-        String propertyValue = properties.getProperty(key);
-        if (!Utilities.isNumber(propertyValue)) {
-            if (useDefaultValue) {
-                logWarnDefaultValue(key, defaultValue);
-                return defaultValue;
-            } else {
-                logErrorNotFound(key);
-                throw new RuntimeException();
-            }
-        }
-        return Integer.parseInt(propertyValue);
-    }
-
-    public boolean getBooleanProperty(String key) {
-        return getBooleanProperty(key, false, false);
-    }
-
-    public boolean getBooleanProperty(String key, boolean defaultValue) {
-        return getBooleanProperty(key, defaultValue, true);
-    }
-
-    private boolean getBooleanProperty(String key, boolean defaultValue, boolean useDefaultValue) {
-        String propertyValue = properties.getProperty(key);
-        if (!Utilities.isBoolean(propertyValue)) {
-            if (useDefaultValue) {
-                logWarnDefaultValue(key, defaultValue);
-                return defaultValue;
-            } else {
-                logErrorNotFound(key);
-                throw new RuntimeException();
-            }
-        }
-        return Boolean.parseBoolean(propertyValue);
-    }
-
-    public List<String> getListProperty(String key) {
-        return getListProperty(key, null, false);
-    }
-
-    public List<String> getListProperty(String key, List<String> defaultValue) {
-        return getListProperty(key, defaultValue, true);
-    }
-
-    private List<String> getListProperty(String key, List<String> defaultValue, boolean useDefaultValue) {
-        String propertyValue = properties.getProperty(key);
-        if (propertyValue == null) {
-            if (useDefaultValue) {
-                logWarnDefaultValue(key, defaultValue);
-                return defaultValue != null ? defaultValue : Collections.emptyList();
-            } else {
-                logErrorNotFound(key);
-                throw new RuntimeException(key + " not found in properties file");
-            }
-        }
-        return Arrays.asList(propertyValue.split(","));
-    }
-
-
-    private void logWarnDefaultValue(String key, Object defaultValue) {
-        logger.warn("{} not found in properties file, using default value {}", key, defaultValue);
-    }
-
-    private void logErrorNotFound(String key) {
-        logger.error("{} not found in properties file", key);
-    }
 }

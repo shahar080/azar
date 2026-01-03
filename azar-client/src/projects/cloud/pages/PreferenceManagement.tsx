@@ -52,7 +52,7 @@ const CloudPreferenceManagement: React.FC = () => {
 
             const currentPage = forceLoad ? 1 : page;
 
-            getAllPreferences({currentUser: userName, userId: userId}, currentPage, 20)
+            getAllPreferences({userId: userId}, currentPage, 20)
                 .then((newPreferences) => {
                     if (newPreferences.length < 20) {
                         setHasMore(false);
@@ -104,11 +104,11 @@ const CloudPreferenceManagement: React.FC = () => {
     const handleDrawerPinnedPreference = (event: React.ChangeEvent<HTMLInputElement>) => {
         const isChecked = event.target.checked
         const updatedPreference = {
-            userId: Number(getUserId()),
+            userId: getUserId(),
             key: DRAWER_PIN_STR,
             value: isChecked.toString(),
         }
-        updatePreference({preference: updatedPreference, currentUser: userName})
+        updatePreference({preference: updatedPreference, userId: getUserId()})
             .then(updatedResult => {
                 if (updatedResult) {
                     const updatedPreferences = preferences.map((preference) => (preference.id === updatedResult.id ? updatedResult : preference));
@@ -125,11 +125,11 @@ const CloudPreferenceManagement: React.FC = () => {
     const handleDarkModePreference = (event: React.ChangeEvent<HTMLInputElement>) => {
         const isChecked = event.target.checked
         const updatedPreference = {
-            userId: Number(getUserId()),
+            userId: getUserId(),
             key: DARK_MODE_STR,
             value: isChecked.toString(),
         }
-        updatePreference({preference: updatedPreference, currentUser: userName})
+        updatePreference({preference: updatedPreference, userId: getUserId()})
             .then(updatedResult => {
                 if (updatedResult) {
                     const updatedPreferences = preferences.map((preference) => (preference.id === updatedResult.id ? updatedResult : preference));
@@ -151,7 +151,7 @@ const CloudPreferenceManagement: React.FC = () => {
             <CloudDrawerMenu
                 open={drawerOpen}
                 pinned={drawerPinned}
-                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, userName, showToast)}
+                onPinToggle={() => pinDrawer(setDrawerPinned, setDrawerOpen, showToast)}
                 onManageUser={handleManageUser}
                 onManagePreferences={handleManagePreferences}
                 onClose={() => setDrawerOpen(false)}

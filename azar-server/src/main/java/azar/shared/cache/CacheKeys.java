@@ -6,9 +6,10 @@ package azar.shared.cache;
  **/
 public class CacheKeys {
 
+    private CacheKeys() {
+    }
+
     /* AzarCloud */
     public static final String PDF_THUMBNAIL = "pdfThumbnail:%s";
 
-    /* Gallery */
-    public static final String PHOTO_THUMBNAIL = "photoThumbnail:%s";
 }

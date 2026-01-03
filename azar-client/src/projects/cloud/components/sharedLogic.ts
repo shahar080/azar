@@ -16,16 +16,15 @@ export const toggleDrawer = (drawerPinned: boolean,
 
 export const pinDrawer = (setDrawerPinned: React.Dispatch<React.SetStateAction<boolean>>,
                           setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>,
-                          userName: string,
                           showToast: (message: string, severity: AlertColor) => void) => {
     setDrawerPinned((prevPinned) => {
         setDrawerOpen(!prevPinned);
         const updatedPreference = {
-            userId: Number(getUserId()),
+            userId: getUserId(),
             key: DRAWER_PIN_STR,
             value: (!prevPinned).toString()
         }
-        updatePreference({preference: updatedPreference, currentUser: userName})
+        updatePreference({preference: updatedPreference, userId: getUserId()})
             .then(updatedPreference => {
                 if (updatedPreference) {
                     setDrawerPinnedState(JSON.parse(updatedPreference.value));

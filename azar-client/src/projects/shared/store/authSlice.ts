@@ -1,10 +1,12 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {getAuthToken} from "../utils/AppState.ts";
+import {getAuthToken, setAuthToken} from "../utils/AppState.ts";
 import {LoginResponse} from "../server/api/responses.ts";
+import {AppDispatch} from "./store.ts";
 
 interface AuthState {
     isLoggedIn: boolean;
 }
+
 
 const initialState: AuthState = {
     isLoggedIn: !!getAuthToken(),
@@ -26,3 +28,8 @@ const authSlice = createSlice({
 
 export const {login, logout} = authSlice.actions;
 export default authSlice.reducer;
+
+export const logoutAndClear = () => (dispatch: AppDispatch) => {
+    setAuthToken('');
+    dispatch(logout());
+};

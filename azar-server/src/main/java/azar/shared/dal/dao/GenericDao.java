@@ -34,7 +34,7 @@ public abstract class GenericDao<T> implements PanacheRepository<T> {
             logger.warn("getThumbnailById was called by unsupported type!");
             return new byte[0];
         }
-        String sql = "SELECT lo_get(p.thumbnail) AS data FROM %s p WHERE p.id = :id".formatted(entityName);
+        String sql = "SELECT p.thumbnail AS data FROM %s p WHERE p.id = :id".formatted(entityName);
         Object r = getEntityManager()
                 .createNativeQuery(sql)
                 .setParameter("id", id)

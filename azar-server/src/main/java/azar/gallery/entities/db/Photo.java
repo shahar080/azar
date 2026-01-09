@@ -47,13 +47,11 @@ public class Photo extends PanacheEntityBase {
     private String description;
 
     @Setter
-    @Lob
     @Column(name = "data", columnDefinition = "bytea", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.ARRAY)
     private byte[] data;
 
     @Setter
-    @Lob
     @Column(name = "thumbnail", columnDefinition = "bytea", nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.ARRAY)
     private byte[] thumbnail;

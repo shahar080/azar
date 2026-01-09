@@ -90,7 +90,7 @@ public class PdfResource extends BaseResource {
             byte[] thumb = Utilities.generateThumbnail(pdf.getData());
 
             if (thumb.length == 0) {
-                return internalError("Error generating thumbnail for %s".formatted(file.fileName()));
+                return internalError("Error generating thumbnail for %s, length=0".formatted(file.fileName()));
             }
             pdf.setThumbnail(thumb);
         } catch (Exception e) {

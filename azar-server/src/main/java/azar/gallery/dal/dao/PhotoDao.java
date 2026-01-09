@@ -21,7 +21,7 @@ public class PhotoDao extends GenericDao<Photo> {
     }
 
     public byte[] getPhoto(Integer id) {
-        String sql = "SELECT lo_get(p.data) FROM photos p WHERE p.id = :id";
+        String sql = "SELECT p.data FROM photos p WHERE p.id = :id";
         Object r = getEntityManager()
                 .createNativeQuery(sql)
                 .setParameter("id", id)

@@ -2,15 +2,16 @@ import React, {useContext, useState} from "react";
 import {Box, Button, GlobalStyles, Menu, MenuItem} from "@mui/material";
 import {ArrowDropDown, Brightness4, Brightness7} from "@mui/icons-material";
 import {Link} from "react-router-dom";
-import {CLOUD_ROUTE, GALLERY_ROUTE, LANDING_ROUTE, WEATHER_ROUTE} from "../utils/reactRoutes.ts";
+import {CLOUD_ROUTE, GALLERY_ROUTE, LANDING_ROUTE, WEATHER_ROUTE, RED_ALERT_ROUTE} from "../utils/reactRoutes.ts";
 import {COMIC_NEUE_FONT} from "../utils/constants.ts";
 import {ThemeModeContext} from "../../../theme/ThemeModeContext.tsx";
 
 type GeneralMenuProps = {
     zIndex?: number;
+    hideThemeToggle?: boolean;
 };
 
-export function GeneralMenu({zIndex = 1}: GeneralMenuProps) {
+export function GeneralMenu({zIndex = 1, hideThemeToggle = false}: GeneralMenuProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const {mode, setMode} = useContext(ThemeModeContext);
 
@@ -140,7 +141,7 @@ export function GeneralMenu({zIndex = 1}: GeneralMenuProps) {
                             sx={{
                                 padding: "12px 20px",
                                 margin: "0",
-                                borderRadius: "0 0 8px 8px",
+                                borderRadius: "0",
                                 color: "white",
                                 "&:hover": {
                                     backgroundColor: "primary.dark",
@@ -150,24 +151,43 @@ export function GeneralMenu({zIndex = 1}: GeneralMenuProps) {
                         >
                             Gallery
                         </MenuItem>
+                        <MenuItem
+                            onClick={handleClose}
+                            component={Link}
+                            to={RED_ALERT_ROUTE}
+                            sx={{
+                                padding: "12px 20px",
+                                margin: "0",
+                                borderRadius: "0 0 8px 8px",
+                                color: "white",
+                                "&:hover": {
+                                    backgroundColor: "primary.dark",
+                                    color: "secondary.contrastText",
+                                },
+                            }}
+                        >
+                            Red Alert
+                        </MenuItem>
                     </Menu>
                 </Box>
 
-                <Button
-                    variant="contained"
-                    onClick={toggleTheme}
-                    sx={{
-                        backgroundColor: "primary.main",
-                        color: "secondary.contrastText",
-                        textTransform: "none",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                    }}
-                >
-                    {mode === 'light' ? <Brightness4/> : <Brightness7/>}
-                </Button>
+                {!hideThemeToggle && (
+                    <Button
+                        variant="contained"
+                        onClick={toggleTheme}
+                        sx={{
+                            backgroundColor: "primary.main",
+                            color: "secondary.contrastText",
+                            textTransform: "none",
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                        }}
+                    >
+                        {mode === 'light' ? <Brightness4/> : <Brightness7/>}
+                    </Button>
+                )}
             </Box>
         </>
     );

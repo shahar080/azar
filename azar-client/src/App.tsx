@@ -11,7 +11,8 @@ import {
     WEATHER_ROUTE,
     WHOAMI_MANAGE_CV_ROUTE,
     WHOAMI_MANAGE_EMAIL_ROUTE,
-    WHOAMI_MANAGE_WHOAMI_ROUTE
+    WHOAMI_MANAGE_WHOAMI_ROUTE,
+    RED_ALERT_ROUTE
 } from './projects/shared/utils/reactRoutes.ts';
 import WhoAmIManageCVPage from "./projects/whoami/pages/ManageCVPage.tsx";
 import WhoAmIManageWHOAMIPage from "./projects/whoami/pages/ManageWhoAmIPage.tsx";
@@ -23,6 +24,7 @@ import CloudHomePage from "./projects/cloud/pages/HomePage.tsx";
 import CloudUserManagement from "./projects/cloud/pages/UserManagement.tsx";
 import CloudPreferenceManagement from "./projects/cloud/pages/PreferenceManagement.tsx";
 import CloudLandingPage from "./projects/cloud/pages/LandingPage.tsx";
+import {RedAlertHomePage} from "./projects/redalert/pages/HomePage.tsx";
 
 function App() {
     return (
@@ -57,6 +59,7 @@ function App() {
                 <Route path={GALLERY_ROUTE} element={<GalleryHomePage/>}/>
                 <Route path={GALLERY_MANAGE_ROUTE} element={<ProtectedRoute
                     redirectPath={GALLERY_ROUTE}><ManageGalleryPage/></ProtectedRoute>}/>
+                <Route path={RED_ALERT_ROUTE} element={<RedAlertHomePage/>}/>
             </Routes>
         </>
     )
